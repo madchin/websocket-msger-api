@@ -16,6 +16,9 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
+### Postgres ###
+tmp
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
