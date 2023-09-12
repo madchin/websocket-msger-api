@@ -3,6 +3,7 @@ package com.example.plugins
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import java.sql.Connection
+import java.sql.SQLException
 import java.sql.Statement
 
 @Serializable
@@ -19,8 +20,19 @@ class CityService(private val connection: Connection) {
     }
 
     init {
-        val statement = connection.createStatement()
-        statement.executeUpdate(CREATE_TABLE_CITIES)
+        try {
+            val metaData = connection.metaData
+            val resultSet = metaData.getTables(null,null,"cities",null)
+            if(!resultSet.next()) {
+                val statement = connection.createStatement()
+                statement.executeUpdate(CREATE_TABLE_CITIES)
+                statement.close()
+            }
+            resultSet.close()
+        }
+        catch (e: SQLException) {
+            e.printStackTrace()
+        }
     }
 
     private var newCityId = 0

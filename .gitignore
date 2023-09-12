@@ -16,6 +16,12 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
+### Postgres ###
+tmp
+
+### Keystore ###
+keystore.jks
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
