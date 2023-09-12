@@ -19,6 +19,9 @@ bin/
 ### Postgres ###
 tmp
 
+### Keystore ###
+keystore.jks
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
