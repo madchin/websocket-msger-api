@@ -20,7 +20,7 @@ class MemberService(private val connection: Connection) {
 
         private fun updateLastSeen(id: String, chatId: String) = "UPDATE members SET lastSeen = jsonb_set(lastSeen, '{$chatId}', to_jsonb(CURRENT_TIMESTAMP)::jsonb WHERE id = $id;"
 
-        private fun delete(id: String) = "DELETE FROM members WHERE id = $id"
+        private fun delete(id: String) = "DELETE FROM members WHERE id = $id;"
     }
     init {
         val statement = connection.createStatement()
