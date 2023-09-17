@@ -3,7 +3,6 @@ package com.example.models
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.sql.Connection
-import java.sql.Statement
 import java.sql.Timestamp
 
 data class Message(
@@ -56,7 +55,7 @@ class MessageService(private val connection: Connection) {
             messages.add(Message(sender = sender, content = content, timestamp = timestamp))
         }
         statement.close()
-        if(messages.isEmpty()) {
+        if (messages.isEmpty()) {
             throw Exception("Record not found")
         }
         return@withContext messages

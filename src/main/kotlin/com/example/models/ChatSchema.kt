@@ -1,13 +1,10 @@
 package com.example.models
 
-import com.example.plugins.City
-import com.example.plugins.CityService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import java.sql.Connection
 import java.sql.Statement
-import java.util.Arrays
 
 @Serializable
 data class Chat(val id: String, val name: String, val members: List<String>, val messages: List<String>? = null)
@@ -45,7 +42,7 @@ class ChatService(private val connection: Connection) {
     suspend fun create(chat: Chat): String = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(INSERT_CHAT, Statement.RETURN_GENERATED_KEYS)
         val members = connection.createArrayOf("text", chat.members.toTypedArray())
-        statement.setString(1,chat.name)
+        statement.setString(1, chat.name)
         statement.setArray(2, members)
         statement.executeUpdate()
 
@@ -76,6 +73,7 @@ class ChatService(private val connection: Connection) {
             throw Exception("Record not found")
         }
     }
+
     suspend fun updateMembers(id: String, member: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_CHAT_MEMBERS)
         statement.setString(1, member)

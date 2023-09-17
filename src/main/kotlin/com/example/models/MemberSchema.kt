@@ -19,9 +19,11 @@ class MemberService(private val connection: Connection) {
         private const val INSERT_MEMBER = "INSERT INTO members (id) VALUES (uuid_generate_v4());"
         private const val SELECT_MEMBER_BY_ID = "SELECT id, name, lastSeen FROM members WHERE id = ?;"
         private const val UPDATE_MEMBER_NAME = "UPDATE members SET name = ? WHERE id = ?;"
-        private const val UPDATE_MEMBER_LAST_SEEN = "UPDATE members SET lastSeen = jsonb_set(lastSeen, '{?}', to_jsonb(CURRENT_TIMESTAMP)::jsonb WHERE id = ?;"
+        private const val UPDATE_MEMBER_LAST_SEEN =
+            "UPDATE members SET lastSeen = jsonb_set(lastSeen, '{?}', to_jsonb(CURRENT_TIMESTAMP)::jsonb WHERE id = ?;"
         private const val DELETE_MEMBER = "DELETE FROM members WHERE id = ?;"
     }
+
     init {
         val statement = connection.createStatement()
         statement.executeUpdate(CREATE_TABLE_MEMBERS)
@@ -41,6 +43,7 @@ class MemberService(private val connection: Connection) {
             throw Exception("Unable to retrieve the id of the newly inserted chat")
         }
     }
+
     suspend fun read(uid: String): Member = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(SELECT_MEMBER_BY_ID)
         statement.setString(1, uid)
@@ -49,7 +52,7 @@ class MemberService(private val connection: Connection) {
         if (resultSet.next()) {
             val name = resultSet.getString("name")
             val lastSeen = resultSet.getString("lastSeen")
-            val parsedLastSeen = Json.decodeFromString<Map<String,Long>>(lastSeen)
+            val parsedLastSeen = Json.decodeFromString<Map<String, Long>>(lastSeen)
 
             statement.close()
             return@withContext Member(uid = uid, name = name, lastSeen = parsedLastSeen)
@@ -58,6 +61,7 @@ class MemberService(private val connection: Connection) {
             throw Exception("Record not found")
         }
     }
+
     suspend fun updateName(uid: String, name: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_MEMBER_NAME)
         statement.setString(1, name)
