@@ -42,7 +42,7 @@ class ChatService(private val connection: Connection) {
         statement.close()
     }
 
-    suspend fun create(chat: Chat): Long = withContext(Dispatchers.IO) {
+    suspend fun create(chat: Chat): String = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(INSERT_CHAT, Statement.RETURN_GENERATED_KEYS)
         val members = connection.createArrayOf("text", chat.members.toTypedArray())
         statement.setString(1,chat.name)
@@ -52,7 +52,7 @@ class ChatService(private val connection: Connection) {
         val generatedKeys = statement.generatedKeys
         if (generatedKeys.next()) {
             statement.close()
-            return@withContext generatedKeys.getLong(1)
+            return@withContext generatedKeys.getString(1)
         } else {
             statement.close()
             throw Exception("Unable to retrieve the id of the newly inserted chat")
