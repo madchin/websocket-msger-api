@@ -12,16 +12,17 @@ class MemberService(private val connection: Connection) {
 
     companion object {
         private const val CREATE_TABLE_MEMBERS = "CREATE TABLE IF NOT EXISTS members (" +
-                "id UUID DEFAULT uuid_generate_v4() PRIMARY KEY, " +
+                "uid UUID, " +
                 "name TEXT, " +
-                "lastSeen JSONB" +
+                "lastSeen JSONB, " +
+                "FOREIGN KEY (uid) REFERENCES users(uid)" +
                 ");"
-        private const val INSERT_MEMBER = "INSERT INTO members (id) VALUES (uuid_generate_v4());"
-        private const val SELECT_MEMBER_BY_ID = "SELECT id, name, lastSeen FROM members WHERE id = ?;"
+        private const val INSERT_MEMBER = "INSERT INTO members (uid) VALUES (uuid_generate_v4());"
+        private const val SELECT_MEMBER_BY_ID = "SELECT uid, name, lastSeen FROM members WHERE uid = ?;"
         private const val UPDATE_MEMBER_NAME = "UPDATE members SET name = ? WHERE id = ?;"
         private const val UPDATE_MEMBER_LAST_SEEN =
             "UPDATE members SET lastSeen = jsonb_set(lastSeen, '{?}', to_jsonb(CURRENT_TIMESTAMP)::jsonb WHERE id = ?;"
-        private const val DELETE_MEMBER = "DELETE FROM members WHERE id = ?;"
+        private const val DELETE_MEMBER = "DELETE FROM members WHERE uid = ?;"
     }
 
     init {
