@@ -17,22 +17,22 @@ import java.util.Date
 
 fun Application.configureSecurity() {
     authentication {
-            oauth("auth-oauth-google") {
-                urlProvider = { "http://localhost:8080/callback" }
-                providerLookup = {
-                    OAuthServerSettings.OAuth2ServerSettings(
-                        name = "google",
-                        authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
-                        accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
-                        requestMethod = HttpMethod.Post,
-                        clientId = System.getenv("GOOGLE_CLIENT_ID"),
-                        clientSecret = System.getenv("GOOGLE_CLIENT_SECRET"),
-                        defaultScopes = listOf("https://www.googleapis.com/auth/userinfo.profile")
-                    )
-                }
-                client = HttpClient(Apache)
+        oauth("auth-oauth-google") {
+            urlProvider = { "http://localhost:8080/callback" }
+            providerLookup = {
+                OAuthServerSettings.OAuth2ServerSettings(
+                    name = "google",
+                    authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
+                    accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
+                    requestMethod = HttpMethod.Post,
+                    clientId = System.getenv("GOOGLE_CLIENT_ID"),
+                    clientSecret = System.getenv("GOOGLE_CLIENT_SECRET"),
+                    defaultScopes = listOf("https://www.googleapis.com/auth/userinfo.profile")
+                )
             }
+            client = HttpClient(Apache)
         }
+    }
 
     val jwtAudience = environment.config.property("jwt.audience").getString()
     val jwtDomain = environment.config.property("jwt.domain").getString()
@@ -62,30 +62,28 @@ fun Application.configureSecurity() {
     }
     routing {
         authenticate("auth-oauth-google") {
-                    get("login") {
-                        call.respondRedirect("/callback")
-                    }
-        
-                    get("/callback") {
-                        val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
-                        call.sessions.set(UserSession(principal?.accessToken.toString()))
-                        call.respondRedirect("/hello")
-                    }
-                }
-
-        authenticate {
-            post("/sign-in") {
-                val user = call.receive<User>()
-
-                val token = JWT.create()
-                    .withAudience(jwtAudience)
-                    .withIssuer(jwtDomain)
-                    .withClaim("username", user.username)
-                    .withExpiresAt(Date(System.currentTimeMillis() + 60000))
-                    .sign(Algorithm.HMAC256(jwtSecret))
-
-                call.respond(hashMapOf("token" to token))
+            get("login") {
+                call.respondRedirect("/callback")
             }
+
+            get("/callback") {
+                val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
+                call.sessions.set(UserSession(principal?.accessToken.toString()))
+                call.respondRedirect("/hello")
+            }
+        }
+
+        post("/sign-in") {
+            val user = call.receive<User>()
+
+            val token = JWT.create()
+                .withAudience(jwtAudience)
+                .withIssuer(jwtDomain)
+                .withClaim("username", user.username)
+                .withExpiresAt(Date(System.currentTimeMillis() + 60000))
+                .sign(Algorithm.HMAC256(jwtSecret))
+
+            call.respond(hashMapOf("token" to token))
         }
     }
 }

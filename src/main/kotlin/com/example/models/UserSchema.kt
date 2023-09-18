@@ -2,9 +2,11 @@ package com.example.models
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.Serializable
+
 import java.sql.Connection
 
+@Serializable
 data class User(val username: String, val password: String)
 
 class UserService(private val connection: Connection) {
