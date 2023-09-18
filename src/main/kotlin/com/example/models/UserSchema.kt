@@ -7,7 +7,7 @@ import java.sql.Connection
 
 data class User(val username: String, val password: String)
 
-class UserSchema(private val connection: Connection) {
+class UserService(private val connection: Connection) {
 
     companion object {
         private val CREATE_TABLE_USER = "CREATE TABLE IF NOT EXISTS users (" +
@@ -43,7 +43,7 @@ class UserSchema(private val connection: Connection) {
         }
     }
 
-    suspend fun insertUser(username: String, password: String) = withContext(Dispatchers.IO) {
+    suspend fun insert(username: String, password: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(INSERT_USER)
         statement.setString(1, username)
         statement.setString(2, password)

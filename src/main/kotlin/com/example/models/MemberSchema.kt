@@ -14,7 +14,7 @@ class MemberService(private val connection: Connection) {
         private const val CREATE_TABLE_MEMBERS = "CREATE TABLE IF NOT EXISTS members (" +
                 "uid UUID, " +
                 "name TEXT, " +
-                "lastSeen JSONB" +
+                "lastSeen JSONB, " +
                 "FOREIGN KEY (uid) REFERENCES users(uid)" +
                 ");"
         private const val INSERT_MEMBER = "INSERT INTO members (uid) VALUES (uuid_generate_v4());"
