@@ -1,5 +1,9 @@
 package com.example.plugins
 
+import com.example.models.ChatService
+import com.example.models.MemberService
+import com.example.models.MessageService
+import com.example.models.UserService
 import com.example.utils.configureDatabase
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -13,6 +17,10 @@ fun Application.configureDatabases() {
     val dbConnection: Connection = connectToDatabase(embedded = false)
     configureDatabase(connection = dbConnection)
     val cityService = CityService(dbConnection)
+    val userService = UserService(dbConnection)
+    val chatService = ChatService(dbConnection)
+    val memberService = MemberService(dbConnection)
+    val messageService = MessageService(dbConnection)
     routing {
         // Create city
         post("/cities") {
