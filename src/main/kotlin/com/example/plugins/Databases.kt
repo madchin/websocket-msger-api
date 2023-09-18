@@ -1,6 +1,6 @@
 package com.example.plugins
 
-import com.example.utils.ConfigureDatabase
+import com.example.utils.configureDatabase
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -11,7 +11,7 @@ import kotlinx.coroutines.*
 
 fun Application.configureDatabases() {
     val dbConnection: Connection = connectToDatabase(embedded = false)
-    ConfigureDatabase(connection = dbConnection)
+    configureDatabase(connection = dbConnection)
     val cityService = CityService(dbConnection)
     routing {
         // Create city

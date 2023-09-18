@@ -20,7 +20,7 @@ class MessageService(private val connection: Connection) {
                 "sender TEXT, " +
                 "content TEXT, " +
                 "timestamp TIMESTAMPZ DEFAULT CURRENT_TIMESTAMP, " +
-                "FOREIGN KEY (chatId) REFERENCES chat(chatId)" +
+                "FOREIGN KEY (chatId) REFERENCES chats(chatId)" +
                 ");"
         private const val INSERT_MESSAGE = "INSERT INTO messages (chatId, sender, content) VALUES (?, ?, ?);"
         private const val SELECT_MESSAGES_BY_CHAT_ID =
