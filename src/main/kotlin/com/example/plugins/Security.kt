@@ -2,8 +2,10 @@ package com.example.plugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.example.models.User
-import com.example.models.UserService
+import com.example.data.model.User
+import com.example.data.service.Services
+import com.example.data.service.UserService
+import com.example.data.service.UserServiceImpl
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.http.*
@@ -18,7 +20,7 @@ import kotlinx.serialization.Serializable
 import java.sql.Connection
 import java.util.Date
 
-fun Application.configureSecurity(connection: Connection) {
+fun Application.configureSecurity(services: Services) {
     authentication {
         oauth("auth-oauth-google") {
             urlProvider = { "http://localhost:8080/callback" }
@@ -90,7 +92,7 @@ fun Application.configureSecurity(connection: Connection) {
         }
         post("/sign-up") {
             val user = call.receive<User>()
-            val userService = UserService(connection)
+            val userService = services.userService
             val username = user.username
             val password = user.password
 
@@ -100,7 +102,7 @@ fun Application.configureSecurity(connection: Connection) {
             if(password.isBlank()) {
                 call.respond(status = HttpStatusCode.BadRequest, message = ErrorResponse("validation","password cannot be blank"))
             }
-            userService.insert(username, password)
+            userService.createUser(username, password)
             call.respond(HttpStatusCode.Created)
         }
     }

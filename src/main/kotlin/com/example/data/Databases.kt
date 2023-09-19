@@ -13,50 +13,12 @@ import io.ktor.server.routing.*
 import java.sql.*
 import kotlinx.coroutines.*
 
-fun Application.configureDatabases(): Connection {
+fun Application.configureDatabases(): Services {
     val dbConnection: Connection = connectToDatabase(embedded = false)
     addDatabaseExtensions(dbConnection)
     val repositories = Repositories(dbConnection)
-    val services = Services(
-        chatRepository = repositories.chatRepository,
-        userRepository = repositories.userRepository,
-        memberRepository = repositories.memberRepository,
-        messageRepository = repositories.messageRepository
-    )
-    val cityService = CityService(dbConnection)
 
-    routing {
-        // Create city
-        post("/cities") {
-            val city = call.receive<City>()
-            val id = cityService.create(city)
-            call.respond(HttpStatusCode.Created, id)
-        }
-        // Read city
-        get("/cities/{id}") {
-            val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-            try {
-                val city = cityService.read(id)
-                call.respond(HttpStatusCode.OK, city)
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.NotFound)
-            }
-        }
-        // Update city
-        put("/cities/{id}") {
-            val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-            val user = call.receive<City>()
-            cityService.update(id, user)
-            call.respond(HttpStatusCode.OK)
-        }
-        // Delete city
-        delete("/cities/{id}") {
-            val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-            cityService.delete(id)
-            call.respond(HttpStatusCode.OK)
-        }
-    }
-    return dbConnection
+    return Services(repositories)
 }
 
 /**
