@@ -4,6 +4,7 @@ import com.example.models.ChatService
 import com.example.models.MemberService
 import com.example.models.MessageService
 import com.example.models.UserService
+import com.example.utils.addDatabaseExtensions
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -12,13 +13,15 @@ import io.ktor.server.routing.*
 import java.sql.*
 import kotlinx.coroutines.*
 
-fun Application.configureDatabases() {
+fun Application.configureDatabases(): Connection {
     val dbConnection: Connection = connectToDatabase(embedded = false)
+    addDatabaseExtensions(dbConnection)
     val cityService = CityService(dbConnection)
     val userService = UserService(dbConnection)
     val chatService = ChatService(dbConnection)
     val memberService = MemberService(dbConnection)
     val messageService = MessageService(dbConnection)
+
     routing {
         // Create city
         post("/cities") {
@@ -50,6 +53,7 @@ fun Application.configureDatabases() {
             call.respond(HttpStatusCode.OK)
         }
     }
+    return dbConnection
 }
 
 /**
