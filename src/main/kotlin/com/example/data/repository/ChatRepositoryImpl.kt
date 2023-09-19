@@ -11,7 +11,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
         private const val CREATE_TABLE_CHATS =
             "CREATE TABLE IF NOT EXISTS chats (" +
                     "id UUID DEFAULT uuid_generate_v4() PRIMARY KEY, " +
-                    "name VARCHAR(255), " +
+                    "name VARCHAR(255)" +
                     ");"
 
         private const val INSERT_CHAT = "INSERT INTO chats (name) VALUES (?);"
