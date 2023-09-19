@@ -3,6 +3,7 @@ package com.example.plugins
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.example.models.User
+import com.example.models.UserService
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.http.*
@@ -13,9 +14,11 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import kotlinx.serialization.Serializable
+import java.sql.Connection
 import java.util.Date
 
-fun Application.configureSecurity() {
+fun Application.configureSecurity(connection: Connection) {
     authentication {
         oauth("auth-oauth-google") {
             urlProvider = { "http://localhost:8080/callback" }
@@ -85,7 +88,23 @@ fun Application.configureSecurity() {
 
             call.respond(hashMapOf("token" to token))
         }
+        post("/sign-up") {
+            val user = call.receive<User>()
+            val userService = UserService(connection)
+            val username = user.username
+            val password = user.password
+
+            if(username.isBlank()) {
+                call.respond(status = HttpStatusCode.BadRequest, message = ErrorResponse("validation", "username cannot be blank"))
+            }
+            if(password.isBlank()) {
+                call.respond(status = HttpStatusCode.BadRequest, message = ErrorResponse("validation","password cannot be blank"))
+            }
+            userService.insert(username, password)
+            call.respond(HttpStatusCode.Created)
+        }
     }
 }
-
+@Serializable
+data class ErrorResponse(val type: String, val message: String)
 class UserSession(accessToken: String)
