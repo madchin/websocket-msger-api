@@ -1,6 +1,6 @@
-package com.example.repository
+package com.example.data.repository
 
-import com.example.model.User
+import com.example.data.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.sql.Connection

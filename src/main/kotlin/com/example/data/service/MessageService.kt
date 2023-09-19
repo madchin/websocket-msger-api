@@ -1,6 +1,6 @@
-package com.example.service
+package com.example.data.service
 
-import com.example.model.Message
+import com.example.data.model.Message
 
 interface MessageService {
     suspend fun sendMessage(message: Message)

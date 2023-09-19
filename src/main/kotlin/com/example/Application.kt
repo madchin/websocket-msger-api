@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.data.configureDatabases
 import com.example.plugins.*
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*

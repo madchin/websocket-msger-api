@@ -1,6 +1,6 @@
-package com.example.repository
+package com.example.data.repository
 
-import com.example.model.Member
+import com.example.data.model.Member
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json

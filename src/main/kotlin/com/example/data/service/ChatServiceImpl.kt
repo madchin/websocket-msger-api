@@ -1,7 +1,7 @@
-package com.example.service
+package com.example.data.service
 
-import com.example.model.Chat
-import com.example.repository.ChatRepository
+import com.example.data.model.Chat
+import com.example.data.repository.ChatRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

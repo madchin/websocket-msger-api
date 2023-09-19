@@ -1,7 +1,7 @@
-package com.example.service
+package com.example.data.service
 
-import com.example.model.Member
-import com.example.repository.MemberRepository
+import com.example.data.model.Member
+import com.example.data.repository.MemberRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

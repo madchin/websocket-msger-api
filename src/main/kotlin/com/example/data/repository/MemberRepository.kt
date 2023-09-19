@@ -1,6 +1,6 @@
-package com.example.repository
+package com.example.data.repository
 
-import com.example.model.Member
+import com.example.data.model.Member
 
 interface MemberRepository {
     suspend fun createMember(): String

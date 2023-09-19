@@ -1,6 +1,6 @@
-package com.example.repository
+package com.example.data.repository
 
-import com.example.model.Chat
+import com.example.data.model.Chat
 
 interface ChatRepository {
     suspend fun createChat(chat: Chat): String

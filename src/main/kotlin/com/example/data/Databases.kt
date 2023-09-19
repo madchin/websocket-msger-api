@@ -1,9 +1,9 @@
-package com.example.plugins
+package com.example.data
 
-import com.example.models.ChatService
-import com.example.models.MemberService
-import com.example.models.MessageService
-import com.example.models.UserService
+import com.example.data.repository.*
+import com.example.data.service.*
+import com.example.plugins.City
+import com.example.plugins.CityService
 import com.example.utils.addDatabaseExtensions
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -16,11 +16,14 @@ import kotlinx.coroutines.*
 fun Application.configureDatabases(): Connection {
     val dbConnection: Connection = connectToDatabase(embedded = false)
     addDatabaseExtensions(dbConnection)
+    val repositories = Repositories(dbConnection)
+    val services = Services(
+        chatRepository = repositories.chatRepository,
+        userRepository = repositories.userRepository,
+        memberRepository = repositories.memberRepository,
+        messageRepository = repositories.messageRepository
+    )
     val cityService = CityService(dbConnection)
-    val userService = UserService(dbConnection)
-    val chatService = ChatService(dbConnection)
-    val memberService = MemberService(dbConnection)
-    val messageService = MessageService(dbConnection)
 
     routing {
         // Create city

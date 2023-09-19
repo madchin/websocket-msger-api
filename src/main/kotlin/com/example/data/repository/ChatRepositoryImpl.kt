@@ -1,6 +1,6 @@
-package com.example.repository
+package com.example.data.repository
 
-import com.example.model.Chat
+import com.example.data.model.Chat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.sql.Connection

@@ -1,6 +1,6 @@
-package com.example.service
+package com.example.data.service
 
-import com.example.model.Member
+import com.example.data.model.Member
 
 interface MemberService {
     suspend fun createMember(): String

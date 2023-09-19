@@ -1,6 +1,6 @@
-package com.example.repository
+package com.example.data.repository
 
-import com.example.model.Message
+import com.example.data.model.Message
 
 interface MessageRepository {
     suspend fun createMessage(message: Message)
