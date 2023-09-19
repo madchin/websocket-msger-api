@@ -1,15 +1,10 @@
-package com.example.models
+package com.example.repository
 
 import com.example.model.Chat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import java.sql.Connection
 import java.sql.Statement
 
-
-
-class ChatService(private val connection: Connection) {
+class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
     companion object {
         private const val CREATE_TABLE_CHATS =
             "CREATE TABLE IF NOT EXISTS chats (" +
@@ -39,7 +34,7 @@ class ChatService(private val connection: Connection) {
         statement.close()
     }
 
-    suspend fun create(chat: Chat): String = withContext(Dispatchers.IO) {
+    override fun create(chat: Chat): String {
         val statement = connection.prepareStatement(INSERT_CHAT, Statement.RETURN_GENERATED_KEYS)
         val members = connection.createArrayOf("text", chat.members.toTypedArray())
         statement.setString(1, chat.name)
@@ -49,14 +44,14 @@ class ChatService(private val connection: Connection) {
         val generatedKeys = statement.generatedKeys
         if (generatedKeys.next()) {
             statement.close()
-            return@withContext generatedKeys.getString(1)
+            return generatedKeys.getString(1)
         } else {
             statement.close()
             throw Exception("Unable to retrieve the id of the newly inserted chat")
         }
     }
 
-    suspend fun read(id: String): Chat = withContext(Dispatchers.IO) {
+    override fun read(id: String): Chat {
         val statement = connection.prepareStatement(SELECT_CHAT_BY_ID)
         statement.setString(1, id)
         val resultSet = statement.executeQuery()
@@ -67,14 +62,14 @@ class ChatService(private val connection: Connection) {
             val members = membersArray?.toList() ?: emptyList()
 
             statement.close()
-            return@withContext Chat(name = name, id = id, members = members)
+            return Chat(name = name, id = id, members = members)
         } else {
             statement.close()
             throw Exception("Record not found")
         }
     }
 
-    suspend fun updateMembers(id: String, member: String) = withContext(Dispatchers.IO) {
+    override fun updateMembers(id: String, member: String) {
         val statement = connection.prepareStatement(UPDATE_CHAT_MEMBERS)
         statement.setString(1, member)
         statement.setString(2, id)
@@ -82,7 +77,7 @@ class ChatService(private val connection: Connection) {
         statement.close()
     }
 
-    suspend fun updateMessages(id: String, message: String) = withContext(Dispatchers.IO) {
+    override fun updateMessages(id: String, message: String) {
         val statement = connection.prepareStatement(UPDATE_CHAT_MESSAGES)
         statement.setString(1, message)
         statement.setString(2, id)
@@ -90,7 +85,7 @@ class ChatService(private val connection: Connection) {
         statement.close()
     }
 
-    suspend fun updateName(id: String, name: String) = withContext(Dispatchers.IO) {
+    override fun updateName(id: String, name: String) {
         val statement = connection.prepareStatement(UPDATE_CHAT_NAME)
         statement.setString(1, name)
         statement.setString(2, id)
@@ -98,7 +93,7 @@ class ChatService(private val connection: Connection) {
         statement.close()
     }
 
-    suspend fun delete(id: String) = withContext(Dispatchers.IO) {
+    override fun delete(id: String) {
         val statement = connection.prepareStatement(DELETE_CHAT)
         statement.setString(1, id)
         statement.executeUpdate()

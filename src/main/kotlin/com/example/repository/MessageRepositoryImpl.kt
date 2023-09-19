@@ -1,14 +1,9 @@
-package com.example.models
+package com.example.repository
 
 import com.example.model.Message
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.sql.Connection
-import java.sql.Timestamp
 
-
-
-class MessageService(private val connection: Connection) {
+class MessageRepositoryImpl(private val connection: Connection) : MessageRepository {
     companion object {
         private const val CREATE_TABLE_MESSAGES = "CREATE TABLE IF NOT EXISTS messages (" +
                 "id SERIAL PRIMARY KEY, " +
@@ -29,7 +24,7 @@ class MessageService(private val connection: Connection) {
         statement.close()
     }
 
-    suspend fun create(message: Message) = withContext(Dispatchers.IO) {
+    override fun create(message: Message) {
         val statement = connection.prepareStatement(INSERT_MESSAGE)
         statement.setString(1, message.chatId)
         statement.setString(2, message.sender)
@@ -38,7 +33,7 @@ class MessageService(private val connection: Connection) {
         statement.close()
     }
 
-    suspend fun read(chatId: String): List<Message> = withContext(Dispatchers.IO) {
+    override fun read(chatId: String): List<Message> {
         val messages = mutableListOf<Message>()
         val statement = connection.prepareStatement(SELECT_MESSAGES_BY_CHAT_ID)
         statement.setString(1, chatId)
@@ -54,6 +49,6 @@ class MessageService(private val connection: Connection) {
         if (messages.isEmpty()) {
             throw Exception("Record not found")
         }
-        return@withContext messages
+        return messages
     }
 }

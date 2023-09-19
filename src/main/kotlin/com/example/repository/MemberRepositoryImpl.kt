@@ -1,15 +1,11 @@
-package com.example.models
+package com.example.repository
 
 import com.example.model.Member
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.sql.Connection
 import java.sql.Statement
 
-
-
-class MemberService(private val connection: Connection) {
+class MemberRepositoryImpl(private val connection: Connection) : MemberRepository {
 
     companion object {
         private const val CREATE_TABLE_MEMBERS = "CREATE TABLE IF NOT EXISTS members (" +
@@ -32,21 +28,21 @@ class MemberService(private val connection: Connection) {
         statement.close()
     }
 
-    suspend fun create(): String = withContext(Dispatchers.IO) {
+    override fun create(): String {
         val statement = connection.prepareStatement(INSERT_MEMBER, Statement.RETURN_GENERATED_KEYS)
         statement.executeUpdate()
 
         val generatedKeys = statement.generatedKeys
         if (generatedKeys.next()) {
             statement.close()
-            return@withContext generatedKeys.getString(1)
+            return generatedKeys.getString(1)
         } else {
             statement.close()
             throw Exception("Unable to retrieve the id of the newly inserted chat")
         }
     }
 
-    suspend fun read(uid: String): Member = withContext(Dispatchers.IO) {
+    override fun read(uid: String): Member {
         val statement = connection.prepareStatement(SELECT_MEMBER_BY_ID)
         statement.setString(1, uid)
         val resultSet = statement.executeQuery()
@@ -57,14 +53,14 @@ class MemberService(private val connection: Connection) {
             val parsedLastSeen = Json.decodeFromString<Map<String, Long>>(lastSeen)
 
             statement.close()
-            return@withContext Member(uid = uid, name = name, lastSeen = parsedLastSeen)
+            return Member(uid = uid, name = name, lastSeen = parsedLastSeen)
         } else {
             statement.close()
             throw Exception("Record not found")
         }
     }
 
-    suspend fun updateName(uid: String, name: String) = withContext(Dispatchers.IO) {
+    override fun updateName(uid: String, name: String) {
         val statement = connection.prepareStatement(UPDATE_MEMBER_NAME)
         statement.setString(1, name)
         statement.setString(2, uid)
@@ -72,7 +68,7 @@ class MemberService(private val connection: Connection) {
         statement.close()
     }
 
-    suspend fun updateLastSeen(uid: String, chatId: String) = withContext(Dispatchers.IO) {
+    override fun updateLastSeen(uid: String, chatId: String) {
         val statement = connection.prepareStatement(UPDATE_MEMBER_LAST_SEEN)
         statement.setString(1, chatId)
         statement.setString(2, uid)
@@ -80,7 +76,7 @@ class MemberService(private val connection: Connection) {
         statement.close()
     }
 
-    suspend fun delete(uid: String) = withContext(Dispatchers.IO) {
+    override fun delete(uid: String) {
         val statement = connection.prepareStatement(DELETE_MEMBER)
         statement.setString(1, uid)
         statement.executeUpdate()
