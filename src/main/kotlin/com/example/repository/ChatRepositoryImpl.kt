@@ -12,17 +12,11 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
             "CREATE TABLE IF NOT EXISTS chats (" +
                     "id UUID DEFAULT uuid_generate_v4() PRIMARY KEY, " +
                     "name VARCHAR(255), " +
-                    "members TEXT[], " +
-                    "messages TEXT[]" +
                     ");"
 
-        private const val INSERT_CHAT = "INSERT INTO chats (name, members) VALUES (?, ?);"
+        private const val INSERT_CHAT = "INSERT INTO chats (name) VALUES (?);"
 
-        private const val SELECT_CHAT_BY_ID = "SELECT id, name, members, messages FROM chats WHERE id = ?;"
-
-        private const val UPDATE_CHAT_MEMBERS = "UPDATE chats SET members = ARRAY_APPEND(members, ?) WHERE id = ?;"
-
-        private const val UPDATE_CHAT_MESSAGES = "UPDATE chats SET messages = ARRAY_APPEND(messages, ?) WHERE id = ?;"
+        private const val SELECT_CHAT_BY_ID = "SELECT id, name FROM chats WHERE id = ?;"
 
         private const val UPDATE_CHAT_NAME = "UPDATE chats SET name = ? WHERE id = ?;"
 
@@ -38,9 +32,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
 
     override suspend fun create(chat: Chat): String {
         val statement = connection.prepareStatement(INSERT_CHAT, Statement.RETURN_GENERATED_KEYS)
-        val members = connection.createArrayOf("text", chat.members.toTypedArray())
         statement.setString(1, chat.name)
-        statement.setArray(2, members)
         statement.executeUpdate()
 
         val generatedKeys = statement.generatedKeys
@@ -60,31 +52,13 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
 
         if (resultSet.next()) {
             val name = resultSet.getString("name")
-            val membersArray = resultSet.getArray("members").array as? Array<String>
-            val members = membersArray?.toList() ?: emptyList()
 
             statement.close()
-            return@withContext Chat(name = name, id = id, members = members)
+            return@withContext Chat(name = name, id = id)
         } else {
             statement.close()
             throw Exception("Record not found")
         }
-    }
-
-    override suspend fun updateMembers(id: String, member: String) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(UPDATE_CHAT_MEMBERS)
-        statement.setString(1, member)
-        statement.setString(2, id)
-        statement.executeUpdate()
-        statement.close()
-    }
-
-    override suspend fun updateMessages(id: String, message: String) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(UPDATE_CHAT_MESSAGES)
-        statement.setString(1, message)
-        statement.setString(2, id)
-        statement.executeUpdate()
-        statement.close()
     }
 
     override suspend fun updateName(id: String, name: String) = withContext(Dispatchers.IO) {
