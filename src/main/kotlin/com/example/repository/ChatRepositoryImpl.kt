@@ -30,7 +30,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
         statement.close()
     }
 
-    override suspend fun create(chat: Chat): String {
+    override suspend fun createChat(chat: Chat): String {
         val statement = connection.prepareStatement(INSERT_CHAT, Statement.RETURN_GENERATED_KEYS)
         statement.setString(1, chat.name)
         statement.executeUpdate()
@@ -45,7 +45,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
         }
     }
 
-    override suspend fun read(id: String): Chat = withContext(Dispatchers.IO) {
+    override suspend fun readChat(id: String): Chat = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(SELECT_CHAT_BY_ID)
         statement.setString(1, id)
         val resultSet = statement.executeQuery()
@@ -61,7 +61,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
         }
     }
 
-    override suspend fun updateName(id: String, name: String) = withContext(Dispatchers.IO) {
+    override suspend fun updateChatName(id: String, name: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_CHAT_NAME)
         statement.setString(1, name)
         statement.setString(2, id)
@@ -69,7 +69,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
         statement.close()
     }
 
-    override suspend fun delete(id: String) = withContext(Dispatchers.IO) {
+    override suspend fun deleteChat(id: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(DELETE_CHAT)
         statement.setString(1, id)
         statement.executeUpdate()

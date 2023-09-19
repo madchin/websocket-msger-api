@@ -30,7 +30,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
         statement.close()
     }
 
-    override suspend fun create(): String = withContext(Dispatchers.IO) {
+    override suspend fun createMember(): String = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(INSERT_MEMBER, Statement.RETURN_GENERATED_KEYS)
         statement.executeUpdate()
 
@@ -44,7 +44,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
         }
     }
 
-    override suspend fun read(uid: String): Member = withContext(Dispatchers.IO) {
+    override suspend fun readMember(uid: String): Member = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(SELECT_MEMBER_BY_ID)
         statement.setString(1, uid)
         val resultSet = statement.executeQuery()
@@ -62,7 +62,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
         }
     }
 
-    override suspend fun updateName(uid: String, name: String) = withContext(Dispatchers.IO) {
+    override suspend fun updateMemberName(uid: String, name: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_MEMBER_NAME)
         statement.setString(1, name)
         statement.setString(2, uid)
@@ -70,7 +70,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
         statement.close()
     }
 
-    override suspend fun updateLastSeen(uid: String, chatId: String) = withContext(Dispatchers.IO) {
+    override suspend fun updateMemberLastSeen(uid: String, chatId: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_MEMBER_LAST_SEEN)
         statement.setString(1, chatId)
         statement.setString(2, uid)
@@ -78,7 +78,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
         statement.close()
     }
 
-    override suspend fun delete(uid: String) = withContext(Dispatchers.IO) {
+    override suspend fun deleteMember(uid: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(DELETE_MEMBER)
         statement.setString(1, uid)
         statement.executeUpdate()

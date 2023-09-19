@@ -25,7 +25,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
         statement.close()
     }
 
-    override suspend fun read(username: String): User = withContext(Dispatchers.IO) {
+    override suspend fun readUser(username: String): User = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(SELECT_USER_BY_USERNAME)
         statement.setString(1, username)
         val resultSet = statement.executeQuery()
@@ -41,7 +41,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
         }
     }
 
-    override suspend fun create(username: String, password: String) = withContext(Dispatchers.IO) {
+    override suspend fun createUser(username: String, password: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(INSERT_USER)
         statement.setString(1, username)
         statement.setString(2, password)
@@ -49,21 +49,21 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
         statement.close()
     }
 
-    override suspend fun updateUsername(username: String) = withContext(Dispatchers.IO) {
+    override suspend fun updateUserUsername(username: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_USERNAME)
         statement.setString(1, username)
         statement.executeUpdate()
         statement.close()
     }
 
-    override suspend fun updatePassword(password: String) = withContext(Dispatchers.IO) {
+    override suspend fun updateUserPassword(password: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_PASSWORD)
         statement.setString(1, password)
         statement.executeUpdate()
         statement.close()
     }
 
-    override suspend fun delete(username: String) = withContext(Dispatchers.IO) {
+    override suspend fun deleteUser(username: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(DELETE_USER)
         statement.setString(1, username)
         statement.executeUpdate()

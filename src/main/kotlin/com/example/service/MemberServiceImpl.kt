@@ -7,22 +7,22 @@ import kotlinx.coroutines.withContext
 
 class MemberServiceImpl(private val memberRepository: MemberRepository) : MemberService {
     override suspend fun createMember(): String = withContext(Dispatchers.IO) {
-        memberRepository.create()
+        memberRepository.createMember()
     }
 
     override suspend fun deleteMember(uid: String) = withContext(Dispatchers.IO) {
-        memberRepository.delete(uid)
+        memberRepository.deleteMember(uid)
     }
 
     override suspend fun getMember(uid: String): Member = withContext(Dispatchers.IO) {
-        memberRepository.read(uid)
+        memberRepository.readMember(uid)
     }
 
     override suspend fun updateMemberLastSeen(uid: String, chatId: String) = withContext(Dispatchers.IO) {
-        memberRepository.updateLastSeen(uid, chatId)
+        memberRepository.updateMemberLastSeen(uid, chatId)
     }
 
     override suspend fun updateMemberName(uid: String, name: String) = withContext(Dispatchers.IO) {
-        memberRepository.updateName(uid, name)
+        memberRepository.updateMemberName(uid, name)
     }
 }

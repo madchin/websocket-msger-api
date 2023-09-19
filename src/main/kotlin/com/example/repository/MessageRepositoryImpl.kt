@@ -26,7 +26,7 @@ class MessageRepositoryImpl(private val connection: Connection) : MessageReposit
         statement.close()
     }
 
-    override suspend fun create(message: Message) = withContext(Dispatchers.IO) {
+    override suspend fun createMessage(message: Message) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(INSERT_MESSAGE)
         statement.setString(1, message.chatId)
         statement.setString(2, message.sender)
@@ -35,7 +35,7 @@ class MessageRepositoryImpl(private val connection: Connection) : MessageReposit
         statement.close()
     }
 
-    override suspend fun read(chatId: String): List<Message> = withContext(Dispatchers.IO) {
+    override suspend fun readMessages(chatId: String): List<Message> = withContext(Dispatchers.IO) {
         val messages = mutableListOf<Message>()
         val statement = connection.prepareStatement(SELECT_MESSAGES_BY_CHAT_ID)
         statement.setString(1, chatId)
