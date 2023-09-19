@@ -3,9 +3,9 @@ package com.example.repository
 import com.example.model.User
 
 interface UserRepository {
-    fun read(username: String): User
-    fun insert(username: String, password: String)
-    fun updateUsername(username: String)
-    fun updatePassword(password: String)
-    fun delete(username: String)
+    suspend fun read(username: String): User
+    suspend fun insert(username: String, password: String)
+    suspend fun updateUsername(username: String)
+    suspend fun updatePassword(password: String)
+    suspend fun delete(username: String)
 }

@@ -1,6 +1,8 @@
 package com.example.repository
 
 import com.example.model.Chat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.sql.Connection
 import java.sql.Statement
 
@@ -34,7 +36,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
         statement.close()
     }
 
-    override fun create(chat: Chat): String {
+    override suspend fun create(chat: Chat): String {
         val statement = connection.prepareStatement(INSERT_CHAT, Statement.RETURN_GENERATED_KEYS)
         val members = connection.createArrayOf("text", chat.members.toTypedArray())
         statement.setString(1, chat.name)
@@ -51,7 +53,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
         }
     }
 
-    override fun read(id: String): Chat {
+    override suspend fun read(id: String): Chat = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(SELECT_CHAT_BY_ID)
         statement.setString(1, id)
         val resultSet = statement.executeQuery()
@@ -62,14 +64,14 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
             val members = membersArray?.toList() ?: emptyList()
 
             statement.close()
-            return Chat(name = name, id = id, members = members)
+            return@withContext Chat(name = name, id = id, members = members)
         } else {
             statement.close()
             throw Exception("Record not found")
         }
     }
 
-    override fun updateMembers(id: String, member: String) {
+    override suspend fun updateMembers(id: String, member: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_CHAT_MEMBERS)
         statement.setString(1, member)
         statement.setString(2, id)
@@ -77,7 +79,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
         statement.close()
     }
 
-    override fun updateMessages(id: String, message: String) {
+    override suspend fun updateMessages(id: String, message: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_CHAT_MESSAGES)
         statement.setString(1, message)
         statement.setString(2, id)
@@ -85,7 +87,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
         statement.close()
     }
 
-    override fun updateName(id: String, name: String) {
+    override suspend fun updateName(id: String, name: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_CHAT_NAME)
         statement.setString(1, name)
         statement.setString(2, id)
@@ -93,7 +95,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
         statement.close()
     }
 
-    override fun delete(id: String) {
+    override suspend fun delete(id: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(DELETE_CHAT)
         statement.setString(1, id)
         statement.executeUpdate()

@@ -1,6 +1,8 @@
 package com.example.repository
 
 import com.example.model.Message
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.sql.Connection
 
 class MessageRepositoryImpl(private val connection: Connection) : MessageRepository {
@@ -24,7 +26,7 @@ class MessageRepositoryImpl(private val connection: Connection) : MessageReposit
         statement.close()
     }
 
-    override fun create(message: Message) {
+    override suspend fun create(message: Message) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(INSERT_MESSAGE)
         statement.setString(1, message.chatId)
         statement.setString(2, message.sender)
@@ -33,7 +35,7 @@ class MessageRepositoryImpl(private val connection: Connection) : MessageReposit
         statement.close()
     }
 
-    override fun read(chatId: String): List<Message> {
+    override suspend fun read(chatId: String): List<Message> = withContext(Dispatchers.IO) {
         val messages = mutableListOf<Message>()
         val statement = connection.prepareStatement(SELECT_MESSAGES_BY_CHAT_ID)
         statement.setString(1, chatId)
@@ -49,6 +51,6 @@ class MessageRepositoryImpl(private val connection: Connection) : MessageReposit
         if (messages.isEmpty()) {
             throw Exception("Record not found")
         }
-        return messages
+        return@withContext messages
     }
 }
