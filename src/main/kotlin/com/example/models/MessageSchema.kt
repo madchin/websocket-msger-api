@@ -1,16 +1,12 @@
 package com.example.models
 
+import com.example.model.Message
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.sql.Connection
 import java.sql.Timestamp
 
-data class Message(
-    val chatId: String? = null,
-    val sender: String,
-    val content: String,
-    val timestamp: Timestamp? = null
-)
+
 
 class MessageService(private val connection: Connection) {
     companion object {
@@ -51,7 +47,7 @@ class MessageService(private val connection: Connection) {
         if (resultSet.next()) {
             val sender = resultSet.getString("sender")
             val content = resultSet.getString("content")
-            val timestamp = resultSet.getTimestamp("timestamp")
+            val timestamp = resultSet.getTimestamp("timestamp")?.toString()?.toLong()
             messages.add(Message(sender = sender, content = content, timestamp = timestamp))
         }
         statement.close()

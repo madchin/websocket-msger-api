@@ -1,13 +1,13 @@
 package com.example.models
 
+import com.example.model.Chat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import java.sql.Connection
 import java.sql.Statement
 
-@Serializable
-data class Chat(val id: String, val name: String, val members: List<String>, val messages: List<String>? = null)
+
 
 class ChatService(private val connection: Connection) {
     companion object {

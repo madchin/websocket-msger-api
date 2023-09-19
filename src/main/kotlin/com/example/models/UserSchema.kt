@@ -1,13 +1,13 @@
 package com.example.models
 
+import com.example.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 import java.sql.Connection
 
-@Serializable
-data class User(val username: String, val password: String)
+
 
 class UserService(private val connection: Connection) {
 

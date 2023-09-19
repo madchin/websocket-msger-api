@@ -1,12 +1,13 @@
 package com.example.models
 
+import com.example.model.Member
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.sql.Connection
 import java.sql.Statement
 
-data class Member(val uid: String, val name: String, val lastSeen: Map<String, Long>)
+
 
 class MemberService(private val connection: Connection) {
 
