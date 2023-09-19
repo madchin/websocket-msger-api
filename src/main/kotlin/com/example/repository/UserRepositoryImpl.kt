@@ -41,7 +41,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
         }
     }
 
-    override suspend fun insert(username: String, password: String) = withContext(Dispatchers.IO) {
+    override suspend fun create(username: String, password: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(INSERT_USER)
         statement.setString(1, username)
         statement.setString(2, password)
