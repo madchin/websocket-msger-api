@@ -1,6 +1,5 @@
 package com.example
 
-import com.example.data.configureDatabases
 import com.example.plugins.*
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
@@ -21,9 +20,9 @@ fun main(args: Array<String>) {
 fun Application.module() {
     configureSockets()
     configureSerialization()
-    val dbConnection = configureDatabases()
+    val services = configureDatabase()
     configureMonitoring()
     configureHTTP()
-    configureSecurity(dbConnection)
+    configureSecurity(services)
     configureRouting()
 }

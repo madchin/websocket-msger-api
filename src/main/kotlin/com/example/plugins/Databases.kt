@@ -1,9 +1,9 @@
-package com.example.data
+package com.example.plugins
 
+import com.example.data.Repositories
+import com.example.data.Services
 import com.example.data.repository.*
 import com.example.data.service.*
-import com.example.plugins.City
-import com.example.plugins.CityService
 import com.example.utils.addDatabaseExtensions
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -13,7 +13,7 @@ import io.ktor.server.routing.*
 import java.sql.*
 import kotlinx.coroutines.*
 
-fun Application.configureDatabases(): Services {
+fun Application.configureDatabase(): Services {
     val dbConnection: Connection = connectToDatabase(embedded = false)
     addDatabaseExtensions(dbConnection)
     val repositories = Repositories(dbConnection)

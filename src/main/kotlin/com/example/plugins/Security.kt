@@ -3,9 +3,7 @@ package com.example.plugins
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.example.data.model.User
-import com.example.data.service.Services
-import com.example.data.service.UserService
-import com.example.data.service.UserServiceImpl
+import com.example.data.Services
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.http.*
@@ -17,7 +15,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
-import java.sql.Connection
 import java.util.Date
 
 fun Application.configureSecurity(services: Services) {
