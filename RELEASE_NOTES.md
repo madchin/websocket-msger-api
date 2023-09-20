@@ -14,4 +14,8 @@
 * Added sign in feature
 * Fixed db init in docker
 
+### Version *0.3.0*
+
+* Add project structure
+
 ### Version *x.x.x*
