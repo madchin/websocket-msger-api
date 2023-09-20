@@ -1,24 +1,25 @@
 package com.example.plugins
 
-import com.example.data.Repositories
+import com.example.data.RepositoriesImpl
 import com.example.data.Services
+import com.example.data.ServicesImpl
 import com.example.data.repository.*
 import com.example.data.service.*
-import com.example.utils.addDatabaseExtensions
+import com.example.data.util.addDatabaseExtensions
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.sql.*
 import kotlinx.coroutines.*
+import java.sql.*
 
 fun Application.configureDatabase(): Services {
     val dbConnection: Connection = connectToDatabase(embedded = false)
     addDatabaseExtensions(dbConnection)
-    val repositories = Repositories(dbConnection)
+    val repositories = RepositoriesImpl(dbConnection)
 
-    return Services(repositories)
+    return ServicesImpl(repositories)
 }
 
 /**

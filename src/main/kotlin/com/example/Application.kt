@@ -23,6 +23,6 @@ fun Application.module() {
     val services = configureDatabase()
     configureMonitoring()
     configureHTTP()
-    configureSecurity(services)
-    configureRouting()
+    configureSecurity()
+    configureRouting(services)
 }
