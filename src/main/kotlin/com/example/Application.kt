@@ -20,9 +20,9 @@ fun main(args: Array<String>) {
 fun Application.module() {
     configureSockets()
     configureSerialization()
-    val dbConnection = configureDatabases()
+    val services = configureDatabase()
     configureMonitoring()
     configureHTTP()
-    configureSecurity(dbConnection)
-    configureRouting()
+    configureSecurity()
+    configureRouting(services)
 }

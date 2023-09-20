@@ -1,16 +1,11 @@
-package com.example.models
+package com.example.data.repository
 
+import com.example.data.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
-
 import java.sql.Connection
 
-@Serializable
-data class User(val username: String, val password: String)
-
-class UserService(private val connection: Connection) {
-
+class UserRepositoryImpl(private val connection: Connection) : UserRepository {
     companion object {
         private val CREATE_TABLE_USER = "CREATE TABLE IF NOT EXISTS users (" +
                 "uid UUID DEFAULT uuid_generate_v4() PRIMARY KEY, " +
@@ -29,7 +24,8 @@ class UserService(private val connection: Connection) {
         statement.executeUpdate(CREATE_TABLE_USER)
         statement.close()
     }
-    suspend fun read(username: String): User = withContext(Dispatchers.IO) {
+
+    override suspend fun readUser(username: String): User = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(SELECT_USER_BY_USERNAME)
         statement.setString(1, username)
         val resultSet = statement.executeQuery()
@@ -45,27 +41,29 @@ class UserService(private val connection: Connection) {
         }
     }
 
-    suspend fun insert(username: String, password: String) = withContext(Dispatchers.IO) {
+    override suspend fun createUser(username: String, password: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(INSERT_USER)
         statement.setString(1, username)
         statement.setString(2, password)
         statement.executeUpdate()
         statement.close()
     }
-    suspend fun updateUsername(username: String) = withContext(Dispatchers.IO) {
+
+    override suspend fun updateUserUsername(username: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_USERNAME)
         statement.setString(1, username)
         statement.executeUpdate()
         statement.close()
     }
 
-    suspend fun updatePassword(password: String) = withContext(Dispatchers.IO) {
+    override suspend fun updateUserPassword(password: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(UPDATE_PASSWORD)
         statement.setString(1, password)
         statement.executeUpdate()
         statement.close()
     }
-    suspend fun delete(username: String) = withContext(Dispatchers.IO) {
+
+    override suspend fun deleteUser(username: String) = withContext(Dispatchers.IO) {
         val statement = connection.prepareStatement(DELETE_USER)
         statement.setString(1, username)
         statement.executeUpdate()

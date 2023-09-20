@@ -1,4 +1,4 @@
-package com.example.utils
+package com.example.data.util
 
 import java.sql.Connection
 
