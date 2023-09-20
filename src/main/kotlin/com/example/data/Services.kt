@@ -1,13 +1,10 @@
 package com.example.data
 
-import com.example.data.service.ChatServiceImpl
-import com.example.data.service.MemberServiceImpl
-import com.example.data.service.MessageServiceImpl
-import com.example.data.service.UserServiceImpl
+import com.example.data.service.*
 
-class Services(repositories: Repositories) {
-    val chatService = ChatServiceImpl(repositories.chatRepository)
-    val userService = UserServiceImpl(repositories.userRepository)
-    val messageService = MessageServiceImpl(repositories.messageRepository)
-    val memberService = MemberServiceImpl(repositories.memberRepository)
+interface Services {
+    val chatService: ChatService
+    val userService: UserService
+    val messageService: MessageService
+    val memberService: MemberService
 }
