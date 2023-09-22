@@ -2,6 +2,7 @@ package com.example.data.repository
 
 import com.example.data.model.User
 import com.example.data.util.GenericException
+import com.example.data.util.parseUserData
 import io.ktor.server.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,7 +15,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
                 "username varchar(64), " +
                 "password varchar(128)" +
                 ");"
-        private val SELECT_USER_BY_USERNAME = "SELECT (username, password) FROM users WHERE username = ?"
+        private val SELECT_USER_BY_USERNAME = "SELECT (username, password) FROM users WHERE username = ?;"
         private val INSERT_USER = "INSERT INTO users (username, password) VALUES (?, ?);"
         private val UPDATE_USERNAME = "UPDATE users SET username = ? WHERE uid = ?"
         private val UPDATE_PASSWORD = "UPDATE users SET password = ? where uid = ?"
@@ -32,14 +33,18 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             val statement = connection.prepareStatement(SELECT_USER_BY_USERNAME)
             statement.setString(1, username)
             val resultSet = statement.executeQuery()
-            statement.close()
+
             if (resultSet.next()) {
-                val password = resultSet.getString("password")
-                return@withContext Result.success(User(username = username, password = password))
+                val userData = resultSet.getString(1)
+                val (_, password) = parseUserData(userData)
+                return@withContext Result.success(User(username, password))
             }
             return@withContext Result.failure(NotFoundException("User with $username username not found"))
+
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            println("generic failure")
+
+            return@withContext Result.failure(GenericException())
         }
     }
 
@@ -52,7 +57,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 
@@ -64,7 +69,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 
@@ -76,7 +81,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 
@@ -88,7 +93,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 

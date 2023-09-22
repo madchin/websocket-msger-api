@@ -1,3 +1,3 @@
 package com.example.data.util
 
-object GenericException : Exception(message = "Oops. Something went wrong!")
+class GenericException(override val message: String = "Oops. Something went wrong!") : Exception()

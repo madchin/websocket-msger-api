@@ -39,7 +39,7 @@ class MessageRepositoryImpl(private val connection: Connection) : MessageReposit
             return@withContext Result.success(true)
 
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 
@@ -64,7 +64,7 @@ class MessageRepositoryImpl(private val connection: Connection) : MessageReposit
                 Result.success(messages)
             }
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 }

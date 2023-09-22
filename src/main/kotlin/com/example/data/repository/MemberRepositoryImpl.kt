@@ -45,7 +45,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
             return@withContext Result.failure(Exception("Unable to retrieve the id of the newly inserted member"))
 
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
 
     }
@@ -66,7 +66,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
             }
             return@withContext Result.failure(NotFoundException("Member with $uid uid not found"))
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 
@@ -79,7 +79,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 
@@ -93,7 +93,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
                 statement.close()
                 return@withContext Result.success(true)
             } catch (e: Throwable) {
-                return@withContext Result.failure(GenericException)
+                return@withContext Result.failure(GenericException())
             }
         }
 
@@ -105,7 +105,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 

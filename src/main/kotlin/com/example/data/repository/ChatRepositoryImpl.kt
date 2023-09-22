@@ -45,7 +45,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
             }
             return@withContext Result.failure(Exception("Unable to retrieve the id of the newly inserted chat"))
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 
@@ -62,7 +62,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
             }
             return@withContext Result.failure(NotFoundException("Chat with $id id not found"))
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 
@@ -75,7 +75,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 
@@ -87,7 +87,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(GenericException)
+            return@withContext Result.failure(GenericException())
         }
     }
 
