@@ -1,6 +1,7 @@
 package com.example.data.repository
 
 import com.example.data.model.Member
+import com.example.data.util.GenericException
 import io.ktor.server.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -41,10 +42,10 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
             if (generatedKeys.next()) {
                 return@withContext Result.success(generatedKeys.getString(1))
             }
-            throw Exception("Unable to retrieve the id of the newly inserted member")
+            return@withContext Result.failure(Exception("Unable to retrieve the id of the newly inserted member"))
 
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
 
     }
@@ -63,9 +64,9 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
 
                 return@withContext Result.success(Member(uid = uid, name = name, lastSeen = parsedLastSeen))
             }
-            throw NotFoundException("Member with $uid uid not found")
+            return@withContext Result.failure(NotFoundException("Member with $uid uid not found"))
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 
@@ -78,7 +79,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 
@@ -92,7 +93,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
                 statement.close()
                 return@withContext Result.success(true)
             } catch (e: Throwable) {
-                return@withContext Result.failure(e)
+                return@withContext Result.failure(GenericException)
             }
         }
 
@@ -104,7 +105,7 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 

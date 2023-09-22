@@ -1,6 +1,7 @@
 package com.example.data.repository
 
 import com.example.data.model.Message
+import com.example.data.util.GenericException
 import io.ktor.server.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,7 +39,7 @@ class MessageRepositoryImpl(private val connection: Connection) : MessageReposit
             return@withContext Result.success(true)
 
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 
@@ -57,10 +58,13 @@ class MessageRepositoryImpl(private val connection: Connection) : MessageReposit
 
                 messages.add(Message(sender = sender, content = content, timestamp = timestamp))
             }
-            if (messages.isEmpty()) throw NotFoundException("Messages in chat with $chatId id not found")
-            return@withContext Result.success(messages)
+            return@withContext if (messages.isEmpty()) {
+                Result.failure(NotFoundException("Messages in chat with $chatId id not found"))
+            } else {
+                Result.success(messages)
+            }
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.data.repository
 
 import com.example.data.model.User
+import com.example.data.util.GenericException
 import io.ktor.server.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -36,9 +37,9 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
                 val password = resultSet.getString("password")
                 return@withContext Result.success(User(username = username, password = password))
             }
-            throw NotFoundException("User with $username username not found")
+            return@withContext Result.failure(NotFoundException("User with $username username not found"))
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 
@@ -51,7 +52,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 
@@ -63,7 +64,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 
@@ -75,7 +76,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 
@@ -87,7 +88,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 

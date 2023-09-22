@@ -1,6 +1,7 @@
 package com.example.data.repository
 
 import com.example.data.model.Chat
+import com.example.data.util.GenericException
 import io.ktor.server.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -42,9 +43,9 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
             if (generatedKeys.next()) {
                 return@withContext Result.success(generatedKeys.getString(1))
             }
-            throw Exception("Unable to retrieve the id of the newly inserted chat")
+            return@withContext Result.failure(Exception("Unable to retrieve the id of the newly inserted chat"))
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 
@@ -59,9 +60,9 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
                 val name = resultSet.getString("name")
                 return@withContext Result.success(Chat(name = name, id = id))
             }
-            throw NotFoundException("Chat with $id id not found")
+            return@withContext Result.failure(NotFoundException("Chat with $id id not found"))
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 
@@ -74,7 +75,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 
@@ -86,7 +87,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
             statement.close()
             return@withContext Result.success(true)
         } catch (e: Throwable) {
-            return@withContext Result.failure(e)
+            return@withContext Result.failure(GenericException)
         }
     }
 
