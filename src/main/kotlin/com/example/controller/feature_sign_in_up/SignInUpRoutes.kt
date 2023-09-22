@@ -22,17 +22,49 @@ fun Route.signInUp(userService: UserService) {
     val jwtSecret = environment?.config?.property("jwt.secret")?.getString()
 
     post("/sign-in") {
-        val user = call.receive<User>()
+        val user = try {
+            call.receive<User>()
+        } catch (e: ContentTransformationException) {
+            null
+        }
+        if (user == null) call.respond(HttpStatusCode.UnprocessableEntity)
+        user?.let {
+            val username = it.username
+            val password = it.password
 
-        val token = JWT.create()
-            .withAudience(jwtAudience)
-            .withIssuer(jwtDomain)
-            .withClaim("username", user.username)
-            .withExpiresAt(Date(System.currentTimeMillis() + 60000))
-            .sign(Algorithm.HMAC256(jwtSecret))
+            if (username.isBlank() || password.isBlank()) {
+                val field = if (username.isBlank()) "username" else "password"
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    ErrorResponse(type = ErrorType.VALIDATION.name, message = "$field cannot be blank")
+                )
+                return@post
+            }
 
-        call.respond(hashMapOf("token" to token))
+            val result = userService.getUser(username)
+            when {
+                result.isSuccess -> {
+                    val token = JWT.create()
+                        .withAudience(jwtAudience)
+                        .withIssuer(jwtDomain)
+                        .withClaim("username", it.username)
+                        .withExpiresAt(Date(System.currentTimeMillis() + 60000))
+                        .sign(Algorithm.HMAC256(jwtSecret))
+
+                    call.respond(hashMapOf("token" to token))
+                }
+                result.isFailure -> {
+                    val message = result.exceptionOrNull()?.message ?: ""
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        ErrorResponse(type = ErrorType.NOT_FOUND.name, message = message)
+                    )
+                }
+            }
+
+        }
     }
+
 
     authenticate("auth-oauth-google") {
         get("login") {
@@ -47,18 +79,39 @@ fun Route.signInUp(userService: UserService) {
     }
 
     post("/sign-up") {
-        val user = call.receive<User>()
-        val username = user.username
-        val password = user.password
+        val user = try {
+            call.receive<User>()
+        } catch (e: ContentTransformationException) {
+            null
+        }
+        if (user == null) call.respond(HttpStatusCode.UnprocessableEntity)
+        user?.let {
+            val username = it.username
+            val password = it.password
 
-        if(username.isBlank()) {
-            call.respond(status = HttpStatusCode.BadRequest, message = ErrorResponse(ErrorType.VALIDATION.name, "username cannot be blank"))
+            if (username.isBlank() || password.isBlank()) {
+                val field = if (username.isBlank()) "username" else "password"
+                call.respond(
+                    status = HttpStatusCode.BadRequest,
+                    message = ErrorResponse(ErrorType.VALIDATION.name, "$field cannot be blank")
+                )
+                return@post
+            }
+
+            val result = userService.createUser(username, password)
+            when {
+                result.isSuccess -> {
+                    call.respond(HttpStatusCode.Created)
+                }
+                result.isFailure -> {
+                    val message = result.exceptionOrNull()?.message ?: ""
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        ErrorResponse(type = ErrorType.NOT_FOUND.name, message = message)
+                    )
+                }
+            }
         }
-        if(password.isBlank()) {
-            call.respond(status = HttpStatusCode.BadRequest, message = ErrorResponse(ErrorType.VALIDATION.name,"password cannot be blank"))
-        }
-        userService.createUser(username, password)
-        call.respond(HttpStatusCode.Created)
     }
 
 }
