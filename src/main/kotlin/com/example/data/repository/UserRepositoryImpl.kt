@@ -1,6 +1,7 @@
 package com.example.data.repository
 
 import com.example.data.model.User
+import io.ktor.server.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.sql.Connection
@@ -25,49 +26,69 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
         statement.close()
     }
 
-    override suspend fun readUser(username: String): User = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(SELECT_USER_BY_USERNAME)
-        statement.setString(1, username)
-        val resultSet = statement.executeQuery()
-
-        if (resultSet.next()) {
-            val password = resultSet.getString("password")
-
+    override suspend fun readUser(username: String): Result<User> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(SELECT_USER_BY_USERNAME)
+            statement.setString(1, username)
+            val resultSet = statement.executeQuery()
             statement.close()
-            return@withContext User(username = username, password = password)
-        } else {
-            statement.close()
-            throw Exception("Record not found")
+            if (resultSet.next()) {
+                val password = resultSet.getString("password")
+                return@withContext Result.success(User(username = username, password = password))
+            }
+            throw NotFoundException("User with $username username not found")
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
         }
     }
 
-    override suspend fun createUser(username: String, password: String) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(INSERT_USER)
-        statement.setString(1, username)
-        statement.setString(2, password)
-        statement.executeUpdate()
-        statement.close()
+    override suspend fun createUser(username: String, password: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(INSERT_USER)
+            statement.setString(1, username)
+            statement.setString(2, password)
+            statement.executeUpdate()
+            statement.close()
+            return@withContext Result.success(true)
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
+        }
     }
 
-    override suspend fun updateUserUsername(username: String) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(UPDATE_USERNAME)
-        statement.setString(1, username)
-        statement.executeUpdate()
-        statement.close()
+    override suspend fun updateUserUsername(username: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(UPDATE_USERNAME)
+            statement.setString(1, username)
+            statement.executeUpdate()
+            statement.close()
+            return@withContext Result.success(true)
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
+        }
     }
 
-    override suspend fun updateUserPassword(password: String) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(UPDATE_PASSWORD)
-        statement.setString(1, password)
-        statement.executeUpdate()
-        statement.close()
+    override suspend fun updateUserPassword(password: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(UPDATE_PASSWORD)
+            statement.setString(1, password)
+            statement.executeUpdate()
+            statement.close()
+            return@withContext Result.success(true)
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
+        }
     }
 
-    override suspend fun deleteUser(username: String) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(DELETE_USER)
-        statement.setString(1, username)
-        statement.executeUpdate()
-        statement.close()
+    override suspend fun deleteUser(username: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(DELETE_USER)
+            statement.setString(1, username)
+            statement.executeUpdate()
+            statement.close()
+            return@withContext Result.success(true)
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
+        }
     }
 
 }

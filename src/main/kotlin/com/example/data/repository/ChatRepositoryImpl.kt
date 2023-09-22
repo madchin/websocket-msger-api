@@ -1,6 +1,7 @@
 package com.example.data.repository
 
 import com.example.data.model.Chat
+import io.ktor.server.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.sql.Connection
@@ -30,50 +31,63 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
         statement.close()
     }
 
-    override suspend fun createChat(chat: Chat): String {
-        val statement = connection.prepareStatement(INSERT_CHAT, Statement.RETURN_GENERATED_KEYS)
-        statement.setString(1, chat.name)
-        statement.executeUpdate()
+    override suspend fun createChat(chat: Chat): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(INSERT_CHAT, Statement.RETURN_GENERATED_KEYS)
+            statement.setString(1, chat.name)
+            statement.executeUpdate()
+            val generatedKeys = statement.generatedKeys
+            statement.close()
 
-        val generatedKeys = statement.generatedKeys
-        if (generatedKeys.next()) {
-            statement.close()
-            return generatedKeys.getString(1)
-        } else {
-            statement.close()
+            if (generatedKeys.next()) {
+                return@withContext Result.success(generatedKeys.getString(1))
+            }
             throw Exception("Unable to retrieve the id of the newly inserted chat")
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
         }
     }
 
-    override suspend fun readChat(id: String): Chat = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(SELECT_CHAT_BY_ID)
-        statement.setString(1, id)
-        val resultSet = statement.executeQuery()
-
-        if (resultSet.next()) {
-            val name = resultSet.getString("name")
-
+    override suspend fun readChat(id: String): Result<Chat> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(SELECT_CHAT_BY_ID)
+            statement.setString(1, id)
+            val resultSet = statement.executeQuery()
             statement.close()
-            return@withContext Chat(name = name, id = id)
-        } else {
-            statement.close()
-            throw Exception("Record not found")
+
+            if (resultSet.next()) {
+                val name = resultSet.getString("name")
+                return@withContext Result.success(Chat(name = name, id = id))
+            }
+            throw NotFoundException("Chat with $id id not found")
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
         }
     }
 
-    override suspend fun updateChatName(id: String, name: String) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(UPDATE_CHAT_NAME)
-        statement.setString(1, name)
-        statement.setString(2, id)
-        statement.executeUpdate()
-        statement.close()
+    override suspend fun updateChatName(id: String, name: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(UPDATE_CHAT_NAME)
+            statement.setString(1, name)
+            statement.setString(2, id)
+            statement.executeUpdate()
+            statement.close()
+            return@withContext Result.success(true)
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
+        }
     }
 
-    override suspend fun deleteChat(id: String) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(DELETE_CHAT)
-        statement.setString(1, id)
-        statement.executeUpdate()
-        statement.close()
+    override suspend fun deleteChat(id: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(DELETE_CHAT)
+            statement.setString(1, id)
+            statement.executeUpdate()
+            statement.close()
+            return@withContext Result.success(true)
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
+        }
     }
 
 }

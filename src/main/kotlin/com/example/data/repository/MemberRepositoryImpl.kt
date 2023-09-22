@@ -1,6 +1,7 @@
 package com.example.data.repository
 
 import com.example.data.model.Member
+import io.ktor.server.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -30,59 +31,81 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
         statement.close()
     }
 
-    override suspend fun createMember(): String = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(INSERT_MEMBER, Statement.RETURN_GENERATED_KEYS)
-        statement.executeUpdate()
+    override suspend fun createMember(): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(INSERT_MEMBER, Statement.RETURN_GENERATED_KEYS)
+            statement.executeUpdate()
+            val generatedKeys = statement.generatedKeys
+            statement.close()
 
-        val generatedKeys = statement.generatedKeys
-        if (generatedKeys.next()) {
+            if (generatedKeys.next()) {
+                return@withContext Result.success(generatedKeys.getString(1))
+            }
+            throw Exception("Unable to retrieve the id of the newly inserted member")
+
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
+        }
+
+    }
+
+    override suspend fun readMember(uid: String): Result<Member> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(SELECT_MEMBER_BY_ID)
+            statement.setString(1, uid)
+            val resultSet = statement.executeQuery()
             statement.close()
-            return@withContext generatedKeys.getString(1)
-        } else {
-            statement.close()
-            throw Exception("Unable to retrieve the id of the newly inserted chat")
+
+            if (resultSet.next()) {
+                val name = resultSet.getString("name")
+                val lastSeen = resultSet.getString("lastSeen")
+                val parsedLastSeen = Json.decodeFromString<Map<String, Long>>(lastSeen)
+
+                return@withContext Result.success(Member(uid = uid, name = name, lastSeen = parsedLastSeen))
+            }
+            throw NotFoundException("Member with $uid uid not found")
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
         }
     }
 
-    override suspend fun readMember(uid: String): Member = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(SELECT_MEMBER_BY_ID)
-        statement.setString(1, uid)
-        val resultSet = statement.executeQuery()
-
-        if (resultSet.next()) {
-            val name = resultSet.getString("name")
-            val lastSeen = resultSet.getString("lastSeen")
-            val parsedLastSeen = Json.decodeFromString<Map<String, Long>>(lastSeen)
-
+    override suspend fun updateMemberName(uid: String, name: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(UPDATE_MEMBER_NAME)
+            statement.setString(1, name)
+            statement.setString(2, uid)
+            statement.executeUpdate()
             statement.close()
-            return@withContext Member(uid = uid, name = name, lastSeen = parsedLastSeen)
-        } else {
-            statement.close()
-            throw Exception("Record not found")
+            return@withContext Result.success(true)
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
         }
     }
 
-    override suspend fun updateMemberName(uid: String, name: String) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(UPDATE_MEMBER_NAME)
-        statement.setString(1, name)
-        statement.setString(2, uid)
-        statement.executeUpdate()
-        statement.close()
-    }
+    override suspend fun updateMemberLastSeen(uid: String, chatId: String): Result<Boolean> =
+        withContext(Dispatchers.IO) {
+            try {
+                val statement = connection.prepareStatement(UPDATE_MEMBER_LAST_SEEN)
+                statement.setString(1, chatId)
+                statement.setString(2, uid)
+                statement.executeUpdate()
+                statement.close()
+                return@withContext Result.success(true)
+            } catch (e: Throwable) {
+                return@withContext Result.failure(e)
+            }
+        }
 
-    override suspend fun updateMemberLastSeen(uid: String, chatId: String) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(UPDATE_MEMBER_LAST_SEEN)
-        statement.setString(1, chatId)
-        statement.setString(2, uid)
-        statement.executeUpdate()
-        statement.close()
-    }
-
-    override suspend fun deleteMember(uid: String) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(DELETE_MEMBER)
-        statement.setString(1, uid)
-        statement.executeUpdate()
-        statement.close()
+    override suspend fun deleteMember(uid: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(DELETE_MEMBER)
+            statement.setString(1, uid)
+            statement.executeUpdate()
+            statement.close()
+            return@withContext Result.success(true)
+        } catch (e: Throwable) {
+            return@withContext Result.failure(e)
+        }
     }
 
 }
