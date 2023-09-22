@@ -6,11 +6,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class MessageServiceImpl(private val messageRepository: MessageRepository) : MessageService {
-    override suspend fun readMessages(chatId: String): List<Message> = withContext(Dispatchers.IO) {
-        messageRepository.readMessages(chatId)
+    override suspend fun readMessages(chatId: String): Result<List<Message>> = withContext(Dispatchers.IO) {
+        return@withContext messageRepository.readMessages(chatId)
     }
 
-    override suspend fun sendMessage(message: Message) = withContext(Dispatchers.IO) {
-        messageRepository.createMessage(message)
+    override suspend fun sendMessage(message: Message): Result<Boolean> = withContext(Dispatchers.IO) {
+        return@withContext messageRepository.createMessage(message)
     }
 }
