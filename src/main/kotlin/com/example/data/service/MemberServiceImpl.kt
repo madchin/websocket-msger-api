@@ -18,10 +18,11 @@ class MemberServiceImpl(private val memberRepository: MemberRepository) : Member
         return@withContext memberRepository.readMember(uid)
     }
 
-    override suspend fun updateMemberLastSeen(uid: String, chatId: String): Result<Boolean> = withContext(Dispatchers.IO) {
-        return@withContext memberRepository.updateMemberLastSeen(uid, chatId)
+    override suspend fun updateMemberLastSeen(uid: String, chatId: String): Result<Boolean> =
+        withContext(Dispatchers.IO) {
+            return@withContext memberRepository.updateMemberLastSeen(uid, chatId)
 
-    }
+        }
 
     override suspend fun updateMemberName(uid: String, name: String): Result<Boolean> = withContext(Dispatchers.IO) {
         return@withContext memberRepository.updateMemberName(uid, name)

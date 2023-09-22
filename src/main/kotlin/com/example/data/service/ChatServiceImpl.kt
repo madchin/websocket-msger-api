@@ -19,6 +19,6 @@ class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService 
     }
 
     override suspend fun changeChatName(id: String, name: String): Result<Boolean> = withContext(Dispatchers.IO) {
-       return@withContext chatRepository.updateChatName(id, name)
+        return@withContext chatRepository.updateChatName(id, name)
     }
 }
