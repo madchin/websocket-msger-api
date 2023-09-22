@@ -6,6 +6,7 @@ import com.example.controller.util.ErrorResponse
 import com.example.controller.util.ErrorType
 import com.example.data.model.User
 import com.example.data.service.UserService
+import com.example.data.util.GenericException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -55,9 +56,10 @@ fun Route.signInUp(userService: UserService) {
                 }
                 result.isFailure -> {
                     val message = result.exceptionOrNull()?.message ?: ""
+                    val type = if(message != GenericException.message) ErrorType.NOT_FOUND.name else ErrorType.GENERIC.name
                     call.respond(
                         HttpStatusCode.NotFound,
-                        ErrorResponse(type = ErrorType.NOT_FOUND.name, message = message)
+                        ErrorResponse(type = type, message = message)
                     )
                 }
             }
@@ -105,9 +107,10 @@ fun Route.signInUp(userService: UserService) {
                 }
                 result.isFailure -> {
                     val message = result.exceptionOrNull()?.message ?: ""
+                    val type = if(message != GenericException.message) ErrorType.NOT_FOUND.name else ErrorType.GENERIC.name
                     call.respond(
                         HttpStatusCode.NotFound,
-                        ErrorResponse(type = ErrorType.NOT_FOUND.name, message = message)
+                        ErrorResponse(type = type, message = message)
                     )
                 }
             }
