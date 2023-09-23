@@ -16,7 +16,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
                 "password varchar(128)" +
                 ");"
         private val SELECT_USER_BY_USERNAME = "SELECT (username, password) FROM users WHERE username = ?;"
-        private val INSERT_USER = "INSERT INTO users (username, password) VALUES (?, ?);"
+        private val INSERT_USER = "INSERT INTO users (username, password) VALUES (?, ?)" // ON CONFLICT (username) DO NOTHING;
         private val UPDATE_USERNAME = "UPDATE users SET username = ? WHERE uid = ?"
         private val UPDATE_PASSWORD = "UPDATE users SET password = ? where uid = ?"
         private val DELETE_USER = "DELETE FROM users WHERE username = ?"
@@ -42,8 +42,6 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             return@withContext Result.failure(NotFoundException("User with $username username not found"))
 
         } catch (e: Throwable) {
-            println("generic failure")
-
             return@withContext Result.failure(GenericException())
         }
     }
@@ -53,12 +51,15 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             val statement = connection.prepareStatement(INSERT_USER)
             statement.setString(1, username)
             statement.setString(2, password)
-            statement.executeUpdate()
+            //statement.setString(3, username)
+            val rowsAffected = statement.executeUpdate()
             statement.close()
+            //return@withContext if(rowsAffected == 1) Result.success(true) else Result.failure(Exception("User with $username already exists"))
             return@withContext Result.success(true)
         } catch (e: Throwable) {
             return@withContext Result.failure(GenericException())
         }
+        TODO("fix not adding data when username already exists")
     }
 
     override suspend fun updateUserUsername(username: String): Result<Boolean> = withContext(Dispatchers.IO) {

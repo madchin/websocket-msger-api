@@ -13,10 +13,9 @@ class MemberRepositoryImpl(private val connection: Connection) : MemberRepositor
 
     companion object {
         private const val CREATE_TABLE_MEMBERS = "CREATE TABLE IF NOT EXISTS members (" +
-                "uid UUID, " +
+                "uid UUID REFERENCES users(uid), " +
                 "name TEXT, " +
-                "lastSeen JSONB, " +
-                "FOREIGN KEY (uid) REFERENCES users(uid)" +
+                "lastSeen JSONB" +
                 ");"
         private const val INSERT_MEMBER = "INSERT INTO members (uid) VALUES (uuid_generate_v4());"
         private const val SELECT_MEMBER_BY_ID = "SELECT uid, name, lastSeen FROM members WHERE uid = ?;"

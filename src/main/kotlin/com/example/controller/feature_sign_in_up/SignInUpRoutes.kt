@@ -108,7 +108,11 @@ fun Route.signInUp(userService: UserService) {
                 }
                 result.isFailure -> {
                     val message = result.exceptionOrNull()?.message ?: ""
-                    val type = if(message != GenericException().message) ErrorType.NOT_FOUND.name else ErrorType.GENERIC.name
+                    val type = when (message) {
+                        GenericException().message -> ErrorType.GENERIC.name
+                        "User with $username already exists" -> ErrorType.NOT_FOUND.name
+                        else -> ErrorType.ALREADY_EXISTS.name
+                    }
                     val statusCode = if(type == ErrorType.NOT_FOUND.name) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
                     call.respond(
                         statusCode,
