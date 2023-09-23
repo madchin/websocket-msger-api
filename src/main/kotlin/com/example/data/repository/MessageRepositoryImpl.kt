@@ -1,6 +1,8 @@
 package com.example.data.repository
 
 import com.example.data.model.Message
+import com.example.data.util.GenericException
+import io.ktor.server.plugins.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.sql.Connection
@@ -26,31 +28,43 @@ class MessageRepositoryImpl(private val connection: Connection) : MessageReposit
         statement.close()
     }
 
-    override suspend fun createMessage(message: Message) = withContext(Dispatchers.IO) {
-        val statement = connection.prepareStatement(INSERT_MESSAGE)
-        statement.setString(1, message.chatId)
-        statement.setString(2, message.sender)
-        statement.setString(3, message.content)
-        statement.executeUpdate()
-        statement.close()
+    override suspend fun createMessage(message: Message): Result<Boolean> = withContext(Dispatchers.IO) {
+        try {
+            val statement = connection.prepareStatement(INSERT_MESSAGE)
+            statement.setString(1, message.chatId)
+            statement.setString(2, message.sender)
+            statement.setString(3, message.content)
+            statement.executeUpdate()
+            statement.close()
+            return@withContext Result.success(true)
+
+        } catch (e: Throwable) {
+            return@withContext Result.failure(GenericException())
+        }
     }
 
-    override suspend fun readMessages(chatId: String): List<Message> = withContext(Dispatchers.IO) {
+    override suspend fun readMessages(chatId: String): Result<List<Message>> = withContext(Dispatchers.IO) {
         val messages = mutableListOf<Message>()
-        val statement = connection.prepareStatement(SELECT_MESSAGES_BY_CHAT_ID)
-        statement.setString(1, chatId)
-        val resultSet = statement.executeQuery()
+        try {
+            val statement = connection.prepareStatement(SELECT_MESSAGES_BY_CHAT_ID)
+            statement.setString(1, chatId)
+            val resultSet = statement.executeQuery()
+            statement.close()
 
-        if (resultSet.next()) {
-            val sender = resultSet.getString("sender")
-            val content = resultSet.getString("content")
-            val timestamp = resultSet.getTimestamp("timestamp")?.toString()?.toLong()
-            messages.add(Message(sender = sender, content = content, timestamp = timestamp))
+            while (resultSet.next()) {
+                val sender = resultSet.getString("sender")
+                val content = resultSet.getString("content")
+                val timestamp = resultSet.getTimestamp("timestamp")?.toString()?.toLong()
+
+                messages.add(Message(sender = sender, content = content, timestamp = timestamp))
+            }
+            return@withContext if (messages.isEmpty()) {
+                Result.failure(NotFoundException("Messages in chat with $chatId id not found"))
+            } else {
+                Result.success(messages)
+            }
+        } catch (e: Throwable) {
+            return@withContext Result.failure(GenericException())
         }
-        statement.close()
-        if (messages.isEmpty()) {
-            throw Exception("Record not found")
-        }
-        return@withContext messages
     }
 }
