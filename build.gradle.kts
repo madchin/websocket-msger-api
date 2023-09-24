@@ -5,6 +5,8 @@ val logback_version: String by project
 
 val postgres_version: String by project
 val h2_version: String by project
+val exposed_version: String by project
+
 plugins {
     kotlin("jvm") version "1.9.10"
     id("io.ktor.plugin") version "2.3.4"
@@ -47,4 +49,11 @@ dependencies {
     implementation("io.ktor:ktor-network-tls-certificates:$ktor_version")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+
+    // ORM -- EXPOSED
+    implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-json:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
 }
