@@ -1,6 +1,6 @@
 package com.example.data.service
 
-import com.example.data.model.Chat
+import com.example.data.dao.model.Chat
 import com.example.data.repository.ChatRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

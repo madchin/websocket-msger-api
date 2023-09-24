@@ -1,6 +1,6 @@
 package com.example.data.repository
 
-import com.example.data.model.Message
+import com.example.data.dao.model.Message
 import com.example.data.util.GenericException
 import io.ktor.server.plugins.*
 import kotlinx.coroutines.Dispatchers

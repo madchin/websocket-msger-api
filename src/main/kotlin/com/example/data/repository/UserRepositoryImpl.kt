@@ -1,6 +1,6 @@
 package com.example.data.repository
 
-import com.example.data.model.User
+import com.example.data.dao.model.User
 import com.example.data.util.GenericException
 import com.example.data.util.parseUserData
 import io.ktor.server.plugins.*
@@ -59,7 +59,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
         } catch (e: Throwable) {
             return@withContext Result.failure(GenericException())
         }
-        TODO("fix not adding data when username already exists")
+        TODO("fix not adding data when username / email already exists")
     }
 
     override suspend fun updateUserUsername(username: String): Result<Boolean> = withContext(Dispatchers.IO) {

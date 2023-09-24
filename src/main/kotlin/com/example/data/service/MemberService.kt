@@ -1,6 +1,6 @@
 package com.example.data.service
 
-import com.example.data.model.Member
+import com.example.data.dao.model.Member
 
 interface MemberService {
     suspend fun createMember(): Result<String>

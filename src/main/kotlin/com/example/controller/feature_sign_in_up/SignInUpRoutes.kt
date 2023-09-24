@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.example.controller.util.ErrorResponse
 import com.example.controller.util.ErrorType
-import com.example.data.model.User
+import com.example.data.dao.model.User
 import com.example.data.service.UserService
 import com.example.data.util.GenericException
 import io.ktor.http.*

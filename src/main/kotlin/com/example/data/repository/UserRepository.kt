@@ -1,6 +1,6 @@
 package com.example.data.repository
 
-import com.example.data.model.User
+import com.example.data.dao.model.User
 
 interface UserRepository {
     suspend fun readUser(username: String): Result<User>

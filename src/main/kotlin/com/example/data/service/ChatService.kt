@@ -1,6 +1,6 @@
 package com.example.data.service
 
-import com.example.data.model.Chat
+import com.example.data.dao.model.Chat
 
 interface ChatService {
     suspend fun createChat(chat: Chat): Result<String>

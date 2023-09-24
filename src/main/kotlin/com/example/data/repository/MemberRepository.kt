@@ -1,6 +1,6 @@
 package com.example.data.repository
 
-import com.example.data.model.Member
+import com.example.data.dao.model.Member
 
 interface MemberRepository {
     suspend fun createMember(): Result<String>

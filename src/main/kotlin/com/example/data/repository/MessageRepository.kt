@@ -1,6 +1,6 @@
 package com.example.data.repository
 
-import com.example.data.model.Message
+import com.example.data.dao.model.Message
 
 interface MessageRepository {
     suspend fun createMessage(message: Message): Result<Boolean>

@@ -1,6 +1,6 @@
 package com.example.data.repository
 
-import com.example.data.model.Chat
+import com.example.data.dao.model.Chat
 
 interface ChatRepository {
     suspend fun createChat(chat: Chat): Result<String>

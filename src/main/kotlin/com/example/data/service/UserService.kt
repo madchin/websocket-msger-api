@@ -1,6 +1,6 @@
 package com.example.data.service
 
-import com.example.data.model.User
+import com.example.data.dao.model.User
 
 interface UserService {
     suspend fun getUser(username: String): Result<User>
