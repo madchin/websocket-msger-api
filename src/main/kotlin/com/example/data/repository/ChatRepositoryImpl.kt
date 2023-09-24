@@ -58,7 +58,7 @@ class ChatRepositoryImpl(private val connection: Connection) : ChatRepository {
 
             if (resultSet.next()) {
                 val name = resultSet.getString("name")
-                return@withContext Result.success(Chat(name = name, id = id))
+                return@withContext Result.success(Chat(name = name, id = id, messagesIds = emptyList(), membersIds = emptyList()))
             }
             return@withContext Result.failure(NotFoundException("Chat with $id id not found"))
         } catch (e: Throwable) {

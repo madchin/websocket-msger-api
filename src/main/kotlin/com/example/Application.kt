@@ -18,11 +18,11 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
+    configureDatabase()
     configureSockets()
     configureSerialization()
-    val services = configureDatabase()
     configureMonitoring()
     configureHTTP()
     configureSecurity()
-    configureRouting(services)
+    configureRouting()
 }

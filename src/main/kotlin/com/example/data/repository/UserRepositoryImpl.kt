@@ -37,7 +37,7 @@ class UserRepositoryImpl(private val connection: Connection) : UserRepository {
             if (resultSet.next()) {
                 val userData = resultSet.getString(1)
                 val (_, password) = parseUserData(userData)
-                return@withContext Result.success(User(username, password))
+                return@withContext Result.success(User(username, "", password))
             }
             return@withContext Result.failure(NotFoundException("User with $username username not found"))
 

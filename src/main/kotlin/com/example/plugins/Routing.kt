@@ -5,8 +5,8 @@ import com.example.data.Services
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 
-fun Application.configureRouting(services: Services) {
+fun Application.configureRouting(services: Services? = null) {
     routing {
-        signInUp(services.userService)
+        //signInUp(services.userService)
     }
 }

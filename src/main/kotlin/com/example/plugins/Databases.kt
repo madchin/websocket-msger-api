@@ -3,6 +3,7 @@ package com.example.plugins
 import com.example.data.RepositoriesImpl
 import com.example.data.Services
 import com.example.data.ServicesImpl
+import com.example.data.dao.DatabaseFactory
 import com.example.data.repository.*
 import com.example.data.service.*
 import com.example.data.util.addDatabaseExtensions
@@ -14,12 +15,13 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.*
 import java.sql.*
 
-fun Application.configureDatabase(): Services {
-    val dbConnection: Connection = connectToDatabase(embedded = false)
-    addDatabaseExtensions(dbConnection)
-    val repositories = RepositoriesImpl(dbConnection)
+fun Application.configureDatabase() {
+    //val dbConnection: Connection = connectToDatabase(embedded = false)
+    //addDatabaseExtensions(dbConnection)
 
-    return ServicesImpl(repositories)
+    val db = DatabaseFactory.init(false, environment = environment)
+    //val repositories = RepositoriesImpl(dbConnection)
+    //return ServicesImpl(repositories)
 }
 
 /**
