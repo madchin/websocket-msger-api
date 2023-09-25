@@ -7,10 +7,10 @@ object Chats : UUIDTable() {
     val name = varchar("name", 255)
     val members = json("members", { it.toString() }, {
         //FIXME
-        listOf(it.toIntOrNull())
+        listOf(it.toInt())
     })
     val messages = json("messages", { it.toString() }, {
         //FIXME
-        listOf(it.toIntOrNull())
+        listOf(it.toInt())
     })
 }
