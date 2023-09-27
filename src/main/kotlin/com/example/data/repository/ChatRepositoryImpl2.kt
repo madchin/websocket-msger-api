@@ -3,57 +3,58 @@ package com.example.data.repository
 import com.example.data.dao.DatabaseFactory.dbQuery
 import com.example.data.dao.model.Chat
 import com.example.data.dao.table.Chats
-import com.example.data.util.GenericException
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insert
-import java.sql.SQLException
+import io.ktor.server.plugins.*
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import java.util.*
 
-//        private const val CREATE_TABLE_CHATS =
-//            "CREATE TABLE IF NOT EXISTS chats (" +
-//                    "id UUID DEFAULT uuid_generate_v4() PRIMARY KEY, " +
-//                    "name VARCHAR(255)" +
-//                        "members JSON, "
-//                            "messages JSON, "
-//                    ");"
-//
-//        private const val INSERT_CHAT = "INSERT INTO chats (name) VALUES (?);"
-//
-//        private const val SELECT_CHAT_BY_ID = "SELECT id, name FROM chats WHERE id = ?;"
-//
-//        private const val UPDATE_CHAT_NAME = "UPDATE chats SET name = ? WHERE id = ?;"
-//
-//        private const val DELETE_CHAT = "DELETE FROM chats WHERE id = ?;"
 class ChatRepositoryImpl2 : ChatRepository {
-
     private fun resultRowToChat(row: ResultRow) = Chat(
         id = row[Chats.id].toString(),
         name = row[Chats.name],
-        messagesIds = row[Chats.messages],
-        membersIds = row[Chats.members]
+        messageIds = row[Chats.messageIds].toList(),
+        memberIds = row[Chats.memberIds].toList()
     )
     override suspend fun createChat(chat: Chat): Result<Chat> = dbQuery {
-
-        val insertedStatement = Chats.insert {
-            it[Chats.name] = chat.name
-            it[Chats.members] = chat.membersIds
-            it[Chats.messages] = chat.messagesIds
+        val rowsAffected = Chats.insert {
+            it[name] = chat.name
+            it[memberIds] = chat.memberIds.toIntArray()
+            it[messageIds] = chat.messageIds.toIntArray()
         }
-        if(insertedStatement.insertedCount == 0) {
-            return@dbQuery Result.failure(Exception("Not inserted"))
+        if (rowsAffected.insertedCount > 0) {
+            Result.success(rowsAffected.resultedValues!!.single().let(::resultRowToChat))
         }
-        return@dbQuery Result.success(insertedStatement.resultedValues!!.single().let(::resultRowToChat))
+        Result.failure(Exception("Chat $chat not inserted"))
+    }
+    override suspend fun readChat(id: String): Result<Chat> = dbQuery {
+        val chat = Chats
+            .select { Chats.id eq UUID.fromString(id) }
+            .map(::resultRowToChat)
+            .singleOrNull()
+        if (chat != null) {
+            Result.success(chat)
+        }
+        Result.failure(NotFoundException("Chat with id $id not exists"))
 
     }
+    override suspend fun updateChatName(id: String, name: String): Result<Boolean> = dbQuery {
+        val updatedRows = Chats
+            .update({ Chats.id eq UUID.fromString(id) }) {
+                it[Chats.name] = name
+            }
+        if (updatedRows > 0) {
+            Result.success(true)
+        }
+        Result.failure(NotFoundException("Chat with id $id not found"))
 
-    override suspend fun readChat(id: String): Result<Chat> {
-        TODO("Not yet implemented")
     }
+    override suspend fun deleteChat(id: String): Result<Boolean> = dbQuery {
+        val deletedRows = Chats
+            .deleteWhere { Chats.id eq UUID.fromString(id) }
+        if (deletedRows > 0) {
+            Result.success(true)
+        }
+        Result.failure(NotFoundException("Chat with id $id not found"))
 
-    override suspend fun updateChatName(id: String, name: String): Result<Boolean> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteChat(id: String): Result<Boolean> {
-        TODO("Not yet implemented")
     }
 }
