@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.data.dao.DatabaseFactory
 import com.example.plugins.*
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
@@ -18,11 +19,11 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    configureDatabase()
+    val services = DatabaseFactory.init(false, environment = environment)
     configureSockets()
     configureSerialization()
     configureMonitoring()
     configureHTTP()
     configureSecurity()
-    configureRouting()
+    configureRouting(services)
 }

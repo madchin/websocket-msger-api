@@ -19,9 +19,7 @@ fun Application.configureDatabase() {
     //val dbConnection: Connection = connectToDatabase(embedded = false)
     //addDatabaseExtensions(dbConnection)
 
-    val db = DatabaseFactory.init(false, environment = environment)
-    //val repositories = RepositoriesImpl(dbConnection)
-    //return ServicesImpl(repositories)
+    DatabaseFactory.init(false, environment = environment)
 }
 
 /**

@@ -1,5 +1,8 @@
 package com.example.data.dao
 
+import com.example.data.RepositoriesImpl
+import com.example.data.Services
+import com.example.data.ServicesImpl
 import com.example.data.dao.table.Chats
 import com.example.data.dao.table.Members
 import com.example.data.dao.table.Messages
@@ -16,7 +19,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionA
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
-    fun init(embedded: Boolean, environment: ApplicationEnvironment): Database {
+    fun init(embedded: Boolean, environment: ApplicationEnvironment): Services {
         fun connectToDb(): Lazy<Database> = if (embedded) {
             lazy {
                 Database.connect(
@@ -44,15 +47,21 @@ object DatabaseFactory {
                 SchemaUtils.create(Messages)
             }
         }
-        val databaseConnection by connectToDb()
-        transaction(databaseConnection) {
-            // add logger print sql to stdout
-            addLogger(StdOutSqlLogger)
+        fun configureServices(): Services {
+            val repositories = RepositoriesImpl()
+            return ServicesImpl(repositories)
         }
+        fun configureLoggers(database: Database) {
+            transaction(database) {
+                // add logger print sql to stdout
+                addLogger(StdOutSqlLogger)
+            }
+        }
+        val databaseConnection by connectToDb()
+        configureLoggers(databaseConnection)
         createSchemas(databaseConnection)
-        return databaseConnection
+        return configureServices()
     }
-
     suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
     suspend fun <T> dbAsyncQuery(block: suspend () -> T, database: Database): Deferred<T> =
