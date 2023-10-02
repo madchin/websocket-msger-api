@@ -10,5 +10,6 @@ fun Application.configureRouting(services: Services) {
     routing {
         //signInUp(services.userService)
         chat(services.chatService)
+        signInUp(services.userService)
     }
 }

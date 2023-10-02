@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService {
-    override suspend fun createChat(chat: Chat): Result<Chat?> = withContext(Dispatchers.IO) {
+    override suspend fun createChat(chat: Chat): Result<Chat> = withContext(Dispatchers.IO) {
         return@withContext chatRepository.createChat(chat)
     }
 

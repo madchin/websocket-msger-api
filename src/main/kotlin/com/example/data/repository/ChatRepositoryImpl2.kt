@@ -6,7 +6,6 @@ import com.example.data.dao.table.Chats
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import java.util.*
 
 class ChatRepositoryImpl2 : ChatRepository {
@@ -17,17 +16,17 @@ class ChatRepositoryImpl2 : ChatRepository {
         memberIds = row[Chats.memberIds].toList()
     )
 
-    override suspend fun createChat(chat: Chat): Result<Chat?> = dbQuery {
+    override suspend fun createChat(chat: Chat): Result<Chat> = dbQuery {
         Chats.insert {
             it[name] = chat.name
             it[memberIds] = chat.memberIds.toIntArray()
             it[messageIds] = chat.messageIds.toIntArray()
         }.run {
             val insertedChat = resultedValues?.singleOrNull()?.let(::resultRowToChat)
-            if(insertedChat != null) {
+            if (insertedChat != null) {
                 return@dbQuery Result.success(insertedChat)
             }
-            return@dbQuery Result.failure(Exception("Chat $chat not inserted"))
+            return@dbQuery Result.failure(Exception("Chat with name ${chat.name} not inserted"))
         }
     }
 
@@ -39,7 +38,7 @@ class ChatRepositoryImpl2 : ChatRepository {
         if (chat != null) {
             return@dbQuery Result.success(chat)
         }
-        return@dbQuery Result.failure(NotFoundException("Chat with id $id not exists"))
+        return@dbQuery Result.failure(NotFoundException("Chat with id $id not found"))
 
     }
 
@@ -59,7 +58,7 @@ class ChatRepositoryImpl2 : ChatRepository {
         Chats
             .deleteWhere { Chats.id eq UUID.fromString(id) }
             .let {
-                if(it != 0) {
+                if (it != 0) {
                     return@dbQuery Result.success(true)
                 }
                 return@dbQuery Result.failure(NotFoundException("Chat with id $id not found"))
