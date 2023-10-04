@@ -1,11 +1,11 @@
-package com.example.data.model
+package com.example.data.dao.model
 
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Message(
-    val chatId: String? = null,
+    val chatId: String,
     val sender: String,
     val content: String,
-    val timestamp: Long? = null
+    val timestamp: Long
 )
