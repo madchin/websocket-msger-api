@@ -7,4 +7,5 @@ interface ChatRepository {
     suspend fun readChat(id: String): Result<Chat>
     suspend fun updateChatName(id: String, name: String): Result<Boolean>
     suspend fun deleteChat(id: String): Result<Boolean>
+    suspend fun updateChatLastSeenMembers(chatId: String, memberUid: String, lastSeen: Long): Result<Boolean>
 }

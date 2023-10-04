@@ -3,6 +3,7 @@ package com.example.data.repository
 import com.example.data.dao.DatabaseFactory.dbQuery
 import com.example.data.dao.model.Chat
 import com.example.data.dao.table.Chats
+import com.example.data.util.GenericException
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -13,13 +14,13 @@ class ChatRepositoryImpl2 : ChatRepository {
         id = row[Chats.id].toString(),
         name = row[Chats.name],
         messageIds = row[Chats.messageIds].toList(),
-        memberIds = row[Chats.memberIds].toList()
+        lastSeenMembers = row[Chats.lastSeenMembers]
     )
 
     override suspend fun createChat(chat: Chat): Result<Chat> = dbQuery {
         Chats.insert {
             it[name] = chat.name
-            it[memberIds] = chat.memberIds.toIntArray()
+            it[lastSeenMembers] = chat.lastSeenMembers
             it[messageIds] = chat.messageIds.toIntArray()
         }.run {
             val insertedChat = resultedValues?.singleOrNull()?.let(::resultRowToChat)
@@ -53,6 +54,25 @@ class ChatRepositoryImpl2 : ChatRepository {
                 return@dbQuery Result.failure(NotFoundException("Chat with id $id not found"))
             }
     }
+
+    override suspend fun updateChatLastSeenMembers(chatId: String, memberUid: String, lastSeen: Long): Result<Boolean> =
+        dbQuery {
+            val chatLastSeen = Chats.slice(Chats.lastSeenMembers).select { Chats.id eq UUID.fromString(chatId) }
+                .map { it[Chats.lastSeenMembers] }
+                .singleOrNull()
+
+            chatLastSeen?.filterNot { it.keys.contains(memberUid) }?.let { filteredLastSeen ->
+                Chats.update {
+                    it[lastSeenMembers] = filteredLastSeen + mapOf(memberUid to lastSeen)
+                }.run {
+                    if (this != 0) {
+                        return@dbQuery Result.success(true)
+                    }
+                    return@dbQuery Result.failure(NotFoundException("Chat with id $chatId has not been found"))
+                }
+            }
+            return@dbQuery Result.failure(GenericException())
+        }
 
     override suspend fun deleteChat(id: String): Result<Boolean> = dbQuery {
         Chats

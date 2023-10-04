@@ -21,4 +21,8 @@ class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService 
     override suspend fun changeChatName(id: String, name: String): Result<Boolean> = withContext(Dispatchers.IO) {
         return@withContext chatRepository.updateChatName(id, name)
     }
+    override suspend fun updateLastSeenMembers(chatId: String, memberUid: String, lastSeen: Long): Result<Boolean> = withContext(Dispatchers.IO) {
+        return@withContext chatRepository.updateChatLastSeenMembers(chatId, memberUid, lastSeen)
+    }
+
 }

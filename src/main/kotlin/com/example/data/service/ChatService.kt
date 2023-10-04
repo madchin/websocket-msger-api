@@ -7,4 +7,5 @@ interface ChatService {
     suspend fun getChat(id: String): Result<Chat>
     suspend fun changeChatName(id: String, name: String): Result<Boolean>
     suspend fun deleteChat(id: String): Result<Boolean>
+    suspend fun updateLastSeenMembers(chatId: String, memberUid: String, lastSeen: Long): Result<Boolean>
 }

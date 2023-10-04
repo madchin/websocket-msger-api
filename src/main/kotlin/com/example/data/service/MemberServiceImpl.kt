@@ -6,8 +6,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class MemberServiceImpl(private val memberRepository: MemberRepository) : MemberService {
-    override suspend fun createMember(): Result<String> = withContext(Dispatchers.IO) {
-        return@withContext memberRepository.createMember()
+    override suspend fun createMember(member: Member): Result<Member> = withContext(Dispatchers.IO) {
+        return@withContext memberRepository.createMember(member)
     }
 
     override suspend fun deleteMember(uid: String): Result<Boolean> = withContext(Dispatchers.IO) {
@@ -17,12 +17,6 @@ class MemberServiceImpl(private val memberRepository: MemberRepository) : Member
     override suspend fun getMember(uid: String): Result<Member> = withContext(Dispatchers.IO) {
         return@withContext memberRepository.readMember(uid)
     }
-
-    override suspend fun updateMemberLastSeen(uid: String, chatId: String): Result<Boolean> =
-        withContext(Dispatchers.IO) {
-            return@withContext memberRepository.updateMemberLastSeen(uid, chatId)
-
-        }
 
     override suspend fun updateMemberName(uid: String, name: String): Result<Boolean> = withContext(Dispatchers.IO) {
         return@withContext memberRepository.updateMemberName(uid, name)
