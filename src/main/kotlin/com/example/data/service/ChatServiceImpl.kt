@@ -1,12 +1,12 @@
 package com.example.data.service
 
-import com.example.data.model.Chat
+import com.example.data.dao.model.Chat
 import com.example.data.repository.ChatRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService {
-    override suspend fun createChat(chat: Chat): Result<String> = withContext(Dispatchers.IO) {
+    override suspend fun createChat(chat: Chat): Result<Chat> = withContext(Dispatchers.IO) {
         return@withContext chatRepository.createChat(chat)
     }
 
@@ -21,4 +21,8 @@ class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService 
     override suspend fun changeChatName(id: String, name: String): Result<Boolean> = withContext(Dispatchers.IO) {
         return@withContext chatRepository.updateChatName(id, name)
     }
+    override suspend fun updateLastSeenMembers(chatId: String, memberUid: String, lastSeen: Long): Result<Boolean> = withContext(Dispatchers.IO) {
+        return@withContext chatRepository.updateChatLastSeenMembers(chatId, memberUid, lastSeen)
+    }
+
 }

@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.example.controller.util.ErrorResponse
 import com.example.controller.util.ErrorType
-import com.example.data.model.User
+import com.example.data.dao.model.User
 import com.example.data.service.UserService
 import com.example.data.util.GenericException
 import io.ktor.http.*
@@ -23,18 +23,17 @@ fun Route.signInUp(userService: UserService) {
     val jwtSecret = environment?.config?.property("jwt.secret")?.getString()
 
     post("/sign-in") {
-        val user = try {
+        val receivedUser = try {
             call.receive<User>()
         } catch (e: ContentTransformationException) {
             null
         }
-        if (user == null) call.respond(HttpStatusCode.UnprocessableEntity)
-        user?.let {
-            val username = it.username
-            val password = it.password
 
-            if (username.isBlank() || password.isBlank()) {
-                val field = if (username.isBlank()) "username" else "password"
+        if (receivedUser == null) call.respond(HttpStatusCode.UnprocessableEntity)
+
+        receivedUser?.let { user ->
+            if (user.username.isBlank() || user.password.isBlank() || user.password.isBlank()) {
+                val field = if (user.username.isBlank()) "username" else "password"
                 call.respond(
                     HttpStatusCode.BadRequest,
                     ErrorResponse(type = ErrorType.VALIDATION.name, message = "$field cannot be blank")
@@ -42,9 +41,8 @@ fun Route.signInUp(userService: UserService) {
                 return@post
             }
 
-            val result = userService.getUser(username)
-            when {
-                result.isSuccess -> {
+            userService.getUser(user).also { result ->
+                result.onSuccess {
                     val token = JWT.create()
                         .withAudience(jwtAudience)
                         .withIssuer(jwtDomain)
@@ -54,17 +52,18 @@ fun Route.signInUp(userService: UserService) {
 
                     call.respond(hashMapOf("token" to token))
                 }
-                result.isFailure -> {
+                result.onFailure {
                     val message = result.exceptionOrNull()?.message ?: ""
-                    val type = if(message != GenericException().message) ErrorType.NOT_FOUND.name else ErrorType.GENERIC.name
-                    val statusCode = if(type == ErrorType.NOT_FOUND.name) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
+                    val type =
+                        if (message != GenericException().message) ErrorType.NOT_FOUND.name else ErrorType.GENERIC.name
+                    val statusCode =
+                        if (type == ErrorType.NOT_FOUND.name) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
                     call.respond(
                         statusCode,
                         ErrorResponse(type = type, message = message)
                     )
                 }
             }
-
         }
     }
 
@@ -87,7 +86,9 @@ fun Route.signInUp(userService: UserService) {
         } catch (e: ContentTransformationException) {
             null
         }
+
         if (user == null) call.respond(HttpStatusCode.UnprocessableEntity)
+
         user?.let {
             val username = it.username
             val password = it.password
@@ -101,19 +102,20 @@ fun Route.signInUp(userService: UserService) {
                 return@post
             }
 
-            val result = userService.createUser(username, password)
-            when {
-                result.isSuccess -> {
+            userService.createUser(User(username = username, password = password, email = "temp")).also { result ->
+                result.onSuccess {
                     call.respond(HttpStatusCode.Created)
                 }
-                result.isFailure -> {
+
+                result.onFailure {
                     val message = result.exceptionOrNull()?.message ?: ""
                     val type = when (message) {
                         GenericException().message -> ErrorType.GENERIC.name
                         "User with $username already exists" -> ErrorType.NOT_FOUND.name
                         else -> ErrorType.ALREADY_EXISTS.name
                     }
-                    val statusCode = if(type == ErrorType.NOT_FOUND.name) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
+                    val statusCode =
+                        if (type == ErrorType.NOT_FOUND.name) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
                     call.respond(
                         statusCode,
                         ErrorResponse(type = type, message = message)
