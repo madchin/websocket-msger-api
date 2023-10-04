@@ -1,28 +1,28 @@
 package com.example.data.service
 
-import com.example.data.model.User
+import com.example.data.dao.model.User
 import com.example.data.repository.UserRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class UserServiceImpl(private val userRepository: UserRepository) : UserService {
-    override suspend fun createUser(username: String, password: String) = withContext(Dispatchers.IO) {
-        userRepository.createUser(username, password)
+    override suspend fun createUser(user: User): Result<Boolean> = withContext(Dispatchers.IO) {
+        return@withContext userRepository.createUser(user)
     }
 
-    override suspend fun deleteUser(username: String) = withContext(Dispatchers.IO) {
-        userRepository.deleteUser(username)
+    override suspend fun deleteUser(username: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        return@withContext userRepository.deleteUser(username)
     }
 
-    override suspend fun getUser(username: String): User = withContext(Dispatchers.IO) {
-        userRepository.readUser(username)
+    override suspend fun getUser(user: User): Result<User> = withContext(Dispatchers.IO) {
+        return@withContext userRepository.readUser(user)
     }
 
-    override suspend fun updateUserPassword(password: String) = withContext(Dispatchers.IO) {
-        userRepository.updateUserPassword(password)
+    override suspend fun updateUserPassword(user: User): Result<Boolean> = withContext(Dispatchers.IO) {
+        return@withContext userRepository.updateUserPassword(user)
     }
 
-    override suspend fun updateUserUsername(username: String) = withContext(Dispatchers.IO) {
-        userRepository.updateUserUsername(username)
+    override suspend fun updateUserUsername(username: String): Result<Boolean> = withContext(Dispatchers.IO) {
+        return@withContext userRepository.updateUserUsername(username)
     }
 }
