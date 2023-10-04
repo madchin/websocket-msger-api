@@ -1,11 +1,11 @@
 package com.example.data.repository
 
-import com.example.data.dao.model.User
+import com.example.data.model.User
 
 interface UserRepository {
-    suspend fun readUser(user: User): Result<User>
-    suspend fun createUser(user: User): Result<Boolean>
-    suspend fun updateUserUsername(username: String): Result<Boolean>
-    suspend fun updateUserPassword(user: User): Result<Boolean>
-    suspend fun deleteUser(username: String): Result<Boolean>
+    suspend fun readUser(username: String): User
+    suspend fun createUser(username: String, password: String)
+    suspend fun updateUserUsername(username: String)
+    suspend fun updateUserPassword(password: String)
+    suspend fun deleteUser(username: String)
 }

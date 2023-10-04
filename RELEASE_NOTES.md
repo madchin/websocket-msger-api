@@ -18,7 +18,4 @@
 
 * Add project structure
 
-### Version *0.4.0*
-
-* Add ORM framework
-* Fix CRUD operations for all tables
+### Version *x.x.x*

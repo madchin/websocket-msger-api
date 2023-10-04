@@ -1,11 +1,10 @@
 package com.example.data.service
 
-import com.example.data.dao.model.Chat
+import com.example.data.model.Chat
 
 interface ChatService {
-    suspend fun createChat(chat: Chat): Result<Chat>
-    suspend fun getChat(id: String): Result<Chat>
-    suspend fun changeChatName(id: String, name: String): Result<Boolean>
-    suspend fun deleteChat(id: String): Result<Boolean>
-    suspend fun updateLastSeenMembers(chatId: String, memberUid: String, lastSeen: Long): Result<Boolean>
+    suspend fun createChat(chat: Chat): String
+    suspend fun getChat(id: String): Chat
+    suspend fun changeChatName(id: String, name: String)
+    suspend fun deleteChat(id: String)
 }
