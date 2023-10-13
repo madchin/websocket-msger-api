@@ -1,6 +1,6 @@
-package com.example.data
+package com.example.domain.dao
 
-import com.example.data.service.*
+import com.example.domain.dao.service.*
 
 interface Services {
     val chatService: ChatService

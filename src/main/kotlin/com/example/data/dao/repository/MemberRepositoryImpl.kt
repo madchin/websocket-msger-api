@@ -1,21 +1,22 @@
-package com.example.data.repository
+package com.example.data.dao.repository
 
 import com.example.data.dao.DatabaseFactory.dbQuery
-import com.example.data.dao.model.Member
+import com.example.domain.model.Member
 import com.example.data.dao.table.Members
+import com.example.domain.dao.repository.MemberRepository
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.util.*
 
-class MemberRepositoryImpl2 : MemberRepository {
+class MemberRepositoryImpl : MemberRepository {
     private fun resultRowToMember(row: ResultRow): Member = Member(
         uid = row[Members.uid].toString(),
         name = row[Members.name]
     )
 
-    override suspend fun createMember(member: Member): Result<Member> = dbQuery {
-        Members.insert {
+    override suspend fun upsertMember(member: Member): Result<Member> = dbQuery {
+        Members.upsert {
             it[uid] = UUID.fromString(member.uid)
             it[name] = member.name
         }.run {

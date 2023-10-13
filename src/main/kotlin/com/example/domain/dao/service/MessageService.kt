@@ -1,6 +1,6 @@
-package com.example.data.service
+package com.example.domain.dao.service
 
-import com.example.data.dao.model.Message
+import com.example.domain.model.Message
 
 interface MessageService {
     suspend fun sendMessage(message: Message): Result<Boolean>

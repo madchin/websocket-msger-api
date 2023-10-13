@@ -1,13 +1,14 @@
-package com.example.data.service
+package com.example.data.dao.service
 
-import com.example.data.dao.model.Member
-import com.example.data.repository.MemberRepository
+import com.example.domain.model.Member
+import com.example.domain.dao.repository.MemberRepository
+import com.example.domain.dao.service.MemberService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class MemberServiceImpl(private val memberRepository: MemberRepository) : MemberService {
-    override suspend fun createMember(member: Member): Result<Member> = withContext(Dispatchers.IO) {
-        return@withContext memberRepository.createMember(member)
+    override suspend fun createOrUpdateMember(member: Member): Result<Member> = withContext(Dispatchers.IO) {
+        return@withContext memberRepository.upsertMember(member)
     }
 
     override suspend fun deleteMember(uid: String): Result<Boolean> = withContext(Dispatchers.IO) {

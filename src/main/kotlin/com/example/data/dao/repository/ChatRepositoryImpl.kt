@@ -1,15 +1,16 @@
-package com.example.data.repository
+package com.example.data.dao.repository
 
 import com.example.data.dao.DatabaseFactory.dbQuery
-import com.example.data.dao.model.Chat
+import com.example.domain.model.Chat
 import com.example.data.dao.table.Chats
 import com.example.data.util.GenericException
+import com.example.domain.dao.repository.ChatRepository
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.util.*
 
-class ChatRepositoryImpl2 : ChatRepository {
+class ChatRepositoryImpl : ChatRepository {
     private fun resultRowToChat(row: ResultRow) = Chat(
         id = row[Chats.id].toString(),
         name = row[Chats.name],
@@ -55,18 +56,19 @@ class ChatRepositoryImpl2 : ChatRepository {
             }
     }
 
-    override suspend fun updateChatLastSeenMembers(chatId: String, memberUid: String, lastSeen: Long): Result<Boolean> =
+    override suspend fun updateChatLastSeenMembers(chatId: String, memberUid: String): Result<Chat> =
         dbQuery {
-            val chatLastSeen = Chats.slice(Chats.lastSeenMembers).select { Chats.id eq UUID.fromString(chatId) }
-                .map { it[Chats.lastSeenMembers] }
+            val chat = Chats.select { Chats.id eq UUID.fromString(chatId) }
+                .map(::resultRowToChat)
                 .singleOrNull()
 
-            chatLastSeen?.filterNot { it.keys.contains(memberUid) }?.let { filteredLastSeen ->
+            chat?.lastSeenMembers?.filterNot { it.keys.contains(memberUid) }?.let { filteredLastSeen ->
+                val lastSeenTimestamp = System.currentTimeMillis()
                 Chats.update {
-                    it[lastSeenMembers] = filteredLastSeen + mapOf(memberUid to lastSeen)
+                    it[lastSeenMembers] = filteredLastSeen + mapOf(memberUid to lastSeenTimestamp)
                 }.run {
                     if (this != 0) {
-                        return@dbQuery Result.success(true)
+                        return@dbQuery Result.success(chat)
                     }
                     return@dbQuery Result.failure(NotFoundException("Chat with id $chatId has not been found"))
                 }

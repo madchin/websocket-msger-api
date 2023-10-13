@@ -1,9 +1,7 @@
-package com.example.data
+package com.example.data.dao
 
-import com.example.data.service.ChatServiceImpl
-import com.example.data.service.MemberServiceImpl
-import com.example.data.service.MessageServiceImpl
-import com.example.data.service.UserServiceImpl
+import com.example.data.dao.service.*
+import com.example.domain.dao.Services
 
 class ServicesImpl(repositories: RepositoriesImpl) : Services {
     override val chatService = ChatServiceImpl(repositories.chatRepository)

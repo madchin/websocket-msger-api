@@ -1,7 +1,8 @@
-package com.example.data.service
+package com.example.data.dao.service
 
-import com.example.data.dao.model.Chat
-import com.example.data.repository.ChatRepository
+import com.example.domain.model.Chat
+import com.example.domain.dao.repository.ChatRepository
+import com.example.domain.dao.service.ChatService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -21,8 +22,10 @@ class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService 
     override suspend fun changeChatName(id: String, name: String): Result<Boolean> = withContext(Dispatchers.IO) {
         return@withContext chatRepository.updateChatName(id, name)
     }
-    override suspend fun updateLastSeenMembers(chatId: String, memberUid: String, lastSeen: Long): Result<Boolean> = withContext(Dispatchers.IO) {
-        return@withContext chatRepository.updateChatLastSeenMembers(chatId, memberUid, lastSeen)
+    override suspend fun joinChat(chatId: String, memberUid: String): Result<Chat> = withContext(Dispatchers.IO) {
+        return@withContext chatRepository.updateChatLastSeenMembers(chatId, memberUid)
     }
+
+
 
 }

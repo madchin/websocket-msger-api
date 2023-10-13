@@ -1,4 +1,4 @@
-package com.example.data.dao.model
+package com.example.domain.model
 
 import kotlinx.serialization.Serializable
 
@@ -7,5 +7,5 @@ data class Message(
     val chatId: String,
     val sender: String,
     val content: String,
-    val timestamp: Long
+    val timestamp: Long? = System.currentTimeMillis()
 )

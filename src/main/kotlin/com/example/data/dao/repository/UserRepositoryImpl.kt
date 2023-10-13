@@ -1,13 +1,15 @@
-package com.example.data.repository
+package com.example.data.dao.repository
 
 import com.example.data.dao.DatabaseFactory.dbQuery
-import com.example.data.dao.model.User
+import com.example.domain.model.User
 import com.example.data.dao.table.Users
+import com.example.domain.dao.repository.UserRepository
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import java.util.UUID
 
-class UserRepositoryImpl2 : UserRepository {
+class UserRepositoryImpl : UserRepository {
     private fun resultRowToUser(row: ResultRow) = User(
         username = row[Users.username],
         email = row[Users.email],

@@ -1,17 +1,17 @@
-package com.example.data.repository
+package com.example.data.dao.repository
 
 import com.example.data.dao.DatabaseFactory.dbQuery
-import com.example.data.dao.model.Message
+import com.example.domain.model.Message
 import com.example.data.dao.table.Messages
+import com.example.domain.dao.repository.MessageRepository
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
 import java.sql.Timestamp
 import java.util.*
 
-class MessageRepositoryImpl2 : MessageRepository {
+class MessageRepositoryImpl : MessageRepository {
 
     private fun resultRowToMessage(row: ResultRow): Message = Message(
         chatId = row[Messages.chatId].toString(),
@@ -24,7 +24,7 @@ class MessageRepositoryImpl2 : MessageRepository {
             it[chatId] = UUID.fromString(message.chatId)
             it[content] = message.content
             it[sender] = message.sender
-            it[timestamp] = Timestamp(message.timestamp).toInstant()
+            it[timestamp] = Timestamp(message.timestamp ?: 0).toInstant()
         }.run {
             val insertedMessage = resultedValues?.singleOrNull()?.let(::resultRowToMessage)
             if(insertedMessage != null) {

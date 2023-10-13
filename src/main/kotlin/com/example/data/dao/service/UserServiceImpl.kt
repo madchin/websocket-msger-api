@@ -1,7 +1,8 @@
-package com.example.data.service
+package com.example.data.dao.service
 
-import com.example.data.dao.model.User
-import com.example.data.repository.UserRepository
+import com.example.domain.model.User
+import com.example.domain.dao.repository.UserRepository
+import com.example.domain.dao.service.UserService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
