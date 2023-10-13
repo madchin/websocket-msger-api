@@ -4,9 +4,10 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.example.controller.util.ErrorResponse
 import com.example.controller.util.ErrorType
-import com.example.data.dao.model.User
-import com.example.data.service.UserService
+import com.example.domain.model.User
+import com.example.domain.dao.service.UserService
 import com.example.data.util.GenericException
+import com.example.data.util.UserSession
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -50,7 +51,7 @@ fun Route.signInUp(userService: UserService) {
                         .withExpiresAt(Date(System.currentTimeMillis() + 60000))
                         .sign(Algorithm.HMAC256(jwtSecret))
 
-                    call.respond(hashMapOf("token" to token))
+                    call.respond(hashMapOf("token" to token, "uid" to it.id))
                 }
                 result.onFailure {
                     val message = result.exceptionOrNull()?.message ?: ""
