@@ -1,7 +1,8 @@
 package com.example
 
 import com.example.data.dao.DatabaseFactory
-import com.example.data.socket.ChatSocketHandlerImpl
+import com.example.data.socket.ChatMemberSocketHandlerImpl
+import com.example.data.socket.ChatRoomSocketHandlerImpl
 import com.example.plugins.*
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
@@ -21,8 +22,9 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     val services = DatabaseFactory.init(false, environment = environment)
-    val chatSocket = ChatSocketHandlerImpl(services.memberChatService, services.messageService, services.chatService)
-    configureSockets(services, chatSocket)
+    val chatRoomSocketHandler = ChatRoomSocketHandlerImpl()
+    val chatMemberSocketHandler = ChatMemberSocketHandlerImpl(services.chatService,services.memberChatService, services.messageService)
+    configureSockets(chatRoomSocketHandler,chatMemberSocketHandler)
     configureSerialization()
     configureMonitoring()
     configureHTTP()
