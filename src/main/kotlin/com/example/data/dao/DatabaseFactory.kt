@@ -1,12 +1,10 @@
 package com.example.data.dao
 
-import com.example.data.RepositoriesImpl
-import com.example.data.Services
-import com.example.data.ServicesImpl
 import com.example.data.dao.table.Chats
 import com.example.data.dao.table.Members
 import com.example.data.dao.table.Messages
 import com.example.data.dao.table.Users
+import com.example.domain.dao.Services
 import io.ktor.server.application.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
