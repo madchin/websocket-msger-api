@@ -22,3 +22,7 @@
 
 * Add ORM framework
 * Fix CRUD operations for all tables
+
+### Version *0.5.0*
+
+* Add websocket for chat communication
