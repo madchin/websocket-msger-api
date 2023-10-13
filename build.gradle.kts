@@ -48,8 +48,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("io.ktor:ktor-network-tls-certificates:$ktor_version")
     testImplementation("io.ktor:ktor-server-tests-jvm")
+    testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-
     // ORM -- EXPOSED
     implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")

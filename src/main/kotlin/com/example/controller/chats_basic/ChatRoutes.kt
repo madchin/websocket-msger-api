@@ -2,9 +2,10 @@ package com.example.controller.chats_basic
 
 import com.example.controller.util.ErrorResponse
 import com.example.controller.util.ErrorType
-import com.example.data.dao.model.Chat
-import com.example.data.service.ChatService
+import com.example.domain.model.Chat
+import com.example.domain.dao.service.ChatService
 import com.example.data.util.GenericException
+import com.example.domain.model.Member
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
@@ -34,7 +35,8 @@ fun Route.chat(chatService: ChatService) {
     post("/chats/{id}/add-member") {
         try {
             val chatId = call.parameters.getOrFail("id")
-            val result = chatService.updateLastSeenMembers(chatId = chatId, memberUid = "chuj", lastSeen = 123123123123)
+            val member = call.receive<Member>()
+            val result = chatService.joinChat(chatId, member.uid)
             result.onSuccess {
                 call.respond(HttpStatusCode.OK)
             }
@@ -52,7 +54,7 @@ fun Route.chat(chatService: ChatService) {
         try {
             val chatId = call.parameters.getOrFail("id")
             val result =
-                chatService.updateLastSeenMembers(chatId = chatId, memberUid = "chasduj", lastSeen = 123123123123)
+                chatService.joinChat(chatId = chatId, memberUid = "chasduj")
             result.onSuccess {
                 call.respond(HttpStatusCode.OK)
             }
