@@ -1,6 +1,5 @@
 package com.example.plugins
 
-import com.example.data.socket.ChatSocketHandlerImpl
 import com.example.domain.dao.Services
 import com.example.domain.model.Chat
 import com.example.domain.model.ChatMember
@@ -16,10 +15,9 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.serialization.json.Json
 import java.time.Duration
+
 fun Application.configureSockets(services: Services, chatSocketHandler: ChatSocketHandler) {
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
@@ -35,7 +33,7 @@ fun Application.configureSockets(services: Services, chatSocketHandler: ChatSock
                 val member = call.receive<Member>()
                 val memberSession = this
 
-                val chat = chatSocketHandler.joinChat(chatId,ChatMember(memberSession, member)).run {
+                val chat = chatSocketHandler.joinChat(chatId, ChatMember(memberSession, member)).run {
                     onFailure {
                         call.respond(HttpStatusCode.BadRequest, it.message.toString())
                     }

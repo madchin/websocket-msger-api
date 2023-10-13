@@ -1,13 +1,12 @@
 package com.example.data.dao.repository
 
 import com.example.data.dao.DatabaseFactory.dbQuery
-import com.example.domain.model.User
 import com.example.data.dao.table.Users
 import com.example.domain.dao.repository.UserRepository
+import com.example.domain.model.User
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import java.util.UUID
 
 class UserRepositoryImpl : UserRepository {
     private fun resultRowToUser(row: ResultRow) = User(
