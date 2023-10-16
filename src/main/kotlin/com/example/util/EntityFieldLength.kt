@@ -1,4 +1,4 @@
-package com.example.data.util
+package com.example.util
 
 enum class EntityFieldLength(val minLength: Int, val maxLength: Int) {
     USERS_USERNAME(12,64),

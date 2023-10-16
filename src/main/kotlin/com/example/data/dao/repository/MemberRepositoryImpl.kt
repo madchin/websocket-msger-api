@@ -3,7 +3,7 @@ package com.example.data.dao.repository
 import com.example.data.dao.DatabaseFactory.dbQuery
 import com.example.domain.model.Member
 import com.example.data.dao.table.Members
-import com.example.data.util.UpsertException
+import com.example.util.UpsertException
 import com.example.domain.dao.repository.MemberRepository
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*

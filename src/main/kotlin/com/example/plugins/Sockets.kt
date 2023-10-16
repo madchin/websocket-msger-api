@@ -33,19 +33,13 @@ fun Application.configureSockets(
                 val memberSession = this
 
                 chatMemberSocketHandler.joinChat(chatId, memberId).run {
-                    onFailure {
-                        call.respond(HttpStatusCode.BadRequest, it.message.toString())
-                        return@webSocket
-                    }
-                    onSuccess { (member, _) ->
-                        val chatMember = ChatMember(session = memberSession, member = member)
-                        chatRoomSocketHandler.onJoin {
-                            it.add(chatMember)
-                        }
+                    val chatMember = ChatMember(session = memberSession, member = this.first)
+                    chatRoomSocketHandler.onJoin {
+                        it.add(chatMember)
                     }
                 }
 
-                for(frame in incoming) {
+                for (frame in incoming) {
                     chatRoomSocketHandler.onReceiveMessage(frame, chatMemberSocketHandler::sendMessage)
                 }
             } catch (e: Exception) {

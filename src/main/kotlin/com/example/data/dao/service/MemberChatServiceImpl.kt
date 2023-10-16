@@ -1,6 +1,5 @@
 package com.example.data.dao.service
 
-import com.example.data.util.GenericException
 import com.example.domain.dao.service.ChatService
 import com.example.domain.dao.service.MemberChatService
 import com.example.domain.dao.service.MemberService

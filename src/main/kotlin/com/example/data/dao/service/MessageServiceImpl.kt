@@ -11,7 +11,7 @@ class MessageServiceImpl(private val messageRepository: MessageRepository) : Mes
         return@withContext messageRepository.readMessages(chatId).getOrThrow()
     }
 
-    override suspend fun sendMessage(message: Message): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun saveMessage(message: Message): Boolean = withContext(Dispatchers.IO) {
         return@withContext messageRepository.createMessage(message).getOrThrow()
     }
 }

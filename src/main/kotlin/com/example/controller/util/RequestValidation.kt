@@ -1,6 +1,6 @@
 package com.example.controller.util
 
-import com.example.data.util.EntityFieldLength
+import com.example.util.EntityFieldLength
 import com.example.domain.model.Chat
 import com.example.domain.model.Member
 import com.example.domain.model.Message

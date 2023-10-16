@@ -1,6 +1,6 @@
 package com.example.data.dao.table
 
-import com.example.data.util.EntityFieldLength
+import com.example.util.EntityFieldLength
 import org.jetbrains.exposed.sql.Table
 
 

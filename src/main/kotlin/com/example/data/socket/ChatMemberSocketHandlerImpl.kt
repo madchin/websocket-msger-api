@@ -1,6 +1,5 @@
 package com.example.data.socket
 
-import com.example.util.GenericException
 import com.example.domain.dao.service.ChatService
 import com.example.domain.dao.service.MemberChatService
 import com.example.domain.dao.service.MessageService

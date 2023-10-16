@@ -3,9 +3,8 @@ package com.example.data.dao.repository
 import com.example.data.dao.DatabaseFactory.dbQuery
 import com.example.domain.model.Chat
 import com.example.data.dao.table.Chats
-import com.example.data.util.GenericException
-import com.example.data.util.InsertionException
-import com.example.data.util.UpdateException
+import com.example.util.InsertionException
+import com.example.util.UpdateException
 import com.example.domain.dao.repository.ChatRepository
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*

@@ -1,4 +1,4 @@
-package com.example.data.util
+package com.example.util
 
 class InsertionException(override val message: String?) : Throwable()
 

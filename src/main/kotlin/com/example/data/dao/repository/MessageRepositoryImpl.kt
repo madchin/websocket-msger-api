@@ -3,7 +3,7 @@ package com.example.data.dao.repository
 import com.example.data.dao.DatabaseFactory.dbQuery
 import com.example.domain.model.Message
 import com.example.data.dao.table.Messages
-import com.example.data.util.InsertionException
+import com.example.util.InsertionException
 import com.example.domain.dao.repository.MessageRepository
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.ResultRow

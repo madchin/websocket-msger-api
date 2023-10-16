@@ -1,13 +1,10 @@
 package com.example.plugins
 
-import com.example.controller.util.validateChat
-import com.example.controller.util.validateMember
-import com.example.controller.util.validateMessage
-import com.example.controller.util.validateUser
-import com.example.data.util.UserSession
+import com.example.controller.util.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.*
 import io.ktor.server.plugins.cachingheaders.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.defaultheaders.*
@@ -45,6 +42,15 @@ fun Application.configureHTTP() {
     install(StatusPages) {
         exception<RequestValidationException> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, cause.reasons.joinToString())
+        }
+
+        exception<Throwable> {call, cause ->
+            when(cause) {
+                is NotFoundException -> call.respond(HttpStatusCode.NotFound, cause.message.toString())
+                is BadRequestException -> call.respond(HttpStatusCode.BadRequest, cause.message.toString())
+
+                else -> call.respond(HttpStatusCode.BadRequest, cause.message.toString())
+            }
         }
     }
     install(CORS) {
