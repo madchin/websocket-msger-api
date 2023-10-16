@@ -24,107 +24,74 @@ fun Route.signInUp(userService: UserService) {
     val jwtSecret = environment?.config?.property("jwt.secret")?.getString()
 
     post("/sign-in") {
-        val receivedUser = try {
-            call.receive<User>()
-        } catch (e: ContentTransformationException) {
-            null
-        }
+        val receivedUser = call.receive<User>()
 
-        if (receivedUser == null) call.respond(HttpStatusCode.UnprocessableEntity)
-        receivedUser?.let { user ->
-            if (user.username.isBlank() || user.password.isBlank() || user.password.isBlank()) {
-                val field = if (user.username.isBlank()) "username" else "password"
+        userService.getUser(receivedUser).also { result ->
+            result.onSuccess {
+                val sevenDaysInMs = 60000L * 60000 * 24 * 7
+                val token = JWT.create()
+                    .withAudience(jwtAudience)
+                    .withIssuer(jwtDomain)
+                    .withClaim("username", it.username)
+                    .withExpiresAt(Date(System.currentTimeMillis() + sevenDaysInMs))
+                    .sign(Algorithm.HMAC256(jwtSecret))
+
+                call.sessions.set(UserSession(uid = it.id ?: ""))
+                call.respond(hashMapOf("token" to token, "uid" to it.id))
+            }
+            result.onFailure {
+                val message = result.exceptionOrNull()?.message ?: ""
+                val type =
+                    if (message != GenericException().message) ErrorType.NOT_FOUND.name else ErrorType.GENERIC.name
+                val statusCode =
+                    if (type == ErrorType.NOT_FOUND.name) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
                 call.respond(
-                    HttpStatusCode.BadRequest,
-                    ErrorResponse(type = ErrorType.VALIDATION.name, message = "$field cannot be blank")
+                    statusCode,
+                    ErrorResponse(type = type, message = message)
                 )
-                return@post
-            }
-
-            userService.getUser(user).also { result ->
-                result.onSuccess {
-                    val sevenDaysInMs = 60000L * 60000 * 24 * 7
-                    val token = JWT.create()
-                        .withAudience(jwtAudience)
-                        .withIssuer(jwtDomain)
-                        .withClaim("username", it.username)
-                        .withExpiresAt(Date(System.currentTimeMillis() + sevenDaysInMs))
-                        .sign(Algorithm.HMAC256(jwtSecret))
-
-                    call.sessions.set(UserSession(uid = it.id ?: ""))
-                    call.respond(hashMapOf("token" to token, "uid" to it.id))
-                }
-                result.onFailure {
-                    val message = result.exceptionOrNull()?.message ?: ""
-                    val type =
-                        if (message != GenericException().message) ErrorType.NOT_FOUND.name else ErrorType.GENERIC.name
-                    val statusCode =
-                        if (type == ErrorType.NOT_FOUND.name) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
-                    call.respond(
-                        statusCode,
-                        ErrorResponse(type = type, message = message)
-                    )
-                }
             }
         }
     }
 
 
-    authenticate("auth-oauth-google") {
-        get("login") {
-            call.respondRedirect("/callback")
-        }
-
-        get("/callback") {
-            val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
-            //call.sessions.set(UserSession(principal?.accessToken.toString()))
-            call.respondRedirect("/hello")
-        }
+authenticate("auth-oauth-google") {
+    get("login") {
+        call.respondRedirect("/callback")
     }
 
-    post("/sign-up") {
-        val user = try {
-            call.receive<User>()
-        } catch (e: ContentTransformationException) {
-            null
-        }
+    get("/callback") {
+        val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
+        //call.sessions.set(UserSession(principal?.accessToken.toString()))
+        call.respondRedirect("/hello")
+    }
+}
 
-        if (user == null) call.respond(HttpStatusCode.UnprocessableEntity)
+post("/sign-up") {
+    val receivedUser = call.receive<User>()
 
-        user?.let {
-            val username = it.username
-            val password = it.password
+    receivedUser.let { user ->
 
-            if (username.isBlank() || password.isBlank()) {
-                val field = if (username.isBlank()) "username" else "password"
+        userService.createUser(User(username = user.username, password = user.password, email = "temp")).also { result ->
+            result.onSuccess {
+                call.respond(HttpStatusCode.Created)
+            }
+
+            result.onFailure {
+                val message = result.exceptionOrNull()?.message ?: ""
+                val type = when (message) {
+                    GenericException().message -> ErrorType.GENERIC.name
+                    "User with ${user.username} already exists" -> ErrorType.ALREADY_EXISTS.name
+                    else -> ErrorType.NOT_FOUND.name
+                }
+                val statusCode =
+                    if (type == ErrorType.NOT_FOUND.name) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
                 call.respond(
-                    status = HttpStatusCode.BadRequest,
-                    message = ErrorResponse(ErrorType.VALIDATION.name, "$field cannot be blank")
+                    statusCode,
+                    ErrorResponse(type = type, message = message)
                 )
-                return@post
-            }
-
-            userService.createUser(User(username = username, password = password, email = "temp")).also { result ->
-                result.onSuccess {
-                    call.respond(HttpStatusCode.Created)
-                }
-
-                result.onFailure {
-                    val message = result.exceptionOrNull()?.message ?: ""
-                    val type = when (message) {
-                        GenericException().message -> ErrorType.GENERIC.name
-                        "User with $username already exists" -> ErrorType.NOT_FOUND.name
-                        else -> ErrorType.ALREADY_EXISTS.name
-                    }
-                    val statusCode =
-                        if (type == ErrorType.NOT_FOUND.name) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
-                    call.respond(
-                        statusCode,
-                        ErrorResponse(type = type, message = message)
-                    )
-                }
             }
         }
     }
+}
 
 }
