@@ -3,6 +3,7 @@ package com.example.data.dao.repository
 import com.example.data.dao.DatabaseFactory.dbQuery
 import com.example.domain.model.Message
 import com.example.data.dao.table.Messages
+import com.example.data.util.InsertionException
 import com.example.domain.dao.repository.MessageRepository
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.ResultRow
@@ -30,7 +31,7 @@ class MessageRepositoryImpl : MessageRepository {
             if(insertedMessage != null) {
                 return@dbQuery Result.success(true)
             }
-            return@dbQuery Result.failure(Exception("Message from sender ${message.sender} with content ${message.content} and with timestamp ${message.timestamp} has not been sent"))
+            return@dbQuery Result.failure(InsertionException("Message from sender ${message.sender} with content ${message.content} and with timestamp ${message.timestamp} has not been saved"))
         }
     }
 

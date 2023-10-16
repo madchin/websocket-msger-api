@@ -2,7 +2,6 @@ package com.example.data.dao.table
 
 import com.example.data.util.EntityFieldLength
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.timestamp
 
 object Messages : IntIdTable() {

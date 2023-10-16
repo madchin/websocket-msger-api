@@ -3,6 +3,7 @@ package com.example.data.dao.repository
 import com.example.data.dao.DatabaseFactory.dbQuery
 import com.example.domain.model.Member
 import com.example.data.dao.table.Members
+import com.example.data.util.UpsertException
 import com.example.domain.dao.repository.MemberRepository
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*
@@ -24,7 +25,7 @@ class MemberRepositoryImpl : MemberRepository {
             if (insertedMember != null) {
                 return@dbQuery Result.success(insertedMember)
             }
-            return@dbQuery Result.failure(Exception("Member with name ${member.name} has not been created"))
+            return@dbQuery Result.failure(UpsertException("Member with name ${member.name} has not been created"))
         }
     }
 
