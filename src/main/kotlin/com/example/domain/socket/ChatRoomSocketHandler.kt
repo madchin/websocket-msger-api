@@ -6,6 +6,6 @@ import io.ktor.websocket.*
 
 interface ChatRoomSocketHandler {
     val chatMembers: MutableSet<ChatMember>
-    suspend fun onReceiveMessage(frame: Frame, saveMessage: suspend (Message) -> Result<Boolean>)
+    suspend fun onReceiveMessage(frame: Frame, saveMessage: suspend (Message) -> Boolean)
     suspend fun onJoin(addChatMember: (MutableSet<ChatMember>) -> Unit)
 }

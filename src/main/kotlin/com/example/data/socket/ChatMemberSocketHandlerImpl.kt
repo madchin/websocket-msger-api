@@ -1,6 +1,6 @@
 package com.example.data.socket
 
-import com.example.data.util.GenericException
+import com.example.util.GenericException
 import com.example.domain.dao.service.ChatService
 import com.example.domain.dao.service.MemberChatService
 import com.example.domain.dao.service.MessageService
@@ -14,21 +14,13 @@ class ChatMemberSocketHandlerImpl(
     private val memberChatService: MemberChatService,
     private val messageService: MessageService
 ) : ChatMemberSocketHandler {
-    override suspend fun sendMessage(message: Message): Result<Boolean> =
-        messageService.sendMessage(message)
+    override suspend fun sendMessage(message: Message): Boolean =
+        messageService.saveMessage(message)
 
-    override suspend fun joinChat(chatId: String, memberId: String): Result<Pair<Member,Chat>> {
-        val getMemberAndChatResult = memberChatService.getMemberAndChat(memberId = memberId, chatId = chatId)
-        return when {
-            getMemberAndChatResult.isSuccess -> {
-                val chatJoinResult = chatService.joinChat(chatId = chatId, memberUid = memberId)
-                if(chatJoinResult.isSuccess) {
-                    return Result.success(getMemberAndChatResult.getOrNull()!!)
-                }
-                return Result.failure(chatJoinResult.exceptionOrNull()!!)
-            }
-            getMemberAndChatResult.isFailure -> Result.failure(getMemberAndChatResult.exceptionOrNull()!!)
-            else -> Result.failure(GenericException())
-        }
+    override suspend fun joinChat(chatId: String, memberId: String): Pair<Member, Chat> {
+        val memberAndChat = memberChatService.getMemberAndChat(memberId = memberId, chatId = chatId)
+        chatService.joinChat(chatId = chatId, memberUid = memberId)
+
+        return memberAndChat
     }
 }
