@@ -1,3 +1,5 @@
 package com.example.data.util
 
-class UserSession(accessToken: String)
+import io.ktor.server.auth.*
+
+class UserSession(val uid: String) : Principal

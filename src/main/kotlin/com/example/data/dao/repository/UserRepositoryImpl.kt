@@ -10,6 +10,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 class UserRepositoryImpl : UserRepository {
     private fun resultRowToUser(row: ResultRow) = User(
+        id = row[Users.id].toString(),
         username = row[Users.username],
         email = row[Users.email],
         password = row[Users.password]

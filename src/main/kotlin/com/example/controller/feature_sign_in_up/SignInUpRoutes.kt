@@ -31,7 +31,6 @@ fun Route.signInUp(userService: UserService) {
         }
 
         if (receivedUser == null) call.respond(HttpStatusCode.UnprocessableEntity)
-
         receivedUser?.let { user ->
             if (user.username.isBlank() || user.password.isBlank() || user.password.isBlank()) {
                 val field = if (user.username.isBlank()) "username" else "password"
@@ -44,13 +43,15 @@ fun Route.signInUp(userService: UserService) {
 
             userService.getUser(user).also { result ->
                 result.onSuccess {
+                    val sevenDaysInMs = 60000L * 60000 * 24 * 7
                     val token = JWT.create()
                         .withAudience(jwtAudience)
                         .withIssuer(jwtDomain)
                         .withClaim("username", it.username)
-                        .withExpiresAt(Date(System.currentTimeMillis() + 60000))
+                        .withExpiresAt(Date(System.currentTimeMillis() + sevenDaysInMs))
                         .sign(Algorithm.HMAC256(jwtSecret))
 
+                    call.sessions.set(UserSession(uid = it.id ?: ""))
                     call.respond(hashMapOf("token" to token, "uid" to it.id))
                 }
                 result.onFailure {
@@ -76,7 +77,7 @@ fun Route.signInUp(userService: UserService) {
 
         get("/callback") {
             val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
-            call.sessions.set(UserSession(principal?.accessToken.toString()))
+            //call.sessions.set(UserSession(principal?.accessToken.toString()))
             call.respondRedirect("/hello")
         }
     }

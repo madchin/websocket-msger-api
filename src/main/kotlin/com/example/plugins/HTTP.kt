@@ -1,5 +1,6 @@
 package com.example.plugins
 
+import com.example.data.util.UserSession
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -9,8 +10,12 @@ import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.forwardedheaders.*
 import io.ktor.server.plugins.swagger.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
+import io.ktor.util.*
 
 fun Application.configureHTTP() {
+    val secretEncryptKey = hex(environment.config.property("ktor.security.session.encryptKey").getString())
+    val secretSignKey = hex(environment.config.property("ktor.security.session.signKey").getString())
     routing {
         swaggerUI(path = "openapi")
     }
@@ -19,13 +24,19 @@ fun Application.configureHTTP() {
     install(DefaultHeaders) {
         header("X-Engine", "Ktor") // will send this header with each response
     }
+    install(Sessions) {
+        header<UserSession>("user_session") {
+            transform(SessionTransportTransformerEncrypt(secretEncryptKey, secretSignKey))
+        }
+    }
     install(CORS) {
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Put)
         allowMethod(HttpMethod.Delete)
         allowMethod(HttpMethod.Patch)
         allowHeader(HttpHeaders.Authorization)
-        allowHeader("MyCustomHeader")
+        allowHeader("user_session")
+        exposeHeader("user_session")
         anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
     }
     install(CachingHeaders) {

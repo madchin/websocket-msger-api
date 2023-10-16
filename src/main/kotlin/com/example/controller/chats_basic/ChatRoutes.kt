@@ -2,9 +2,9 @@ package com.example.controller.chats_basic
 
 import com.example.controller.util.ErrorResponse
 import com.example.controller.util.ErrorType
-import com.example.domain.model.Chat
-import com.example.domain.dao.service.ChatService
 import com.example.data.util.GenericException
+import com.example.domain.dao.service.ChatService
+import com.example.domain.model.Chat
 import com.example.domain.model.Member
 import io.ktor.http.*
 import io.ktor.server.application.*
