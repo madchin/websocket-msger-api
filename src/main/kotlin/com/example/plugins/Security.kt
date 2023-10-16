@@ -2,7 +2,6 @@ package com.example.plugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.example.data.util.UserSession
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.http.*

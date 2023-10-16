@@ -12,7 +12,6 @@ import io.ktor.server.plugins.swagger.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.util.*
-import java.io.File
 
 fun Application.configureHTTP() {
     val secretEncryptKey = hex(environment.config.property("ktor.security.session.encryptKey").getString())
@@ -27,7 +26,7 @@ fun Application.configureHTTP() {
     }
     install(Sessions) {
         header<UserSession>("user_session") {
-            transform(SessionTransportTransformerEncrypt(secretEncryptKey,secretSignKey))
+            transform(SessionTransportTransformerEncrypt(secretEncryptKey, secretSignKey))
         }
     }
     install(CORS) {
