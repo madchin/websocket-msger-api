@@ -6,11 +6,11 @@ import com.example.domain.socket.ChatRoomSocketHandler
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.util.*
 import io.ktor.server.websocket.*
-import io.ktor.websocket.*
 import kotlinx.serialization.json.Json
 import java.time.Duration
 
@@ -25,25 +25,20 @@ fun Application.configureSockets(
         masking = false
         contentConverter = KotlinxWebsocketSerializationConverter(Json)
     }
+
     routing {
         webSocket("/chat/{id}") { // websocketSession
-            try {
-                val chatId = call.parameters.getOrFail("id")
-                val memberId = call.request.queryParameters.getOrFail("member-id")
-                val memberSession = this
-
-                chatMemberSocketHandler.joinChat(chatId, memberId).run {
-                    val chatMember = ChatMember(session = memberSession, member = this.first)
-                    chatRoomSocketHandler.onJoin {
-                        it.add(chatMember)
-                    }
+            val chatId = call.parameters.getOrFail("id")
+            val memberId = call.request.queryParameters.getOrFail("member-id")
+            val memberSession = this
+            chatMemberSocketHandler.joinChat(chatId, memberId).run {
+                val chatMember = ChatMember(session = memberSession, member = this.first)
+                chatRoomSocketHandler.onJoin {
+                    it.add(chatMember)
                 }
-
-                for (frame in incoming) {
-                    chatRoomSocketHandler.onReceiveMessage(frame, chatMemberSocketHandler::sendMessage)
-                }
-            } catch (e: Exception) {
-                println(e.localizedMessage)
+            }
+            for (frame in incoming) {
+                chatRoomSocketHandler.onReceiveMessage(frame, chatMemberSocketHandler::sendMessage)
             }
         }
     }

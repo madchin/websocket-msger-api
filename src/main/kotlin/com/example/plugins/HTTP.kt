@@ -1,6 +1,7 @@
 package com.example.plugins
 
 import com.example.controller.util.*
+import com.example.util.GenericException
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -43,12 +44,10 @@ fun Application.configureHTTP() {
         exception<RequestValidationException> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, cause.reasons.joinToString())
         }
-
         exception<Throwable> {call, cause ->
             when(cause) {
                 is NotFoundException -> call.respond(HttpStatusCode.NotFound, cause.message.toString())
                 is BadRequestException -> call.respond(HttpStatusCode.BadRequest, cause.message.toString())
-
                 else -> call.respond(HttpStatusCode.BadRequest, cause.message.toString())
             }
         }

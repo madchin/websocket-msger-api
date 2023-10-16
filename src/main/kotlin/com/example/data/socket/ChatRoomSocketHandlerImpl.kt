@@ -15,15 +15,11 @@ class ChatRoomSocketHandlerImpl : ChatRoomSocketHandler {
             val decodedMessage: Message = Json.decodeFromString(frame.readText())
             saveMessage(decodedMessage)
             val encodedMessage = Json.encodeToString(decodedMessage)
-            try {
-                chatMembers
-                    .filter { it.member.uid != decodedMessage.sender }
-                    .forEach { chatMember ->
-                        chatMember.session.send(encodedMessage)
-                    }
-            } catch (e: Exception) {
-                println("exceptiopn is ${e.localizedMessage}")
-            }
+            chatMembers
+                .filter { it.member.uid != decodedMessage.sender }
+                .forEach { chatMember ->
+                    chatMember.session.send(encodedMessage)
+                }
         }
     }
 

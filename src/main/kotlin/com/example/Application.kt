@@ -24,10 +24,10 @@ fun Application.module() {
     val services = DatabaseFactory.init(false, environment = environment)
     val chatRoomSocketHandler = ChatRoomSocketHandlerImpl()
     val chatMemberSocketHandler = ChatMemberSocketHandlerImpl(services.chatService,services.memberChatService, services.messageService)
-    configureSockets(chatRoomSocketHandler,chatMemberSocketHandler)
+    configureHTTP()
     configureSerialization()
     configureMonitoring()
-    configureHTTP()
     configureSecurity()
+    configureSockets(chatRoomSocketHandler,chatMemberSocketHandler)
     configureRouting(services)
 }
