@@ -7,23 +7,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService {
-    override suspend fun createChat(chat: Chat): Result<Chat> = withContext(Dispatchers.IO) {
-        return@withContext chatRepository.createChat(chat)
+    override suspend fun createChat(chat: Chat): Chat = withContext(Dispatchers.IO) {
+        return@withContext chatRepository.createChat(chat).getOrThrow()
     }
 
-    override suspend fun deleteChat(id: String): Result<Boolean> = withContext(Dispatchers.IO) {
-        return@withContext chatRepository.deleteChat(id)
+    override suspend fun deleteChat(id: String): Boolean = withContext(Dispatchers.IO) {
+        return@withContext chatRepository.deleteChat(id).getOrThrow()
     }
 
-    override suspend fun getChat(id: String): Result<Chat> = withContext(Dispatchers.IO) {
-        return@withContext chatRepository.readChat(id)
+    override suspend fun getChat(id: String): Chat = withContext(Dispatchers.IO) {
+        return@withContext chatRepository.readChat(id).getOrThrow()
     }
 
-    override suspend fun changeChatName(id: String, name: String): Result<Boolean> = withContext(Dispatchers.IO) {
-        return@withContext chatRepository.updateChatName(id, name)
+    override suspend fun changeChatName(id: String, name: String): Boolean = withContext(Dispatchers.IO) {
+        return@withContext chatRepository.updateChatName(id, name).getOrThrow()
     }
-    override suspend fun joinChat(chatId: String, memberUid: String): Result<Chat> = withContext(Dispatchers.IO) {
-        return@withContext chatRepository.updateChatLastSeenMembers(chatId, memberUid)
+    override suspend fun joinChat(chatId: String, memberUid: String): Chat = withContext(Dispatchers.IO) {
+        return@withContext chatRepository.updateChatLastSeenMembers(chatId, memberUid).getOrThrow()
     }
 
 

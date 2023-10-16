@@ -1,9 +1,9 @@
 package com.example.data.dao.table
 
+import com.example.util.EntityFieldLength
 import org.jetbrains.exposed.dao.id.UUIDTable
-
 object Users : UUIDTable() {
-    val username = varchar("username",64)
-    val email = varchar("email",320)
-    val password = varchar("password",11111)
+    val username = varchar("username", EntityFieldLength.USERS_USERNAME.maxLength)
+    val email = varchar("email", EntityFieldLength.USERS_EMAIL.maxLength)
+    val password = varchar("password", EntityFieldLength.USERS_PASSWORD.maxLength)
 }

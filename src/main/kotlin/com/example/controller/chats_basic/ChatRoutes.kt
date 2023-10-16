@@ -1,14 +1,10 @@
 package com.example.controller.chats_basic
 
-import com.example.controller.util.ErrorResponse
-import com.example.controller.util.ErrorType
-import com.example.data.util.GenericException
 import com.example.domain.dao.service.ChatService
 import com.example.domain.model.Chat
 import com.example.domain.model.Member
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -21,97 +17,42 @@ fun Route.chat(chatService: ChatService) {
             messageIds = listOf(1, 2, 3),
             lastSeenMembers = listOf(mapOf("xd" to 123312, "elo" to 11))
         )
-        val result = chatService.createChat(tmpChat)
-
-        result.onSuccess {
+        chatService.createChat(tmpChat).also {
             call.respond(HttpStatusCode.Created, it.toString())
-        }
-
-        result.onFailure {
-            val message = it.message ?: GenericException().message
-            call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorType.NOT_FOUND.name, message))
         }
     }
     post("/chats/{id}/add-member") {
-        try {
-            val chatId = call.parameters.getOrFail("id")
-            val member = call.receive<Member>()
-            val result = chatService.joinChat(chatId, member.uid)
-            result.onSuccess {
-                call.respond(HttpStatusCode.OK)
-            }
-            result.onFailure {
-                val message = it.message ?: GenericException().message
-                call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorType.GENERIC.name, message))
-            }
-        } catch (e: MissingRequestParameterException) {
-            call.respond(HttpStatusCode.BadRequest, e.message.toString())
-
+        val chatId = call.parameters.getOrFail("id")
+        val member = call.receive<Member>()
+        chatService.joinChat(chatId, member.uid).also {
+            call.respond(HttpStatusCode.OK)
         }
     }
 
     post("/chats/{id}/last-seen2") {
-        try {
-            val chatId = call.parameters.getOrFail("id")
-            val result =
-                chatService.joinChat(chatId = chatId, memberUid = "chasduj")
-            result.onSuccess {
-                call.respond(HttpStatusCode.OK)
-            }
-            result.onFailure {
-                val message = it.message ?: GenericException().message
-                call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorType.GENERIC.name, message))
-            }
-        } catch (e: MissingRequestParameterException) {
-            call.respond(HttpStatusCode.BadRequest, e.message.toString())
-
+        val chatId = call.parameters.getOrFail("id")
+        chatService.joinChat(chatId = chatId, memberUid = "chasduj").also {
+            call.respond(HttpStatusCode.OK)
         }
     }
 
     delete("/chats/{id}") {
-        try {
-            val chatId = call.parameters.getOrFail("id")
-            val result = chatService.deleteChat(chatId)
-            result.onSuccess {
-                call.respond(HttpStatusCode.OK)
-            }
-            result.onFailure {
-                val message = it.message ?: GenericException().message
-                call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorType.GENERIC.name, message))
-            }
-        } catch (e: MissingRequestParameterException) {
-            call.respond(HttpStatusCode.BadRequest, e.message.toString())
+        val chatId = call.parameters.getOrFail("id")
+        chatService.deleteChat(chatId).also {
+            call.respond(HttpStatusCode.OK)
         }
     }
     get("/chats/{id}") {
-        try {
-            val chatId = call.parameters.getOrFail("id")
-            val result = chatService.getChat(chatId)
-            result.onSuccess {
-                call.respond(HttpStatusCode.OK, it)
-            }
-            result.onFailure {
-                val message = it.message ?: GenericException().message
-                call.respond(HttpStatusCode.BadRequest, message)
-            }
-        } catch (e: MissingRequestParameterException) {
-            call.respond(HttpStatusCode.BadRequest, e.message.toString())
+        val chatId = call.parameters.getOrFail("id")
+        chatService.getChat(chatId).also {
+            call.respond(HttpStatusCode.OK, it)
         }
     }
     put("chats/{id}") {
-        try {
-            val chatId = call.parameters.getOrFail("id")
-            val chat = call.receive<Chat>()
-            val result = chatService.changeChatName(chatId, chat.name)
-            result.onSuccess {
-                call.respond(HttpStatusCode.OK)
-            }
-            result.onFailure {
-                val message = it.message ?: GenericException().message
-                call.respond(HttpStatusCode.BadRequest, message)
-            }
-        } catch (e: MissingRequestParameterException) {
-            call.respond(HttpStatusCode.BadRequest, e.message.toString())
+        val chatId = call.parameters.getOrFail("id")
+        val chat = call.receive<Chat>()
+        chatService.changeChatName(chatId, chat.name).also {
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

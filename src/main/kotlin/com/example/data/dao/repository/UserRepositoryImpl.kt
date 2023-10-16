@@ -2,6 +2,7 @@ package com.example.data.dao.repository
 
 import com.example.data.dao.DatabaseFactory.dbQuery
 import com.example.data.dao.table.Users
+import com.example.util.InsertionException
 import com.example.domain.dao.repository.UserRepository
 import com.example.domain.model.User
 import io.ktor.server.plugins.*
@@ -39,7 +40,7 @@ class UserRepositoryImpl : UserRepository {
             if (insertedUser != null) {
                 return@dbQuery Result.success(true)
             }
-            return@dbQuery Result.failure(Exception("User with username ${user.username} has not been created."))
+            return@dbQuery Result.failure(InsertionException("User with username ${user.username} has not been created."))
         }
     }
 

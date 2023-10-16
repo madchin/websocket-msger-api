@@ -1,4 +1,4 @@
-package com.example.data.util
+package com.example.controller.util
 
 import io.ktor.server.auth.*
 

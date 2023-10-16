@@ -1,14 +1,19 @@
 package com.example.plugins
 
-import com.example.data.util.UserSession
+import com.example.controller.util.*
+import com.example.util.GenericException
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.*
 import io.ktor.server.plugins.cachingheaders.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.forwardedheaders.*
+import io.ktor.server.plugins.requestvalidation.*
+import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.plugins.swagger.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.util.*
@@ -27,6 +32,24 @@ fun Application.configureHTTP() {
     install(Sessions) {
         header<UserSession>("user_session") {
             transform(SessionTransportTransformerEncrypt(secretEncryptKey, secretSignKey))
+        }
+    }
+    install(RequestValidation) {
+        validateUser()
+        validateChat()
+        validateMember()
+        validateMessage()
+    }
+    install(StatusPages) {
+        exception<RequestValidationException> { call, cause ->
+            call.respond(HttpStatusCode.BadRequest, cause.reasons.joinToString())
+        }
+        exception<Throwable> {call, cause ->
+            when(cause) {
+                is NotFoundException -> call.respond(HttpStatusCode.NotFound, cause.message.toString())
+                is BadRequestException -> call.respond(HttpStatusCode.BadRequest, cause.message.toString())
+                else -> call.respond(HttpStatusCode.BadRequest, cause.message.toString())
+            }
         }
     }
     install(CORS) {

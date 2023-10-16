@@ -3,7 +3,8 @@ package com.example.data.dao.repository
 import com.example.data.dao.DatabaseFactory.dbQuery
 import com.example.domain.model.Chat
 import com.example.data.dao.table.Chats
-import com.example.data.util.GenericException
+import com.example.util.InsertionException
+import com.example.util.UpdateException
 import com.example.domain.dao.repository.ChatRepository
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*
@@ -28,7 +29,7 @@ class ChatRepositoryImpl : ChatRepository {
             if (insertedChat != null) {
                 return@dbQuery Result.success(insertedChat)
             }
-            return@dbQuery Result.failure(Exception("Chat with name ${chat.name} not inserted"))
+            return@dbQuery Result.failure(InsertionException("Chat with name ${chat.name} not inserted"))
         }
     }
 
@@ -70,10 +71,10 @@ class ChatRepositoryImpl : ChatRepository {
                     if (this != 0) {
                         return@dbQuery Result.success(chat)
                     }
-                    return@dbQuery Result.failure(NotFoundException("Chat with id $chatId has not been found"))
+                    return@dbQuery Result.failure(UpdateException("Chat with id $chatId field has not been updated"))
                 }
             }
-            return@dbQuery Result.failure(GenericException())
+            return@dbQuery Result.failure(NotFoundException("Chat with id $chatId has not been found"))
         }
 
     override suspend fun deleteChat(id: String): Result<Boolean> = dbQuery {

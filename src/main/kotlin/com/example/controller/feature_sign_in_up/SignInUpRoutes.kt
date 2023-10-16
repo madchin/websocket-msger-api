@@ -2,12 +2,9 @@ package com.example.controller.feature_sign_in_up
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.example.controller.util.ErrorResponse
-import com.example.controller.util.ErrorType
-import com.example.domain.model.User
+import com.example.controller.util.UserSession
 import com.example.domain.dao.service.UserService
-import com.example.data.util.GenericException
-import com.example.data.util.UserSession
+import com.example.domain.model.User
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -24,48 +21,20 @@ fun Route.signInUp(userService: UserService) {
     val jwtSecret = environment?.config?.property("jwt.secret")?.getString()
 
     post("/sign-in") {
-        val receivedUser = try {
-            call.receive<User>()
-        } catch (e: ContentTransformationException) {
-            null
-        }
+        val receivedUser = call.receive<User>()
 
-        if (receivedUser == null) call.respond(HttpStatusCode.UnprocessableEntity)
-        receivedUser?.let { user ->
-            if (user.username.isBlank() || user.password.isBlank() || user.password.isBlank()) {
-                val field = if (user.username.isBlank()) "username" else "password"
-                call.respond(
-                    HttpStatusCode.BadRequest,
-                    ErrorResponse(type = ErrorType.VALIDATION.name, message = "$field cannot be blank")
-                )
-                return@post
-            }
+        userService.getUser(receivedUser).also { user ->
+            val sevenDaysInMs = 60000L * 60000 * 24 * 7
+            val token = JWT.create()
+                .withAudience(jwtAudience)
+                .withIssuer(jwtDomain)
+                .withClaim("username", user.username)
+                .withExpiresAt(Date(System.currentTimeMillis() + sevenDaysInMs))
+                .sign(Algorithm.HMAC256(jwtSecret))
 
-            userService.getUser(user).also { result ->
-                result.onSuccess {
-                    val sevenDaysInMs = 60000L * 60000 * 24 * 7
-                    val token = JWT.create()
-                        .withAudience(jwtAudience)
-                        .withIssuer(jwtDomain)
-                        .withClaim("username", it.username)
-                        .withExpiresAt(Date(System.currentTimeMillis() + sevenDaysInMs))
-                        .sign(Algorithm.HMAC256(jwtSecret))
+            call.sessions.set(UserSession(uid = user.id ?: ""))
+            call.respond(hashMapOf("token" to token, "uid" to user.id))
 
-                    call.sessions.set(UserSession(uid = it.id ?: ""))
-                    call.respond(hashMapOf("token" to token, "uid" to it.id))
-                }
-                result.onFailure {
-                    val message = result.exceptionOrNull()?.message ?: ""
-                    val type =
-                        if (message != GenericException().message) ErrorType.NOT_FOUND.name else ErrorType.GENERIC.name
-                    val statusCode =
-                        if (type == ErrorType.NOT_FOUND.name) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
-                    call.respond(
-                        statusCode,
-                        ErrorResponse(type = type, message = message)
-                    )
-                }
-            }
         }
     }
 
@@ -83,48 +52,11 @@ fun Route.signInUp(userService: UserService) {
     }
 
     post("/sign-up") {
-        val user = try {
-            call.receive<User>()
-        } catch (e: ContentTransformationException) {
-            null
+        val user = call.receive<User>()
+        userService.createUser(User(username = user.username, password = user.password, email = "temp")).also {
+            call.respond(HttpStatusCode.Created)
         }
 
-        if (user == null) call.respond(HttpStatusCode.UnprocessableEntity)
-
-        user?.let {
-            val username = it.username
-            val password = it.password
-
-            if (username.isBlank() || password.isBlank()) {
-                val field = if (username.isBlank()) "username" else "password"
-                call.respond(
-                    status = HttpStatusCode.BadRequest,
-                    message = ErrorResponse(ErrorType.VALIDATION.name, "$field cannot be blank")
-                )
-                return@post
-            }
-
-            userService.createUser(User(username = username, password = password, email = "temp")).also { result ->
-                result.onSuccess {
-                    call.respond(HttpStatusCode.Created)
-                }
-
-                result.onFailure {
-                    val message = result.exceptionOrNull()?.message ?: ""
-                    val type = when (message) {
-                        GenericException().message -> ErrorType.GENERIC.name
-                        "User with $username already exists" -> ErrorType.NOT_FOUND.name
-                        else -> ErrorType.ALREADY_EXISTS.name
-                    }
-                    val statusCode =
-                        if (type == ErrorType.NOT_FOUND.name) HttpStatusCode.NotFound else HttpStatusCode.BadRequest
-                    call.respond(
-                        statusCode,
-                        ErrorResponse(type = type, message = message)
-                    )
-                }
-            }
-        }
     }
 
 }
