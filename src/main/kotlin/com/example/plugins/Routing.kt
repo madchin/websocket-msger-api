@@ -1,6 +1,6 @@
 package com.example.plugins
 
-import com.example.controller.feature_chat.chat
+import com.example.controller.feature_chat_manage.chat
 import com.example.controller.feature_sign_in_up.signInUp
 import com.example.domain.dao.Services
 import io.ktor.server.application.*

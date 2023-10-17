@@ -1,4 +1,4 @@
-package com.example.controller.feature_chat
+package com.example.controller.feature_chat_manage
 
 import com.example.domain.dao.service.ChatService
 import com.example.domain.dao.service.MemberService
@@ -11,7 +11,6 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 
 fun Route.chat(chatService: ChatService, memberService: MemberService) {
-
     get("/chat/{chatId}?member-id={memberId}") {
         val chatId = call.parameters.getOrFail("chatId")
         val memberId = call.request.queryParameters.getOrFail("memberId")
