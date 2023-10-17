@@ -11,7 +11,7 @@ fun Application.configureRouting(services: Services) {
     routing {
         //signInUp(services.userService)
         authenticate("auth-jwt") {
-            chat(services.chatService, services.memberService)
+            chat(services.chatService)
         }
         signInUp(services.userService)
     }
