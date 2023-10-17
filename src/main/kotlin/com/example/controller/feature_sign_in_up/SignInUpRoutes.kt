@@ -28,7 +28,7 @@ fun Route.signInUp(userService: UserService) {
             val token = JWT.create()
                 .withAudience(jwtAudience)
                 .withIssuer(jwtDomain)
-                .withClaim("username", user.username)
+                .withClaim("uid", user.id)
                 .withExpiresAt(Date(System.currentTimeMillis() + sevenDaysInMs))
                 .sign(Algorithm.HMAC256(jwtSecret))
 

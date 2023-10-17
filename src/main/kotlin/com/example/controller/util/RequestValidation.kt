@@ -5,7 +5,13 @@ import com.example.domain.model.Chat
 import com.example.domain.model.Member
 import com.example.domain.model.Message
 import com.example.domain.model.User
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.requestvalidation.*
+import io.ktor.server.response.*
+import io.ktor.util.pipeline.*
 
 private val validationReason = object {
     fun blank(field: String) = "$field field cannot be blank"
@@ -126,4 +132,18 @@ fun RequestValidationConfig.validateUser() {
             else -> ValidationResult.Valid
         }
     }
+}
+
+fun PipelineContext<Unit,ApplicationCall>.isRequestedDataOwner(memberId: String): Boolean {
+    val principal = call.principal<JWTPrincipal>()
+    val loggedInUserId = principal?.payload?.getClaim("uid")
+
+    return (loggedInUserId != null && loggedInUserId.asString() == memberId)
+}
+
+fun PipelineContext<Unit,ApplicationCall>.isChatParticipant(chat: Chat): Boolean {
+    val principal = call.principal<JWTPrincipal>()
+    val loggedInUserId = principal?.payload?.getClaim("uid")
+    val isParticipant = chat.lastSeenMembers.singleOrNull { it.containsKey(loggedInUserId?.asString()) } != null
+    return (loggedInUserId != null && isParticipant)
 }

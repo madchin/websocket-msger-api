@@ -43,8 +43,9 @@ fun Application.configureSecurity() {
             validate { credential ->
                 val payload = credential.payload
                 val containsAudience = payload.audience.contains(jwtAudience)
-                val isUsernameNotEmpty = payload.getClaim("username").asString() != ""
-                if (containsAudience && isUsernameNotEmpty) {
+                val userId = payload.getClaim("uid").asString()
+                val isUserIdProper = userId != null && userId.isNotBlank()
+                if (containsAudience && isUserIdProper) {
                     JWTPrincipal(payload)
                 } else {
                     null
