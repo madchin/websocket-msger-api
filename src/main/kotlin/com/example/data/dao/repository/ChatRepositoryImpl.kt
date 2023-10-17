@@ -33,15 +33,16 @@ class ChatRepositoryImpl : ChatRepository {
         }
     }
 
-    override suspend fun readChat(id: String): Result<Chat> = dbQuery {
+    override suspend fun readChat(chatId: String, memberId: String): Result<Chat> = dbQuery {
         val chat = Chats
-            .select { Chats.id eq UUID.fromString(id) }
+            .select { Chats.id eq UUID.fromString(chatId) }
             .map(::resultRowToChat)
             .singleOrNull()
-        if (chat != null) {
+        val isMember = chat?.lastSeenMembers?.singleOrNull { it.keys.contains(memberId) } != null
+        if (isMember && chat != null) {
             return@dbQuery Result.success(chat)
         }
-        return@dbQuery Result.failure(NotFoundException("Chat with id $id not found"))
+        return@dbQuery Result.failure(NotFoundException("Chat with id $chatId not found"))
 
     }
 

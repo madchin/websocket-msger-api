@@ -15,8 +15,8 @@ class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService 
         return@withContext chatRepository.deleteChat(id).getOrThrow()
     }
 
-    override suspend fun getChat(id: String): Chat = withContext(Dispatchers.IO) {
-        return@withContext chatRepository.readChat(id).getOrThrow()
+    override suspend fun getChat(chatId: String, memberId: String): Chat = withContext(Dispatchers.IO) {
+        return@withContext chatRepository.readChat(chatId,memberId).getOrThrow()
     }
 
     override suspend fun changeChatName(id: String, name: String): Boolean = withContext(Dispatchers.IO) {
