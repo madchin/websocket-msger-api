@@ -2,16 +2,17 @@ package com.example.service
 
 import com.example.domain.dao.repository.ChatRepository
 import com.example.domain.model.Chat
+import com.example.domain.model.ChatDTO
 import com.example.domain.service.ChatService
 import com.example.util.ForbiddenException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService {
-    override suspend fun createChat(chat: Chat, userId: String): Chat = withContext(Dispatchers.IO) {
+    override suspend fun createChat(chat: ChatDTO, userId: String): Chat = withContext(Dispatchers.IO) {
         val chatWithOwner =
             chat.copy(lastSeenMembers = listOf(mapOf(userId to System.currentTimeMillis())))
-        return@withContext chatRepository.createChat(chatWithOwner).getOrThrow()
+        return@withContext chatRepository.createChat(chatWithOwner.toChat()).getOrThrow()
     }
 
     override suspend fun deleteChat(chatId: String, userId: String): Boolean =
@@ -46,9 +47,11 @@ class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService 
 
     override suspend fun joinChat(chatId: String, userId: String): Chat =
         withContext(Dispatchers.IO) {
-            chatRepository.readChat(chatId).getOrThrow().also {
-                return@withContext chatRepository.updateChatLastSeenMembers(chatId, userId).getOrThrow()
-            }
+            val existingChat = chatRepository.readChat(chatId).getOrThrow()
+            val chatMembersWithoutJoiningUser = existingChat.lastSeenMembers.filterNot { it.keys.contains(userId) }
+            val chatWithoutJoiningUser = existingChat.copy(lastSeenMembers = chatMembersWithoutJoiningUser)
+
+            return@withContext chatRepository.updateChatLastSeenMembers(chatWithoutJoiningUser, userId).getOrThrow()
         }
 
 

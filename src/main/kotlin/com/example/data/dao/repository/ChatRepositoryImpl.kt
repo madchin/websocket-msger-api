@@ -56,24 +56,17 @@ class ChatRepositoryImpl : ChatRepository {
             }
     }
 
-    override suspend fun updateChatLastSeenMembers(chatId: String, memberUid: String): Result<Chat> =
+    override suspend fun updateChatLastSeenMembers(chat: Chat, memberUid: String): Result<Chat> =
         dbQuery {
-            val chat = Chats.select { Chats.id eq UUID.fromString(chatId) }
-                .map(::resultRowToChat)
-                .singleOrNull()
-
-            chat?.lastSeenMembers?.filterNot { it.keys.contains(memberUid) }?.let { filteredLastSeen ->
-                val lastSeenTimestamp = System.currentTimeMillis()
-                Chats.update {
-                    it[lastSeenMembers] = filteredLastSeen + mapOf(memberUid to lastSeenTimestamp)
-                }.run {
-                    if (this != 0) {
-                        return@dbQuery Result.success(chat)
-                    }
-                    return@dbQuery Result.failure(UpdateException("Chat with id $chatId field has not been updated"))
+            val lastSeenTimestamp = System.currentTimeMillis()
+            Chats.update {
+                it[lastSeenMembers] = chat.lastSeenMembers + mapOf(memberUid to lastSeenTimestamp)
+            }.run {
+                if (this != 0) {
+                    return@dbQuery Result.success(chat)
                 }
+                return@dbQuery Result.failure(UpdateException("Chat with id ${chat.id} field has not been updated"))
             }
-            return@dbQuery Result.failure(NotFoundException("Chat with id $chatId has not been found"))
         }
 
     override suspend fun deleteChat(chatId: String): Result<Boolean> = dbQuery {
