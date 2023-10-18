@@ -23,9 +23,9 @@ fun Route.signInUp(userService: UserService) {
     val jwtSecret = environment?.config?.property("jwt.secret")?.getString()
 
     post("/sign-in") {
-        val receivedUser = call.receive<User>()
+        val receivedUser = call.receive<UserDTO>()
         //FIXME FIX PASSWORD HASHING
-        userService.getUser(receivedUser).also { user ->
+        userService.getUser(receivedUser.toUser()).also { user ->
             if (user.id == null) {
                 throw GenericException
             }
