@@ -5,6 +5,8 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.example.controller.util.UserSession
 import com.example.domain.dao.service.UserService
 import com.example.domain.model.User
+import com.example.domain.model.UserDTO
+import com.example.util.GenericException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -22,8 +24,11 @@ fun Route.signInUp(userService: UserService) {
 
     post("/sign-in") {
         val receivedUser = call.receive<User>()
-
+        //FIXME FIX PASSWORD HASHING
         userService.getUser(receivedUser).also { user ->
+            if (user.id == null) {
+                throw GenericException
+            }
             val sevenDaysInMs = 60000L * 60000 * 24 * 7
             val token = JWT.create()
                 .withAudience(jwtAudience)
@@ -31,10 +36,8 @@ fun Route.signInUp(userService: UserService) {
                 .withClaim("uid", user.id)
                 .withExpiresAt(Date(System.currentTimeMillis() + sevenDaysInMs))
                 .sign(Algorithm.HMAC256(jwtSecret))
-
-            call.sessions.set(UserSession(uid = user.id ?: ""))
+            call.sessions.set(UserSession(uid = user.id))
             call.respond(hashMapOf("token" to token, "uid" to user.id))
-
         }
     }
 
@@ -52,8 +55,8 @@ fun Route.signInUp(userService: UserService) {
     }
 
     post("/sign-up") {
-        val user = call.receive<User>()
-        userService.createUser(User(username = user.username, password = user.password, email = "temp")).also {
+        val userDTO = call.receive<UserDTO>()
+        userService.createUser(userDTO.toUser()).also {
             call.respond(HttpStatusCode.Created)
         }
 

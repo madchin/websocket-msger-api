@@ -4,6 +4,7 @@ import com.example.controller.util.isChatParticipant
 import com.example.controller.util.isRequestedDataOwner
 import com.example.domain.dao.service.ChatService
 import com.example.domain.model.Chat
+import com.example.domain.model.ChatDTO
 import com.example.util.ForbiddenException
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -26,13 +27,13 @@ fun Route.chat(chatService: ChatService) {
 
     post("/chat?member-id={memberId}") {
         val memberId = call.request.queryParameters.getOrFail("memberId")
-        val chat = call.receive<Chat>()
-        val chatWithOwner = chat.copy(lastSeenMembers = listOf(mapOf(memberId to System.currentTimeMillis())))
+        val chatDTO = call.receive<ChatDTO>()
+        val chatDTOWithOwner = chatDTO.copy(lastSeenMembers = listOf(mapOf(memberId to System.currentTimeMillis())))
         if (!isRequestedDataOwner(memberId)) {
             throw ForbiddenException
         }
-        chatService.createChat(chatWithOwner).also {
-            call.respond(HttpStatusCode.Created, it.toString())
+        chatService.createChat(chatDTOWithOwner.toChat()).also {
+            call.respond(HttpStatusCode.Created, it)
         }
     }
     post("/chat/{chatId}/join-chat?member-id={memberId}") {
@@ -48,11 +49,11 @@ fun Route.chat(chatService: ChatService) {
 
     put("chat/{id}/change-name") {
         val chatId = call.parameters.getOrFail("id")
-        val chat = call.receive<Chat>()
-        if (!isChatParticipant(chat)) {
+        val chatDTO = call.receive<ChatDTO>()
+        if (!isChatParticipant(chatDTO.toChat())) {
             throw ForbiddenException
         }
-        chatService.changeChatName(chatId, chat.name).also {
+        chatService.changeChatName(chatId, chatDTO.name).also {
             call.respond(HttpStatusCode.OK)
         }
     }
