@@ -1,10 +1,6 @@
 package com.example
 
-import com.example.domain.service.Services
-import com.example.domain.service.ChatService
-import com.example.domain.service.MemberService
-import com.example.domain.service.MessageService
-import com.example.domain.service.UserService
+import com.example.domain.service.*
 import com.example.plugins.configureRouting
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -21,6 +17,8 @@ class FakeServices : Services {
     override val messageService: MessageService
         get() = TODO("Not yet implemented")
     override val userService: UserService
+        get() = TODO("Not yet implemented")
+    override val authService: AuthService
         get() = TODO("Not yet implemented")
 }
 
