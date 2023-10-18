@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.example.controller.util.UserSession
 import com.example.domain.dao.service.UserService
-import com.example.domain.model.User
 import com.example.domain.model.UserDTO
 import com.example.util.GenericException
 import io.ktor.http.*
