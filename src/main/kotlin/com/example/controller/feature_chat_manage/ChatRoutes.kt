@@ -13,8 +13,8 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 
 fun Route.chat(chatService: ChatService) {
-    get("/chat/{chatId}") {
-        val chatId = call.parameters.getOrFail("chatId")
+    get("/chat/{id}") {
+        val chatId = call.parameters.getOrFail("id")
         val principal = call.principal<JWTPrincipal>()
         val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ForbiddenException
         chatService.getChat(chatId, userIdClaim.asString()).also {
@@ -26,12 +26,12 @@ fun Route.chat(chatService: ChatService) {
         val principal = call.principal<JWTPrincipal>()
         val chatDTO = call.receive<ChatDTO>()
         val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ForbiddenException
-        chatService.createChat(chatDTO.toChat(), userIdClaim.asString()).also {
+        chatService.createChat(chatDTO, userIdClaim.asString()).also {
             call.respond(HttpStatusCode.Created, it)
         }
     }
-    post("/chat/{chatId}/join-chat") {
-        val chatId = call.parameters.getOrFail("chatId")
+    post("/chat/{id}/join-chat") {
+        val chatId = call.parameters.getOrFail("id")
         val principal = call.principal<JWTPrincipal>()
         val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ForbiddenException
         chatService.joinChat(chatId, userIdClaim.asString()).also {
