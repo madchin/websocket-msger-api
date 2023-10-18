@@ -5,6 +5,8 @@ import com.example.data.dao.table.Users
 import com.example.util.InsertionException
 import com.example.domain.dao.repository.UserRepository
 import com.example.domain.model.User
+import com.example.util.DuplicateUserException
+import com.example.util.WrongCredentialsException
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -19,18 +21,22 @@ class UserRepositoryImpl : UserRepository {
 
     override suspend fun readUser(user: User): Result<User> = dbQuery {
         Users
-            .select { Users.username eq user.username and (Users.password eq user.password) }
+            .select { Users.username eq user.username }
             .map(::resultRowToUser)
             .singleOrNull()
             .let {
                 if (it != null) {
                     return@dbQuery Result.success(it)
                 }
-                return@dbQuery Result.failure(NotFoundException("User with username ${user.username} not found."))
+                return@dbQuery Result.failure(WrongCredentialsException)
             }
     }
 
     override suspend fun createUser(user: User): Result<Boolean> = dbQuery {
+        val existingUser = Users.select { Users.username eq user.username}.singleOrNull()
+        if(existingUser != null) {
+            return@dbQuery Result.failure(DuplicateUserException("User with username ${user.username} already exists"))
+        }
         Users.insert {
             it[username] = user.username
             it[email] = user.email

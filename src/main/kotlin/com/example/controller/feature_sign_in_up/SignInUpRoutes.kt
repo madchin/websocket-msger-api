@@ -5,7 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.example.controller.util.UserSession
 import com.example.domain.dao.service.UserService
 import com.example.domain.model.UserDTO
-import com.example.util.GenericException
+import com.example.util.WrongCredentialsException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -13,6 +13,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import org.mindrot.jbcrypt.BCrypt
 import java.util.*
 
 
@@ -23,11 +24,12 @@ fun Route.signInUp(userService: UserService) {
 
     post("/sign-in") {
         val receivedUser = call.receive<UserDTO>()
-        //FIXME FIX PASSWORD HASHING
         userService.getUser(receivedUser.toUser()).also { user ->
-            if (user.id == null) {
-                throw GenericException
+            val isPasswordCorrect = BCrypt.checkpw(receivedUser.password, user.password)
+            if (!isPasswordCorrect) {
+                throw WrongCredentialsException
             }
+
             val sevenDaysInMs = 60000L * 60000 * 24 * 7
             val token = JWT.create()
                 .withAudience(jwtAudience)
@@ -35,7 +37,8 @@ fun Route.signInUp(userService: UserService) {
                 .withClaim("uid", user.id)
                 .withExpiresAt(Date(System.currentTimeMillis() + sevenDaysInMs))
                 .sign(Algorithm.HMAC256(jwtSecret))
-            call.sessions.set(UserSession(uid = user.id))
+
+            call.sessions.set(UserSession(uid = user.id!!))
             call.respond(hashMapOf("token" to token, "uid" to user.id))
         }
     }
@@ -55,7 +58,9 @@ fun Route.signInUp(userService: UserService) {
 
     post("/sign-up") {
         val userDTO = call.receive<UserDTO>()
-        userService.createUser(userDTO.toUser()).also {
+        val hashedPassword = BCrypt.hashpw(userDTO.password, BCrypt.gensalt())
+        val hashedUserDTO = userDTO.copy(password = hashedPassword)
+        userService.createUser(hashedUserDTO.toUser()).also {
             call.respond(HttpStatusCode.Created)
         }
 
