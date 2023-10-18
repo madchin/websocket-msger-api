@@ -22,8 +22,8 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     val services = DatabaseFactory.init(false, environment = environment)
-    val chatRoomSocketHandler = ChatRoomSocketHandlerImpl()
-    val chatMemberSocketHandler = ChatMemberSocketHandlerImpl(services.chatService,services.memberChatService, services.messageService)
+    val chatRoomSocketHandler = ChatRoomSocketHandlerImpl(services.messageService)
+    val chatMemberSocketHandler = ChatMemberSocketHandlerImpl(services.chatService,services.memberService)
     configureHTTP()
     configureSerialization()
     configureMonitoring()

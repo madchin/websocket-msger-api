@@ -6,4 +6,6 @@ class UpdateException(override val message: String?) : Throwable()
 
 class UpsertException(override val message: String?) : Throwable()
 
-class GenericException(override val message: String = "Oops. Something went wrong!") : Throwable()
+object ForbiddenException : Throwable()
+
+object GenericException: Throwable(message = "Oops. Something went wrong!")
