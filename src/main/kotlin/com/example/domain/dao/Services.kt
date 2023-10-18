@@ -7,5 +7,4 @@ interface Services {
     val userService: UserService
     val messageService: MessageService
     val memberService: MemberService
-    val memberChatService: MemberChatService
 }

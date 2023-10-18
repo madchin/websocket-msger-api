@@ -1,12 +1,8 @@
 package com.example.data.socket
 
 import com.example.domain.dao.service.ChatService
-import com.example.domain.dao.service.MemberChatService
 import com.example.domain.dao.service.MemberService
-import com.example.domain.dao.service.MessageService
-import com.example.domain.model.Chat
 import com.example.domain.model.Member
-import com.example.domain.model.Message
 import com.example.domain.socket.ChatMemberSocketHandler
 
 class ChatMemberSocketHandlerImpl(

@@ -2,7 +2,6 @@ package com.example.domain.socket
 
 import com.example.domain.model.ChatMember
 import io.ktor.websocket.*
-import kotlin.reflect.KSuspendFunction1
 
 interface ChatRoomSocketHandler {
     val chatMembers: MutableSet<ChatMember>

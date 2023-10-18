@@ -8,7 +8,6 @@ import io.ktor.websocket.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.*
-import kotlin.reflect.KSuspendFunction1
 
 class ChatRoomSocketHandlerImpl(
     private val messageService: MessageService
