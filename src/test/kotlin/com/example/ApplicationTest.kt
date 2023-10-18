@@ -16,8 +16,6 @@ class FakeServices : Services {
         get() = TODO("Not yet implemented")
     override val messageService: MessageService
         get() = TODO("Not yet implemented")
-    override val userService: UserService
-        get() = TODO("Not yet implemented")
     override val authService: AuthService
         get() = TODO("Not yet implemented")
 }

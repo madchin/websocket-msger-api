@@ -6,7 +6,6 @@ import com.example.service.*
 
 class ServicesImpl(repositories: RepositoriesImpl) : Services {
     override val chatService = ChatServiceImpl(repositories.chatRepository)
-    override val userService = UserServiceImpl(repositories.userRepository)
     override val messageService = MessageServiceImpl(repositories.messageRepository)
     override val memberService = MemberServiceImpl(repositories.memberRepository)
     override val authService: AuthService = AuthServiceImpl(repositories.userRepository)
