@@ -1,4 +1,4 @@
-package com.example.domain.dao.service
+package com.example.domain.service
 
 import com.example.domain.model.Message
 

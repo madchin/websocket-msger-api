@@ -1,6 +1,6 @@
 package com.example.data.socket
 
-import com.example.domain.dao.service.MessageService
+import com.example.domain.service.MessageService
 import com.example.domain.model.ChatMember
 import com.example.domain.model.Message
 import com.example.domain.socket.ChatRoomSocketHandler

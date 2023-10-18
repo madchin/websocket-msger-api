@@ -1,8 +1,8 @@
-package com.example.data.dao.service
+package com.example.service
 
 import com.example.domain.model.Chat
 import com.example.domain.dao.repository.ChatRepository
-import com.example.domain.dao.service.ChatService
+import com.example.domain.service.ChatService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

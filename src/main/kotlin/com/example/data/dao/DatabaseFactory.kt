@@ -4,7 +4,7 @@ import com.example.data.dao.table.Chats
 import com.example.data.dao.table.Members
 import com.example.data.dao.table.Messages
 import com.example.data.dao.table.Users
-import com.example.domain.dao.Services
+import com.example.domain.service.Services
 import io.ktor.server.application.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers

@@ -2,7 +2,7 @@ package com.example.controller.feature_chat_manage
 
 import com.example.controller.util.isChatParticipant
 import com.example.controller.util.isRequestedDataOwner
-import com.example.domain.dao.service.ChatService
+import com.example.domain.service.ChatService
 import com.example.domain.model.ChatDTO
 import com.example.util.ForbiddenException
 import io.ktor.http.*

@@ -1,7 +1,10 @@
 package com.example
 
-import com.example.domain.dao.Services
-import com.example.domain.dao.service.*
+import com.example.domain.service.Services
+import com.example.domain.service.ChatService
+import com.example.domain.service.MemberService
+import com.example.domain.service.MessageService
+import com.example.domain.service.UserService
 import com.example.plugins.configureRouting
 import io.ktor.client.request.*
 import io.ktor.client.statement.*

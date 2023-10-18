@@ -1,7 +1,7 @@
 package com.example.controller.feature_member_manage
 
 import com.example.controller.util.isRequestedDataOwner
-import com.example.domain.dao.service.MemberService
+import com.example.domain.service.MemberService
 import com.example.domain.model.Member
 import com.example.util.ForbiddenException
 import io.ktor.http.*
