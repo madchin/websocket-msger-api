@@ -138,10 +138,3 @@ fun PipelineContext<Unit, ApplicationCall>.isRequestedDataOwner(memberId: String
 
     return (loggedInUserId != null && loggedInUserId.asString() == memberId)
 }
-
-fun PipelineContext<Unit, ApplicationCall>.isChatParticipant(chat: Chat): Boolean {
-    val principal = call.principal<JWTPrincipal>()
-    val loggedInUserId = principal?.payload?.getClaim("uid")
-    val isParticipant = chat.lastSeenMembers.singleOrNull { it.containsKey(loggedInUserId?.asString()) } != null
-    return (loggedInUserId != null && isParticipant)
-}

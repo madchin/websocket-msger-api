@@ -1,10 +1,7 @@
 package com.example.plugins
 
 import com.example.controller.util.*
-import com.example.util.DuplicateUserException
-import com.example.util.ForbiddenException
-import com.example.util.GenericException
-import com.example.util.WrongCredentialsException
+import com.example.util.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -54,6 +51,8 @@ fun Application.configureHTTP() {
                 is DuplicateUserException -> call.respond(HttpStatusCode.BadRequest, cause.message.toString())
                 is ForbiddenException -> call.respond(HttpStatusCode.Forbidden)
                 is WrongCredentialsException -> call.respond(HttpStatusCode.BadRequest, cause.message.toString())
+                is UserNotFoundException -> call.respond(HttpStatusCode.BadRequest, cause.message.toString())
+                is ChatNotFoundException -> call.respond(HttpStatusCode.BadRequest, cause.message.toString())
                 else -> call.respond(HttpStatusCode.BadRequest, GenericException.message.toString())
             }
         }

@@ -6,6 +6,7 @@ import com.example.data.dao.table.Chats
 import com.example.util.InsertionException
 import com.example.util.UpdateException
 import com.example.domain.dao.repository.ChatRepository
+import com.example.util.ChatNotFoundException
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -33,28 +34,25 @@ class ChatRepositoryImpl : ChatRepository {
         }
     }
 
-    override suspend fun readChat(chatId: String, memberId: String): Result<Chat> = dbQuery {
-        val chat = Chats
+    override suspend fun readChat(chatId: String): Result<Chat> = dbQuery {
+        Chats
             .select { Chats.id eq UUID.fromString(chatId) }
             .map(::resultRowToChat)
-            .singleOrNull()
-        val isMember = chat?.lastSeenMembers?.singleOrNull { it.keys.contains(memberId) } != null
-        if (isMember && chat != null) {
-            return@dbQuery Result.success(chat)
-        }
-        return@dbQuery Result.failure(NotFoundException("Chat with id $chatId not found"))
-
+            .singleOrNull()?.let {
+                return@dbQuery Result.success(it)
+            }
+        return@dbQuery Result.failure(ChatNotFoundException("Chat with id $chatId not found"))
     }
 
-    override suspend fun updateChatName(id: String, name: String): Result<Boolean> = dbQuery {
+    override suspend fun updateChatName(chatId: String, name: String): Result<Boolean> = dbQuery {
         Chats
-            .update({ Chats.id eq UUID.fromString(id) }) {
+            .update({ Chats.id eq UUID.fromString(chatId) }) {
                 it[Chats.name] = name
             }.let {
                 if (it != 0) {
                     return@dbQuery Result.success(true)
                 }
-                return@dbQuery Result.failure(NotFoundException("Chat with id $id not found"))
+                return@dbQuery Result.failure(NotFoundException("Chat with id $chatId not found"))
             }
     }
 
@@ -78,14 +76,14 @@ class ChatRepositoryImpl : ChatRepository {
             return@dbQuery Result.failure(NotFoundException("Chat with id $chatId has not been found"))
         }
 
-    override suspend fun deleteChat(id: String): Result<Boolean> = dbQuery {
+    override suspend fun deleteChat(chatId: String): Result<Boolean> = dbQuery {
         Chats
-            .deleteWhere { Chats.id eq UUID.fromString(id) }
+            .deleteWhere { Chats.id eq UUID.fromString(chatId) }
             .let {
                 if (it != 0) {
                     return@dbQuery Result.success(true)
                 }
-                return@dbQuery Result.failure(NotFoundException("Chat with id $id not found"))
+                return@dbQuery Result.failure(NotFoundException("Chat with id $chatId not found"))
             }
     }
 }
