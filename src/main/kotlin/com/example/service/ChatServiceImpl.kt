@@ -1,12 +1,9 @@
 package com.example.service
 
-import com.example.domain.model.Chat
 import com.example.domain.dao.repository.ChatRepository
+import com.example.domain.model.Chat
 import com.example.domain.service.ChatService
 import com.example.util.ForbiddenException
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

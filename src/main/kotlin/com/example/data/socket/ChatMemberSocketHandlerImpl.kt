@@ -11,7 +11,7 @@ class ChatMemberSocketHandlerImpl(
 ) : ChatMemberSocketHandler {
     override suspend fun joinChat(chatId: String, memberId: String): Member {
         val member = memberService.getMember(memberId)
-        chatService.joinChat(chatId = chatId, memberUid = memberId)
+        chatService.joinChat(chatId,memberId)
 
         return member
     }

@@ -1,7 +1,6 @@
 package com.example.domain.service
 
 import com.example.domain.model.Chat
-import io.ktor.server.auth.jwt.*
 
 interface ChatService {
     suspend fun createChat(chat: Chat, userId: String): Chat
