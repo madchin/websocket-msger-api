@@ -2,7 +2,7 @@ package com.example.controller.feature_chat_manage
 
 import com.example.domain.model.ChatDTO
 import com.example.domain.service.ChatService
-import com.example.util.ForbiddenException
+import com.example.util.ExplicitException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -16,7 +16,8 @@ fun Route.chat(chatService: ChatService) {
     get("/chat/{id}") {
         val chatId = call.parameters.getOrFail("id")
         val principal = call.principal<JWTPrincipal>()
-        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ForbiddenException
+        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ExplicitException.Forbidden
+
         chatService.getChat(chatId, userIdClaim.asString()).also {
             call.respond(HttpStatusCode.OK, it)
         }
@@ -25,7 +26,8 @@ fun Route.chat(chatService: ChatService) {
     post("/chat") {
         val principal = call.principal<JWTPrincipal>()
         val chatDTO = call.receive<ChatDTO>()
-        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ForbiddenException
+        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ExplicitException.Forbidden
+
         chatService.createChat(chatDTO, userIdClaim.asString()).also {
             call.respond(HttpStatusCode.Created, it)
         }
@@ -33,7 +35,8 @@ fun Route.chat(chatService: ChatService) {
     post("/chat/{id}/join-chat") {
         val chatId = call.parameters.getOrFail("id")
         val principal = call.principal<JWTPrincipal>()
-        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ForbiddenException
+        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ExplicitException.Forbidden
+
         chatService.joinChat(chatId, userIdClaim.asString()).also {
             call.respond(HttpStatusCode.OK)
         }
@@ -43,7 +46,7 @@ fun Route.chat(chatService: ChatService) {
         val chatId = call.parameters.getOrFail("id")
         val chatDTO = call.receive<ChatDTO>()
         val principal = call.principal<JWTPrincipal>()
-        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ForbiddenException
+        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ExplicitException.Forbidden
 
         chatService.changeChatName(chatId, chatDTO.name, userIdClaim.asString()).also {
             call.respond(HttpStatusCode.OK)

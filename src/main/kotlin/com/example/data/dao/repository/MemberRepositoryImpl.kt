@@ -1,11 +1,10 @@
 package com.example.data.dao.repository
 
 import com.example.data.dao.DatabaseFactory.dbQuery
-import com.example.domain.model.Member
 import com.example.data.dao.table.Members
-import com.example.util.UpsertException
 import com.example.domain.dao.repository.MemberRepository
-import io.ktor.server.plugins.*
+import com.example.domain.model.Member
+import com.example.util.ExplicitException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.util.*
@@ -25,7 +24,7 @@ class MemberRepositoryImpl : MemberRepository {
             if (insertedMember != null) {
                 return@dbQuery Result.success(insertedMember)
             }
-            return@dbQuery Result.failure(UpsertException("Member with name ${member.name} has not been created"))
+            return@dbQuery Result.failure(ExplicitException.MemberUpsert)
         }
     }
 
@@ -38,7 +37,7 @@ class MemberRepositoryImpl : MemberRepository {
                 if (it != null) {
                     return@dbQuery Result.success(it)
                 }
-                return@dbQuery Result.failure(NotFoundException("User with uid $uid has not been found"))
+                return@dbQuery Result.failure(ExplicitException.MemberNotFound)
             }
     }
 
@@ -50,7 +49,7 @@ class MemberRepositoryImpl : MemberRepository {
                 if (it != 0) {
                     return@dbQuery Result.success(true)
                 }
-                return@dbQuery Result.failure(NotFoundException("User with uid $uid has not been found"))
+                return@dbQuery Result.failure(ExplicitException.MemberUpdate)
             }
     }
 
@@ -60,7 +59,7 @@ class MemberRepositoryImpl : MemberRepository {
                 if (it != 0) {
                     return@dbQuery Result.success(true)
                 }
-                return@dbQuery Result.failure(NotFoundException("User with uid $uid has not been found"))
+                return@dbQuery Result.failure(ExplicitException.MemberNotFound)
             }
     }
 }

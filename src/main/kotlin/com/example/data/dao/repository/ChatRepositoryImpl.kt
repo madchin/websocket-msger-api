@@ -1,13 +1,10 @@
 package com.example.data.dao.repository
 
 import com.example.data.dao.DatabaseFactory.dbQuery
-import com.example.domain.model.Chat
 import com.example.data.dao.table.Chats
-import com.example.util.InsertionException
-import com.example.util.UpdateException
 import com.example.domain.dao.repository.ChatRepository
-import com.example.util.ChatNotFoundException
-import io.ktor.server.plugins.*
+import com.example.domain.model.Chat
+import com.example.util.ExplicitException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.util.*
@@ -30,7 +27,7 @@ class ChatRepositoryImpl : ChatRepository {
             if (insertedChat != null) {
                 return@dbQuery Result.success(insertedChat)
             }
-            return@dbQuery Result.failure(InsertionException("Chat with name ${chat.name} not inserted"))
+            return@dbQuery Result.failure(ExplicitException.ChatInsert)
         }
     }
 
@@ -41,7 +38,7 @@ class ChatRepositoryImpl : ChatRepository {
             .singleOrNull()?.let {
                 return@dbQuery Result.success(it)
             }
-        return@dbQuery Result.failure(ChatNotFoundException("Chat with id $chatId not found"))
+        return@dbQuery Result.failure(ExplicitException.ChatNotFound)
     }
 
     override suspend fun updateChatName(chatId: String, name: String): Result<Boolean> = dbQuery {
@@ -52,7 +49,7 @@ class ChatRepositoryImpl : ChatRepository {
                 if (it != 0) {
                     return@dbQuery Result.success(true)
                 }
-                return@dbQuery Result.failure(NotFoundException("Chat with id $chatId not found"))
+                return@dbQuery Result.failure(ExplicitException.ChatUpdate)
             }
     }
 
@@ -65,7 +62,7 @@ class ChatRepositoryImpl : ChatRepository {
                 if (this != 0) {
                     return@dbQuery Result.success(chat)
                 }
-                return@dbQuery Result.failure(UpdateException("Chat with id ${chat.id} field has not been updated"))
+                return@dbQuery Result.failure(ExplicitException.ChatUpdate)
             }
         }
 
@@ -76,7 +73,7 @@ class ChatRepositoryImpl : ChatRepository {
                 if (it != 0) {
                     return@dbQuery Result.success(true)
                 }
-                return@dbQuery Result.failure(NotFoundException("Chat with id $chatId not found"))
+                return@dbQuery Result.failure(ExplicitException.ChatNotFound)
             }
     }
 }

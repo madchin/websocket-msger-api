@@ -4,9 +4,7 @@ import com.example.data.dao.DatabaseFactory.dbQuery
 import com.example.data.dao.table.Users
 import com.example.domain.dao.repository.UserRepository
 import com.example.domain.model.User
-import com.example.util.InsertionException
-import com.example.util.UserNotFoundException
-import io.ktor.server.plugins.*
+import com.example.util.ExplicitException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
@@ -27,11 +25,11 @@ class UserRepositoryImpl : UserRepository {
                 if (it != null) {
                     return@dbQuery Result.success(it)
                 }
-                return@dbQuery Result.failure(UserNotFoundException("User with username $username not found"))
+                return@dbQuery Result.failure(ExplicitException.UserNotFound)
             }
     }
 
-    override suspend fun createUser(user: User): Result<Boolean> = dbQuery {
+    override suspend fun createUser(user: User): Result<User> = dbQuery {
         Users.insert {
             it[username] = user.username
             it[email] = user.email
@@ -39,9 +37,9 @@ class UserRepositoryImpl : UserRepository {
         }.run {
             val insertedUser = resultedValues?.singleOrNull()?.let(::resultRowToUser)
             if (insertedUser != null) {
-                return@dbQuery Result.success(true)
+                return@dbQuery Result.success(insertedUser)
             }
-            return@dbQuery Result.failure(InsertionException("User with username ${user.username} has not been created."))
+            return@dbQuery Result.failure(ExplicitException.UserInsert)
         }
     }
 
@@ -52,7 +50,7 @@ class UserRepositoryImpl : UserRepository {
             if (it != 0) {
                 return@dbQuery Result.success(true)
             }
-            return@dbQuery Result.failure(NotFoundException("User with username $username has not been found."))
+            return@dbQuery Result.failure(ExplicitException.UserUpdate)
         }
     }
 
@@ -63,7 +61,7 @@ class UserRepositoryImpl : UserRepository {
             if (it != 0) {
                 return@dbQuery Result.success(true)
             }
-            return@dbQuery Result.failure(NotFoundException("User with username ${user.username} has not been found."))
+            return@dbQuery Result.failure(ExplicitException.UserUpdate)
         }
     }
 
@@ -74,7 +72,7 @@ class UserRepositoryImpl : UserRepository {
                 if (it != 0) {
                     return@dbQuery Result.success(true)
                 }
-                return@dbQuery Result.failure(NotFoundException("User with username $username has not been found."))
+                return@dbQuery Result.failure(ExplicitException.UserNotFound)
             }
     }
 }
