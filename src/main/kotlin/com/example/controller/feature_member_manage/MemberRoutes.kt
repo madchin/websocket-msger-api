@@ -1,8 +1,8 @@
 package com.example.controller.feature_member_manage
 
 import com.example.controller.util.isRequestedDataOwner
-import com.example.domain.model.Member
-import com.example.domain.service.MemberService
+import com.example.model.Member
+import com.example.service.MemberService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*

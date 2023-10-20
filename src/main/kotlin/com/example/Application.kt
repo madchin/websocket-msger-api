@@ -1,9 +1,10 @@
 package com.example
 
-import com.example.data.dao.DatabaseFactory
-import com.example.data.socket.ChatMemberSocketHandlerImpl
-import com.example.data.socket.ChatRoomSocketHandlerImpl
+import com.example.dao.DatabaseFactory
+import com.example.dao.RepositoryFactory
 import com.example.plugins.*
+import com.example.service.ServiceFactory
+import com.example.socket.SocketFactory
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
 import java.io.File
@@ -21,13 +22,19 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    val services = DatabaseFactory.init(false, environment = environment)
-    val chatRoomSocketHandler = ChatRoomSocketHandlerImpl(services.messageService)
-    val chatMemberSocketHandler = ChatMemberSocketHandlerImpl(services.chatService,services.memberService)
+    DatabaseFactory.init(false, environment = environment)
+    RepositoryFactory.init()
+    ServiceFactory.init(
+        RepositoryFactory.chatRepository,
+        RepositoryFactory.messageRepository,
+        RepositoryFactory.memberRepository,
+        RepositoryFactory.userRepository
+    )
+    SocketFactory.init(ServiceFactory.chatService, ServiceFactory.memberService)
     configureHTTP()
     configureSerialization()
     configureMonitoring()
     configureSecurity()
-    configureSockets(chatRoomSocketHandler,chatMemberSocketHandler)
-    configureRouting(services)
+    configureSockets(SocketFactory.chatRoom, SocketFactory.chatMember)
+    configureRouting(ServiceFactory.chatService, ServiceFactory.authService)
 }

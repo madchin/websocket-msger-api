@@ -1,9 +1,8 @@
 package com.example.service
 
-import com.example.domain.dao.repository.UserRepository
-import com.example.domain.model.User
-import com.example.domain.model.UserDTO
-import com.example.domain.service.AuthService
+import com.example.dao.repository.UserRepository
+import com.example.model.User
+import com.example.model.UserDTO
 import com.example.util.ExplicitException
 import com.example.util.PasswordHasher
 

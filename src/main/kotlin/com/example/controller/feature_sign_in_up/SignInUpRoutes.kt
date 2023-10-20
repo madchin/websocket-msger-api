@@ -3,8 +3,8 @@ package com.example.controller.feature_sign_in_up
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.example.controller.util.UserSession
-import com.example.domain.model.UserDTO
-import com.example.domain.service.AuthService
+import com.example.model.UserDTO
+import com.example.service.AuthService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

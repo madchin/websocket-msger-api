@@ -1,11 +1,10 @@
 package com.example.service
 
-import com.example.domain.dao.repository.ChatRepository
-import com.example.domain.dao.repository.MessageRepository
-import com.example.domain.model.Chat
-import com.example.domain.model.ChatDTO
-import com.example.domain.model.Message
-import com.example.domain.service.ChatService
+import com.example.dao.repository.ChatRepository
+import com.example.dao.repository.MessageRepository
+import com.example.model.Chat
+import com.example.model.ChatDTO
+import com.example.model.Message
 import com.example.util.ExplicitException
 
 class ChatServiceImpl(

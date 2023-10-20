@@ -1,8 +1,8 @@
 package com.example.plugins
 
-import com.example.domain.model.ChatMember
-import com.example.domain.socket.ChatMemberSocketHandler
-import com.example.domain.socket.ChatRoomSocketHandler
+import com.example.model.ChatMember
+import com.example.socket.ChatMemberSocketHandler
+import com.example.socket.ChatRoomSocketHandler
 import io.ktor.serialization.kotlinx.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*

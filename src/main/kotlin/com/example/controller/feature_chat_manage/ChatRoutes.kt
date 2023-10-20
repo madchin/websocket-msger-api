@@ -1,7 +1,7 @@
 package com.example.controller.feature_chat_manage
 
-import com.example.domain.model.ChatDTO
-import com.example.domain.service.ChatService
+import com.example.model.ChatDTO
+import com.example.service.ChatService
 import com.example.util.ExplicitException
 import io.ktor.http.*
 import io.ktor.server.application.*

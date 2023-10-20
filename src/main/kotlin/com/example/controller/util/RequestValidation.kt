@@ -1,9 +1,9 @@
 package com.example.controller.util
 
-import com.example.domain.model.Chat
-import com.example.domain.model.Member
-import com.example.domain.model.Message
-import com.example.domain.model.User
+import com.example.model.Chat
+import com.example.model.Member
+import com.example.model.Message
+import com.example.model.User
 import com.example.util.EntityFieldLength
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

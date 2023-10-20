@@ -1,8 +1,7 @@
 package com.example.service
 
-import com.example.domain.dao.repository.MemberRepository
-import com.example.domain.model.Member
-import com.example.domain.service.MemberService
+import com.example.dao.repository.MemberRepository
+import com.example.model.Member
 
 class MemberServiceImpl(private val memberRepository: MemberRepository) : MemberService {
     override suspend fun createOrUpdateMember(member: Member): Member {
