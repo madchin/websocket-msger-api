@@ -5,10 +5,13 @@ import com.example.model.Member
 import com.example.model.Message
 import com.example.model.User
 import com.example.util.EntityFieldLength
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.requestvalidation.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 
 private val validationReason = object {
@@ -132,6 +135,11 @@ fun RequestValidationConfig.validateUser() {
     }
 }
 
+fun StatusPagesConfig.requestValidationExceptionHandler() {
+    exception<RequestValidationException> { call, cause ->
+        call.respond(HttpStatusCode.BadRequest, cause.reasons.joinToString())
+    }
+}
 fun PipelineContext<Unit, ApplicationCall>.isRequestedDataOwner(memberId: String): Boolean {
     val principal = call.principal<JWTPrincipal>()
     val loggedInUserId = principal?.payload?.getClaim("uid")

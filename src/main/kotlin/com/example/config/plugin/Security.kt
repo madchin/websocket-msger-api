@@ -10,50 +10,59 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 
-fun Application.configureSecurity() {
+fun AuthenticationConfig.configureOAuth() {
+    oauth("auth-oauth-google") {
+        urlProvider = { "http://localhost:8080/callback" }
+        providerLookup = {
+            OAuthServerSettings.OAuth2ServerSettings(
+                name = "google",
+                authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
+                accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
+                requestMethod = HttpMethod.Post,
+                clientId = System.getenv("GOOGLE_CLIENT_ID"),
+                clientSecret = System.getenv("GOOGLE_CLIENT_SECRET"),
+                defaultScopes = listOf("https://www.googleapis.com/auth/userinfo.profile")
+            )
+        }
+        client = HttpClient(Apache)
+    }
+}
+
+fun AuthenticationConfig.configureJWT(environment: ApplicationEnvironment) {
     val jwtAudience = environment.config.property("jwt.audience").getString()
     val jwtDomain = environment.config.property("jwt.domain").getString()
     val jwtRealm = environment.config.property("jwt.realm").getString()
     val jwtSecret = environment.config.property("jwt.secret").getString()
+    jwt("auth-jwt") {
+        realm = jwtRealm
+        verifier(
+            JWT
+                .require(Algorithm.HMAC256(jwtSecret))
+                .withAudience(jwtAudience)
+                .withIssuer(jwtDomain)
+                .build()
+        )
+        validate { credential ->
+            val payload = credential.payload
+            val containsAudience = payload.audience.contains(jwtAudience)
+            val userId = payload.getClaim("uid").asString()
+            val isUserIdProper = userId != null && userId.isNotBlank()
+            if (containsAudience && isUserIdProper) {
+                JWTPrincipal(payload)
+            } else {
+                null
+            }
+        }
+        challenge { defaultScheme, realm ->
+            call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
+        }
+    }
+}
+
+fun Application.configureSecurity() {
+    val appEnvironment = environment
     install(Authentication) {
-        oauth("auth-oauth-google") {
-            urlProvider = { "http://localhost:8080/callback" }
-            providerLookup = {
-                OAuthServerSettings.OAuth2ServerSettings(
-                    name = "google",
-                    authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
-                    accessTokenUrl = "https://accounts.google.com/o/oauth2/token",
-                    requestMethod = HttpMethod.Post,
-                    clientId = System.getenv("GOOGLE_CLIENT_ID"),
-                    clientSecret = System.getenv("GOOGLE_CLIENT_SECRET"),
-                    defaultScopes = listOf("https://www.googleapis.com/auth/userinfo.profile")
-                )
-            }
-            client = HttpClient(Apache)
-        }
-        jwt("auth-jwt") {
-            realm = jwtRealm
-            verifier(
-                JWT
-                    .require(Algorithm.HMAC256(jwtSecret))
-                    .withAudience(jwtAudience)
-                    .withIssuer(jwtDomain)
-                    .build()
-            )
-            validate { credential ->
-                val payload = credential.payload
-                val containsAudience = payload.audience.contains(jwtAudience)
-                val userId = payload.getClaim("uid").asString()
-                val isUserIdProper = userId != null && userId.isNotBlank()
-                if (containsAudience && isUserIdProper) {
-                    JWTPrincipal(payload)
-                } else {
-                    null
-                }
-            }
-            challenge { defaultScheme, realm ->
-                call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
-            }
-        }
+        configureOAuth()
+        configureJWT(appEnvironment)
     }
 }
