@@ -1,9 +1,8 @@
 package com.example.controller.feature_member_manage
 
 import com.example.controller.util.isRequestedDataOwner
-import com.example.domain.dao.service.MemberService
-import com.example.domain.model.Member
-import com.example.util.ForbiddenException
+import com.example.model.Member
+import com.example.service.MemberService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -16,7 +15,7 @@ fun Route.member(memberService: MemberService) {
     post("/member/add-member") {
         val member = call.receive<Member>()
         if (!isRequestedDataOwner(member.uid)) {
-            throw ForbiddenException
+            //throw ForbiddenException
         }
         memberService.createOrUpdateMember(member).also {
             call.respond(HttpStatusCode.Created, it)
@@ -25,7 +24,7 @@ fun Route.member(memberService: MemberService) {
     put("/member/update-member-name") {
         val member = call.receive<Member>()
         if (!isRequestedDataOwner(member.uid)) {
-            throw ForbiddenException
+            //throw ForbiddenException
         }
         memberService.updateMemberName(member.uid, member.name).also {
             call.respond(HttpStatusCode.OK)
@@ -34,7 +33,7 @@ fun Route.member(memberService: MemberService) {
     get("/member?id={id}") {
         val memberId = call.parameters.getOrFail("id")
         if (!isRequestedDataOwner(memberId)) {
-            throw ForbiddenException
+            //throw ForbiddenException
         }
         memberService.getMember(memberId).also {
             call.respond(HttpStatusCode.OK, it)
@@ -43,7 +42,7 @@ fun Route.member(memberService: MemberService) {
     delete("/member?id={id}") {
         val memberId = call.parameters.getOrFail("id")
         if (!isRequestedDataOwner(memberId)) {
-            throw ForbiddenException
+            //throw ForbiddenException
         }
         memberService.deleteMember(memberId).also {
             call.respond(HttpStatusCode.NoContent)

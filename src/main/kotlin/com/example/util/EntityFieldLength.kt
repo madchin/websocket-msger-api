@@ -1,9 +1,18 @@
 package com.example.util
 
-enum class EntityFieldLength(val minLength: Int, val maxLength: Int) {
-    USERS_USERNAME(12,64),
-    USERS_EMAIL(0,320),
-    USERS_PASSWORD(6,64),
-    MEMBERS_NAME(6,64),
-    CHATS_NAME(12,64)
+sealed class EntityFieldLength(val minLength: Int, val maxLength: Int) {
+    object Users {
+        data object Username : EntityFieldLength(12, 64)
+        data object Email : EntityFieldLength(0, 320)
+        data object Password : EntityFieldLength(6, 64)
+    }
+    object Members {
+        data object Name : EntityFieldLength(6, 64)
+    }
+    object Chats {
+        data object Name : EntityFieldLength(12, 64)
+    }
+    object Messages {
+        data object Sender : EntityFieldLength(Users.Username.minLength, Users.Username.maxLength)
+    }
 }
