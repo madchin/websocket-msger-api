@@ -1,8 +1,8 @@
 package com.example.data.socket
 
-import com.example.domain.service.MessageService
 import com.example.domain.model.ChatMember
 import com.example.domain.model.Message
+import com.example.domain.service.ChatService
 import com.example.domain.socket.ChatRoomSocketHandler
 import io.ktor.websocket.*
 import kotlinx.serialization.encodeToString
@@ -10,14 +10,14 @@ import kotlinx.serialization.json.Json
 import java.util.*
 
 class ChatRoomSocketHandlerImpl(
-    private val messageService: MessageService
+    private val chatService: ChatService
 ) : ChatRoomSocketHandler {
     override val chatMembers: MutableSet<ChatMember> = Collections.synchronizedSet(LinkedHashSet())
 
     override suspend fun broadcastMessage(frame: Frame) {
         if (frame is Frame.Text) {
             val decodedMessage: Message = Json.decodeFromString(frame.readText())
-            messageService.saveMessage(decodedMessage)
+            chatService.sendMessage(decodedMessage)
             val encodedMessage = Json.encodeToString(decodedMessage)
             chatMembers
                 .filter { it.member.uid != decodedMessage.sender }

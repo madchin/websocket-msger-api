@@ -1,12 +1,17 @@
 package com.example.service
 
 import com.example.domain.dao.repository.ChatRepository
+import com.example.domain.dao.repository.MessageRepository
 import com.example.domain.model.Chat
 import com.example.domain.model.ChatDTO
+import com.example.domain.model.Message
 import com.example.domain.service.ChatService
 import com.example.util.ExplicitException
 
-class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService {
+class ChatServiceImpl(
+    private val chatRepository: ChatRepository,
+    private val messageRepository: MessageRepository
+) : ChatService {
 
     private fun ensureUserIsChatMember(chat: Chat, userId: String) {
         chat.lastSeenMembers.singleOrNull { it.keys.contains(userId) } ?: throw ExplicitException.Forbidden
@@ -27,8 +32,8 @@ class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService 
 
 
     override suspend fun getChat(chatId: String, userId: String): Chat =
-        chatRepository.readChat(chatId).getOrThrow().also { chat ->
-            ensureUserIsChatMember(chat, userId)
+        chatRepository.readChat(chatId).getOrThrow().apply {
+            ensureUserIsChatMember(this, userId)
         }
 
     override suspend fun changeChatName(chatId: String, name: String, userId: String): Boolean =
@@ -44,4 +49,10 @@ class ChatServiceImpl(private val chatRepository: ChatRepository) : ChatService 
 
             chatRepository.updateChatLastSeenMembers(chatWithoutJoiningUser, userId).getOrThrow()
         }
+
+    override suspend fun sendMessage(message: Message): Boolean =
+        messageRepository.createMessage(message).getOrThrow()
+
+    override suspend fun readMessages(chatId: String): List<Message> =
+        messageRepository.readMessages(chatId).getOrThrow()
 }
