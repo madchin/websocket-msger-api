@@ -1,4 +1,4 @@
-package com.example.plugins
+package com.example.config.plugin
 
 import com.example.model.ChatMember
 import com.example.socket.ChatMemberSocketHandler

@@ -1,11 +1,10 @@
-package com.example.plugins
+package com.example.config.plugin
 
 import com.example.controller.util.*
 import com.example.util.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
-import io.ktor.server.plugins.*
 import io.ktor.server.plugins.cachingheaders.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.defaultheaders.*
