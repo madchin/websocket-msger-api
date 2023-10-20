@@ -3,6 +3,8 @@ package com.example.util
 import io.ktor.http.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 sealed class ExplicitException(
     val status: HttpStatusCode = HttpStatusCode.BadRequest,
@@ -20,21 +22,26 @@ sealed class ExplicitException(
     data object UserInsert : ExplicitException(message = "User has not been inserted")
     data object UserNotFound : ExplicitException(message = "User has not been found")
     data object UserUpdate : ExplicitException(message = "User has not been updated")
-    data object Generic : ExplicitException()
+    data object Generic : ExplicitException() {
+        val description = super.status.description
+    }
     data object WrongCredentials : ExplicitException(message = "Provided credentials are wrong")
 
     data object Forbidden : ExplicitException(status = HttpStatusCode.Forbidden)
 
     data object DuplicateUser : ExplicitException(message = "User already exists")
 }
+@Serializable
+data class ErrorResponse(val type: String, val message: String)
 
 fun StatusPagesConfig.responseExceptionHandler() {
     exception<Throwable> { call, cause ->
         if(cause is ExplicitException) {
-            call.respond(cause.status, cause.message)
+            call.respond(cause.status, ErrorResponse(cause.status.description,cause.message))
         }
         else {
-            call.respond(ExplicitException.Generic.status, ExplicitException.Generic.message)
+            val genericError = ExplicitException.Generic
+            call.respond(status = genericError.status, ErrorResponse(genericError.description, genericError.message))
         }
     }
 }
