@@ -4,11 +4,11 @@ import com.example.service.ChatService
 import com.example.service.MemberService
 
 object SocketFactory {
-    lateinit var chatRoom: ChatRoomSocketHandler
-    lateinit var chatMember: ChatMemberSocketHandler
+    lateinit var chatRoomHandler: ChatRoomSocketHandler
+    lateinit var chatMemberHandler: ChatMemberSocketHandler
 
     fun init(chatService: ChatService, memberService: MemberService) {
-        chatRoom = ChatRoomSocketHandlerImpl(chatService)
-        chatMember = ChatMemberSocketHandlerImpl(chatService, memberService)
+        chatRoomHandler = ChatRoomSocketHandlerImpl(chatService)
+        chatMemberHandler = ChatMemberSocketHandlerImpl(chatService, memberService)
     }
 }

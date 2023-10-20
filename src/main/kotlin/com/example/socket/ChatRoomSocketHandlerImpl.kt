@@ -1,7 +1,6 @@
 package com.example.socket
 
 import com.example.model.ChatMember
-import com.example.model.Member
 import com.example.model.Message
 import com.example.service.ChatService
 import io.ktor.websocket.*

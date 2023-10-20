@@ -5,8 +5,6 @@ import com.example.dao.repository.MessageRepository
 import com.example.model.Chat
 import com.example.model.ChatDTO
 import com.example.model.Message
-import com.example.socket.ChatMemberSocketHandler
-import com.example.socket.ChatRoomSocketHandler
 import com.example.util.ExplicitException
 
 class ChatServiceImpl(

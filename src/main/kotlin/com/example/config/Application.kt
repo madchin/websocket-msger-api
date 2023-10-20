@@ -35,6 +35,11 @@ fun Application.module() {
     configureSerialization()
     configureMonitoring()
     configureSecurity()
-    configureSockets(SocketFactory.chatRoom, SocketFactory.chatMember)
-    configureRouting(ServiceFactory.chatService, ServiceFactory.authService)
+    configureSockets()
+    configureRouting(
+        ServiceFactory.chatService,
+        ServiceFactory.authService,
+        SocketFactory.chatMemberHandler,
+        SocketFactory.chatRoomHandler
+    )
 }
