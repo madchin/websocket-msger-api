@@ -1,8 +1,8 @@
-package com.example.config
+package com.example
 
+import com.example.config.*
 import com.example.dao.DatabaseFactory
 import com.example.dao.RepositoryFactory
-import com.example.config.plugin.*
 import com.example.service.ServiceFactory
 import com.example.socket.SocketFactory
 import io.ktor.network.tls.certificates.*

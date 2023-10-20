@@ -1,4 +1,4 @@
-package com.example.config.plugin
+package com.example.config
 
 import com.example.controller.util.*
 import com.example.util.responseExceptionHandler
@@ -80,7 +80,6 @@ fun Application.configureCORS() {
 fun Application.configureHTTP() {
     configureSessions()
     configureCORS()
-    configureSessions()
     configureStatusPages()
     configureRequestValidation()
     configureHeaders()

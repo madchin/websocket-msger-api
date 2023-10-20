@@ -1,4 +1,4 @@
-package com.example.config.plugin
+package com.example.config
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm

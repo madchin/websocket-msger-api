@@ -1,7 +1,7 @@
 package com.example
 
 import com.example.model.*
-import com.example.config.plugin.configureRouting
+import com.example.config.configureRouting
 import com.example.service.AuthService
 import com.example.service.ChatService
 import com.example.socket.ChatMemberSocketHandler

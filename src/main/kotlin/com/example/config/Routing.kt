@@ -1,4 +1,4 @@
-package com.example.config.plugin
+package com.example.config
 
 import com.example.controller.feature_chat.chat
 import com.example.controller.feature_sign_in_up.signInUp
