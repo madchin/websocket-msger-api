@@ -7,5 +7,5 @@ interface ChatRoomSocketHandler {
     val chatMembers: MutableSet<ChatMember>
     suspend fun broadcastMessage(frame: Frame)
     suspend fun onReceiveMessage(session: DefaultWebSocketSession, broadcastMessage: suspend (Frame) -> Unit)
-    suspend fun onJoin(addChatMember: (MutableSet<ChatMember>) -> Unit)
+    suspend fun onJoin(chatMember: ChatMember)
 }

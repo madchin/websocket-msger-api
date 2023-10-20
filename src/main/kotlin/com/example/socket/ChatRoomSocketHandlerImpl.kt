@@ -1,6 +1,7 @@
 package com.example.socket
 
 import com.example.model.ChatMember
+import com.example.model.Member
 import com.example.model.Message
 import com.example.service.ChatService
 import io.ktor.websocket.*
@@ -32,7 +33,7 @@ class ChatRoomSocketHandlerImpl(
         }
     }
 
-    override suspend fun onJoin(addChatMember: (MutableSet<ChatMember>) -> Unit) {
-        addChatMember(chatMembers)
+    override suspend fun onJoin(chatMember: ChatMember) {
+        chatMembers.add(chatMember)
     }
 }
