@@ -60,4 +60,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-json:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
+    // PASSWORD HASHING
+    implementation("org.mindrot:jbcrypt:0.4")
 }

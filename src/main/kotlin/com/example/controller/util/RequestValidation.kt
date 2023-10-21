@@ -1,11 +1,18 @@
 package com.example.controller.util
 
+import com.example.model.Chat
+import com.example.model.Member
+import com.example.model.Message
+import com.example.model.User
 import com.example.util.EntityFieldLength
-import com.example.domain.model.Chat
-import com.example.domain.model.Member
-import com.example.domain.model.Message
-import com.example.domain.model.User
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.requestvalidation.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
+import io.ktor.util.pipeline.*
 
 private val validationReason = object {
     fun blank(field: String) = "$field field cannot be blank"
@@ -25,13 +32,13 @@ fun RequestValidationConfig.validateMember() {
         when {
             body.uid.isBlank() -> ValidationResult.Invalid(validationReason.blank("uid"))
             body.name.isBlank() -> ValidationResult.Invalid(validationReason.blank("name"))
-            body.name.length > EntityFieldLength.MEMBERS_NAME.maxLength || body.name.length < EntityFieldLength.MEMBERS_NAME.minLength -> {
+            body.name.length > EntityFieldLength.Members.Name.maxLength || body.name.length < EntityFieldLength.Members.Name.minLength -> {
                 ValidationResult.Invalid(
                     validationReason.length(
                         "name",
                         body.name.length,
-                        EntityFieldLength.MEMBERS_NAME.minLength,
-                        EntityFieldLength.MEMBERS_NAME.maxLength
+                        EntityFieldLength.Members.Name.minLength,
+                        EntityFieldLength.Members.Name.maxLength
                     )
                 )
             }
@@ -45,13 +52,13 @@ fun RequestValidationConfig.validateChat() {
     validate<Chat> { body ->
         when {
             body.name.isBlank() -> ValidationResult.Invalid(validationReason.blank("name"))
-            body.name.length > EntityFieldLength.CHATS_NAME.maxLength || body.name.length < EntityFieldLength.CHATS_NAME.minLength -> {
+            body.name.length > EntityFieldLength.Chats.Name.maxLength || body.name.length < EntityFieldLength.Chats.Name.minLength -> {
                 ValidationResult.Invalid(
                     validationReason.length(
                         "name",
                         body.name.length,
-                        EntityFieldLength.CHATS_NAME.minLength,
-                        EntityFieldLength.CHATS_NAME.maxLength
+                        EntityFieldLength.Chats.Name.minLength,
+                        EntityFieldLength.Chats.Name.maxLength
                     )
                 )
             }
@@ -66,13 +73,13 @@ fun RequestValidationConfig.validateMessage() {
         when {
             body.chatId.isBlank() -> ValidationResult.Invalid(validationReason.blank("uid"))
             body.sender.isBlank() -> ValidationResult.Invalid(validationReason.blank("name"))
-            body.sender.length > EntityFieldLength.MEMBERS_NAME.maxLength || body.sender.length < EntityFieldLength.MEMBERS_NAME.minLength -> {
+            body.sender.length > EntityFieldLength.Messages.Sender.maxLength || body.sender.length < EntityFieldLength.Messages.Sender.minLength -> {
                 ValidationResult.Invalid(
                     validationReason.length(
                         "sender",
                         body.sender.length,
-                        EntityFieldLength.MEMBERS_NAME.minLength,
-                        EntityFieldLength.MEMBERS_NAME.maxLength
+                        EntityFieldLength.Messages.Sender.minLength,
+                        EntityFieldLength.Messages.Sender.maxLength
                     )
                 )
             }
@@ -90,35 +97,35 @@ fun RequestValidationConfig.validateUser() {
             body.email.isBlank() -> ValidationResult.Invalid(validationReason.blank("email"))
             body.password.isBlank() -> ValidationResult.Invalid(validationReason.blank("password"))
             body.password.contains(body.username) -> ValidationResult.Invalid(validationReason.passwordContainUsername)
-            body.username.length > EntityFieldLength.USERS_USERNAME.maxLength || body.username.length < EntityFieldLength.USERS_USERNAME.minLength -> {
+            body.username.length > EntityFieldLength.Users.Username.maxLength || body.username.length < EntityFieldLength.Users.Username.minLength -> {
                 ValidationResult.Invalid(
                     validationReason.length(
                         "username",
                         body.username.length,
-                        EntityFieldLength.USERS_USERNAME.minLength,
-                        EntityFieldLength.USERS_USERNAME.maxLength
+                        EntityFieldLength.Users.Username.minLength,
+                        EntityFieldLength.Users.Username.maxLength
                     )
                 )
             }
 
-            body.email.length > EntityFieldLength.USERS_EMAIL.maxLength || body.email.length < EntityFieldLength.USERS_EMAIL.minLength -> {
+            body.email.length > EntityFieldLength.Users.Email.maxLength || body.email.length < EntityFieldLength.Users.Email.minLength -> {
                 ValidationResult.Invalid(
                     validationReason.length(
                         "email",
                         body.email.length,
-                        EntityFieldLength.USERS_EMAIL.minLength,
-                        EntityFieldLength.USERS_EMAIL.maxLength
+                        EntityFieldLength.Users.Email.minLength,
+                        EntityFieldLength.Users.Email.maxLength
                     )
                 )
             }
 
-            body.password.length > EntityFieldLength.USERS_PASSWORD.maxLength || body.password.length < EntityFieldLength.USERS_PASSWORD.minLength -> {
+            body.password.length > EntityFieldLength.Users.Password.maxLength || body.password.length < EntityFieldLength.Users.Password.minLength -> {
                 ValidationResult.Invalid(
                     validationReason.length(
                         "password",
                         body.password.length,
-                        EntityFieldLength.USERS_PASSWORD.minLength,
-                        EntityFieldLength.USERS_PASSWORD.maxLength
+                        EntityFieldLength.Users.Password.minLength,
+                        EntityFieldLength.Users.Password.maxLength
                     )
                 )
             }
@@ -126,4 +133,16 @@ fun RequestValidationConfig.validateUser() {
             else -> ValidationResult.Valid
         }
     }
+}
+
+fun StatusPagesConfig.requestValidationExceptionHandler() {
+    exception<RequestValidationException> { call, cause ->
+        call.respond(HttpStatusCode.BadRequest, cause.reasons.joinToString())
+    }
+}
+fun PipelineContext<Unit, ApplicationCall>.isRequestedDataOwner(memberId: String): Boolean {
+    val principal = call.principal<JWTPrincipal>()
+    val loggedInUserId = principal?.payload?.getClaim("uid")
+
+    return (loggedInUserId != null && loggedInUserId.asString() == memberId)
 }
