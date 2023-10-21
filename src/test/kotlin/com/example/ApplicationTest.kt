@@ -1,11 +1,8 @@
 import com.example.config.*
 import com.example.dao.DatabaseFactory
 import com.example.dao.RepositoryFactory
-import com.example.dao.RepositoryTestFactory
 import com.example.service.ServiceFactory
-import com.example.service.ServiceTestFactory
 import com.example.socket.SocketFactory
-import com.example.socket.SocketTestFactory
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
 import java.io.File
@@ -24,23 +21,23 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     DatabaseFactory.init(true, environment = environment)
-    RepositoryTestFactory.init()
-    ServiceTestFactory.init(
-        RepositoryTestFactory.chatRepository,
-        RepositoryTestFactory.messageRepository,
-        RepositoryTestFactory.memberRepository,
-        RepositoryTestFactory.userRepository
+    RepositoryFactory.init()
+    ServiceFactory.init(
+        RepositoryFactory.chatRepository,
+        RepositoryFactory.messageRepository,
+        RepositoryFactory.memberRepository,
+        RepositoryFactory.userRepository
     )
-    SocketTestFactory.init(ServiceTestFactory.chatService, ServiceTestFactory.memberService)
+    SocketFactory.init(ServiceFactory.chatService, ServiceFactory.memberService)
     configureHTTP()
     configureSerialization()
     configureMonitoring()
     configureSecurity()
     configureSockets()
     configureRouting(
-        ServiceTestFactory.chatService,
-        ServiceTestFactory.authService,
-        SocketTestFactory.chatMemberHandler,
-        SocketTestFactory.chatRoomHandler
+        ServiceFactory.chatService,
+        ServiceFactory.authService,
+        SocketFactory.chatMemberHandler,
+        SocketFactory.chatRoomHandler
     )
 }

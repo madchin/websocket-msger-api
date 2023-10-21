@@ -9,7 +9,7 @@ import org.junit.Test
 
 class ChatRoutesTest {
     @Test
-    fun `test get chat with id which not exists`() = testApplication {
+    fun `get chat which not exist`() = testApplication {
         environment {
             config = ApplicationConfig("application-test.conf")
         }
