@@ -1,56 +1,14 @@
-import com.example.domain.dao.Services
-import com.example.domain.dao.service.*
-import com.example.domain.model.Chat
-import com.example.domain.model.Member
-import com.example.domain.model.Message
-import com.example.domain.model.User
-import com.example.plugins.*
+import com.example.config.*
+import com.example.dao.DatabaseFactory
+import com.example.dao.RepositoryFactory
+import com.example.dao.RepositoryTestFactory
+import com.example.service.ServiceFactory
+import com.example.service.ServiceTestFactory
+import com.example.socket.SocketFactory
+import com.example.socket.SocketTestFactory
 import io.ktor.network.tls.certificates.*
 import io.ktor.server.application.*
 import java.io.File
-
-class FakeServices : Services {
-    override val chatService: ChatService = object : ChatService {
-        override suspend fun createChat(chat: Chat): Chat = Chat("10", "xd")
-
-        override suspend fun getChat(id: String): Chat = Chat("10", "xd")
-
-        override suspend fun changeChatName(id: String, name: String): Boolean = true
-
-        override suspend fun deleteChat(id: String): Boolean = true
-
-        override suspend fun joinChat(chatId: String, memberUid: String): Chat = Chat("10", "xd")
-    }
-    override val memberService: MemberService = object : MemberService {
-        override suspend fun createOrUpdateMember(member: Member): Member = Member(uid = "xD", name = "xD")
-        override suspend fun getMember(uid: String): Member = Member(uid = "xD", name = "xD")
-
-        override suspend fun updateMemberName(uid: String, name: String): Boolean = true
-
-        override suspend fun deleteMember(uid: String): Boolean = true
-    }
-    override val messageService: MessageService = object : MessageService {
-        override suspend fun saveMessage(message: Message): Boolean = true
-
-        override suspend fun readMessages(chatId: String): List<Message> = emptyList()
-    }
-    override val userService: UserService = object : UserService {
-        override suspend fun getUser(user: User): User =
-            User(id = "xD", username = "xxxx", email = "aaaa", password = "aaaa")
-
-        override suspend fun createUser(user: User): Boolean = true
-
-        override suspend fun updateUserUsername(username: String): Boolean = true
-
-        override suspend fun updateUserPassword(user: User): Boolean = true
-
-        override suspend fun deleteUser(username: String): Boolean = true
-    }
-    override val memberChatService: MemberChatService = object : MemberChatService {
-        override suspend fun getMemberAndChat(chatId: String, memberId: String): Pair<Member, Chat> =
-            Pair(Member("xd", "xd"), Chat("xd", "xd"))
-    }
-}
 
 fun main(args: Array<String>) {
     val keyStoreFile = File("./keystore.jks")
@@ -65,12 +23,24 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    //val chatRoomSocketHandler = ChatRoomSocketHandlerImpl()
-    //val chatMemberSocketHandler = ChatMemberSocketHandlerImpl(services.chatService,services.memberChatService, services.messageService)
+    DatabaseFactory.init(true, environment = environment)
+    RepositoryTestFactory.init()
+    ServiceTestFactory.init(
+        RepositoryTestFactory.chatRepository,
+        RepositoryTestFactory.messageRepository,
+        RepositoryTestFactory.memberRepository,
+        RepositoryTestFactory.userRepository
+    )
+    SocketTestFactory.init(ServiceTestFactory.chatService, ServiceTestFactory.memberService)
     configureHTTP()
     configureSerialization()
     configureMonitoring()
     configureSecurity()
-    //configureSockets(chatRoomSocketHandler,chatMemberSocketHandler)
-    configureRouting(FakeServices())
+    configureSockets()
+    configureRouting(
+        ServiceTestFactory.chatService,
+        ServiceTestFactory.authService,
+        SocketTestFactory.chatMemberHandler,
+        SocketTestFactory.chatRoomHandler
+    )
 }

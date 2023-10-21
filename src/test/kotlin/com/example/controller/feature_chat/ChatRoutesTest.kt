@@ -1,4 +1,4 @@
-package com.example.controller.chats_basic
+package com.example.controller.feature_chat
 
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -9,13 +9,13 @@ import org.junit.Test
 
 class ChatRoutesTest {
     @Test
-    fun test_get_chat_unauthorized_fail() = testApplication {
+    fun `test get chat with id which not exists`() = testApplication {
         environment {
             config = ApplicationConfig("application-test.conf")
         }
 
         val response = client.get("/chats/xd")
-        assertEquals(HttpStatusCode.Unauthorized, response.status)
+        assertEquals(HttpStatusCode.NotFound, response.status)
     }
 
 }
