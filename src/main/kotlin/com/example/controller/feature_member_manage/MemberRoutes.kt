@@ -5,6 +5,8 @@ import com.example.model.Member
 import com.example.service.MemberService
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -14,18 +16,17 @@ import io.ktor.server.util.*
 fun Route.member(memberService: MemberService) {
     post("/member/add-member") {
         val member = call.receive<Member>()
-        if (!isRequestedDataOwner(member.uid)) {
-            //throw ForbiddenException
-        }
-        memberService.createOrUpdateMember(member).also {
+        val principal = call.principal<JWTPrincipal>()
+        val currentUserId = principal?.payload?.getClaim("uid")?.asString()!!
+
+        memberService.addMember(member, currentUserId).also {
             call.respond(HttpStatusCode.Created, it)
         }
     }
     put("/member/update-member-name") {
         val member = call.receive<Member>()
-        if (!isRequestedDataOwner(member.uid)) {
-            //throw ForbiddenException
-        }
+        val principal = call.principal<JWTPrincipal>()
+        val userId = principal?.payload?.getClaim("uid")?.asString()!!
         memberService.updateMemberName(member.uid, member.name).also {
             call.respond(HttpStatusCode.OK)
         }
