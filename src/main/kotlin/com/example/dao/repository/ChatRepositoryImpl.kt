@@ -59,7 +59,8 @@ class ChatRepositoryImpl : ChatRepository {
                 it[lastSeenMembers] = chat.lastSeenMembers + mapOf(memberUid to lastSeenTimestamp)
             }.run {
                 if (this != 0) {
-                    return@dbQuery Result.success(chat)
+                    val updatedChat = Chats.select { Chats.id eq UUID.fromString(chat.id) }.map(::resultRowToChat).first()
+                    return@dbQuery Result.success(updatedChat)
                 }
                 return@dbQuery Result.failure(ExplicitException.ChatUpdate)
             }

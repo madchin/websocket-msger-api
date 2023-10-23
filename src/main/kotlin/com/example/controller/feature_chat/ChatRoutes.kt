@@ -45,7 +45,7 @@ fun Route.chat(
         val userIdClaim = principal?.payload?.getClaim("uid")?.asString()!!
 
         chatService.joinChat(chatId, userIdClaim).also {
-            call.respond(HttpStatusCode.OK)
+            call.respond(HttpStatusCode.OK, it)
         }
     }
 

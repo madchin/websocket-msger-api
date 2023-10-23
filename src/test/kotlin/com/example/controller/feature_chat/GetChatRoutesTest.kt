@@ -64,7 +64,7 @@ class GetChatRoutesTest {
             }
         }
     }
-    companion object {
+    private companion object {
         const val USER_ID = "user_id"
     }
 }
