@@ -4,7 +4,6 @@ import com.example.model.ChatDTO
 import com.example.service.ChatService
 import com.example.socket.ChatMemberSocketHandler
 import com.example.socket.ChatRoomSocketHandler
-import com.example.util.ExplicitException
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -23,9 +22,9 @@ fun Route.chat(
     get("/chat/{id}") {
         val chatId = call.parameters.getOrFail("id")
         val principal = call.principal<JWTPrincipal>()
-        val userIdClaim = principal?.payload?.getClaim("uid")?.asString()!!
+        val userId = principal?.payload?.getClaim("uid")?.asString()!!
 
-        chatService.getChat(chatId, userIdClaim).also {
+        chatService.getChat(chatId, userId).also {
             call.respond(HttpStatusCode.OK, it)
         }
     }
@@ -33,18 +32,18 @@ fun Route.chat(
     post("/chat") {
         val principal = call.principal<JWTPrincipal>()
         val chatDTO = call.receive<ChatDTO>()
-        val userIdClaim = principal?.payload?.getClaim("uid")?.asString()!!
+        val userId = principal?.payload?.getClaim("uid")?.asString()!!
 
-        chatService.createChat(chatDTO, userIdClaim).also {
+        chatService.createChat(chatDTO, userId).also {
             call.respond(HttpStatusCode.Created, it)
         }
     }
     post("/chat/{id}/join-chat") {
         val chatId = call.parameters.getOrFail("id")
         val principal = call.principal<JWTPrincipal>()
-        val userIdClaim = principal?.payload?.getClaim("uid")?.asString()!!
+        val userId = principal?.payload?.getClaim("uid")?.asString()!!
 
-        chatService.joinChat(chatId, userIdClaim).also {
+        chatService.joinChat(chatId, userId).also {
             call.respond(HttpStatusCode.OK, it)
         }
     }
@@ -53,10 +52,20 @@ fun Route.chat(
         val chatId = call.parameters.getOrFail("id")
         val chatDTO = call.receive<ChatDTO>()
         val principal = call.principal<JWTPrincipal>()
-        val userIdClaim = principal?.payload?.getClaim("uid")?.asString()!!
+        val userId = principal?.payload?.getClaim("uid")?.asString()!!
 
-        chatService.changeChatName(chatId, chatDTO.name, userIdClaim).also {
+        chatService.changeChatName(chatId, chatDTO.name, userId).also {
             call.respond(HttpStatusCode.OK, it)
+        }
+    }
+
+    delete("chat/{id}") {
+        val chatId = call.parameters.getOrFail("id")
+        val principal = call.principal<JWTPrincipal>()
+        val userId = principal?.payload?.getClaim("uid")?.asString()!!
+
+        chatService.deleteChat(chatId,userId).also {
+            call.respond(HttpStatusCode.NoContent)
         }
     }
     webSocket("/chat/{id}") { // websocketSession
