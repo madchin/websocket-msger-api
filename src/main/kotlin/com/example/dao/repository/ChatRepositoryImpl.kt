@@ -40,15 +40,16 @@ class ChatRepositoryImpl : ChatRepository {
         return@dbQuery Result.failure(ExplicitException.ChatNotFound)
     }
 
-    override suspend fun updateChatName(chatId: String, name: String): Result<Boolean> = dbQuery {
+    override suspend fun updateChatName(chatId: String, name: String): Result<Chat> = dbQuery {
         Chats
             .update({ Chats.id eq UUID.fromString(chatId) }) {
                 it[Chats.name] = name
             }.let {
                 if (it != 0) {
-                    return@dbQuery Result.success(true)
+                    val updatedChat = Chats.select { Chats.id eq UUID.fromString(chatId) }.map(::resultRowToChat).first()
+                    return@dbQuery Result.success(updatedChat)
                 }
-                return@dbQuery Result.failure(ExplicitException.ChatUpdate)
+                return@dbQuery Result.failure(ExplicitException.ChatNotFound)
             }
     }
 
@@ -59,9 +60,10 @@ class ChatRepositoryImpl : ChatRepository {
                 it[lastSeenMembers] = chat.lastSeenMembers + mapOf(memberUid to lastSeenTimestamp)
             }.run {
                 if (this != 0) {
-                    return@dbQuery Result.success(chat)
+                    val updatedChat = Chats.select { Chats.id eq UUID.fromString(chat.id) }.map(::resultRowToChat).first()
+                    return@dbQuery Result.success(updatedChat)
                 }
-                return@dbQuery Result.failure(ExplicitException.ChatUpdate)
+                return@dbQuery Result.failure(ExplicitException.ChatNotFound)
             }
         }
 

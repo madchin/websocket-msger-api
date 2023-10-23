@@ -48,7 +48,7 @@ class MemberRepositoryImpl : MemberRepository {
                 if (it != 0) {
                     return@dbQuery Result.success(true)
                 }
-                return@dbQuery Result.failure(ExplicitException.MemberUpdate)
+                return@dbQuery Result.failure(ExplicitException.MemberNotFound)
             }
     }
 

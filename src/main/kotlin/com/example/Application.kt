@@ -1,6 +1,7 @@
 package com.example
 
 import com.example.config.*
+import com.example.controller.util.JwtConfig
 import com.example.dao.DatabaseFactory
 import com.example.dao.RepositoryFactory
 import com.example.service.ServiceFactory
@@ -31,6 +32,7 @@ fun Application.module() {
         RepositoryFactory.userRepository
     )
     SocketFactory.init(ServiceFactory.chatService, ServiceFactory.memberService)
+    JwtConfig.init(environment)
     configureHTTP()
     configureSerialization()
     configureMonitoring()
