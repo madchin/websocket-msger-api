@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 
 class GetChatRoutesTest {
     @Test
-    fun `Fail to get chat when unauthorized`() = testApplication {
+    fun `Unauthorized - fail to get chat`() = testApplication {
         val randomUid = UUID.randomUUID().toString()
         environment {
             config = ApplicationConfig("application-test.conf")
@@ -28,14 +28,14 @@ class GetChatRoutesTest {
     }
 
     @Test
-    fun `Fail to get chat which not exists when authorized`() = testApplication {
+    fun `Authorized - Fail to get chat which not exists`() = testApplication {
         val randomUid = UUID.randomUUID().toString()
         environment {
             config = ApplicationConfig("application-test.conf")
         }
         startApplication()
         client.get("/chat/$randomUid") {
-            val token = JwtConfig.createToken(USER_ID)
+            val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
         }.apply {
             assertEquals(HttpStatusCode.NotFound, status)
@@ -43,7 +43,7 @@ class GetChatRoutesTest {
     }
 
     @Test
-    fun `Successfully get chat which exists when authorized`() = testApplication {
+    fun `Authorized - Successfully get chat which user is member`() = testApplication {
         environment {
             config = ApplicationConfig("application-test.conf")
         }
@@ -53,9 +53,9 @@ class GetChatRoutesTest {
             }
         }
         startApplication()
-        val createdChat = ServiceFactory.chatService.createChat(ChatDTO("example"), USER_ID)
+        val createdChat = ServiceFactory.chatService.createChat(ChatDTO("example"), FIRST_USER_ID)
         client.get("/chat/${createdChat.id}") {
-            val token = JwtConfig.createToken(USER_ID)
+            val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
@@ -64,7 +64,29 @@ class GetChatRoutesTest {
             }
         }
     }
+
+    @Test
+    fun `Authorized - Fail to get chat which user is not member`() = testApplication {
+        environment {
+            config = ApplicationConfig("application-test.conf")
+        }
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+        startApplication()
+        val createdChat = ServiceFactory.chatService.createChat(ChatDTO("example"), FIRST_USER_ID)
+        client.get("/chat/${createdChat.id}") {
+            val token = JwtConfig.createToken(SECOND_USER_ID)
+            bearerAuth(token)
+        }.apply {
+            assertEquals(HttpStatusCode.Forbidden, status)
+        }
+    }
+
     private companion object {
-        const val USER_ID = "user_id"
+        const val FIRST_USER_ID = "first_user_id"
+        const val SECOND_USER_ID = "second_user_id"
     }
 }

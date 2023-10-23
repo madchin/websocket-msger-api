@@ -1,21 +1,17 @@
 package com.example.controller.feature_chat
 
 import com.example.controller.util.JwtConfig
-import com.example.model.Chat
 import com.example.model.ChatDTO
 import com.example.service.ServiceFactory
-import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.config.*
 import io.ktor.server.testing.*
-import java.util.UUID
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 class DeleteChatRoutesTest {
     @Test
