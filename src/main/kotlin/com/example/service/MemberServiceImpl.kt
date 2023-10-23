@@ -4,8 +4,8 @@ import com.example.dao.repository.MemberRepository
 import com.example.model.Member
 
 class MemberServiceImpl(private val memberRepository: MemberRepository) : MemberService {
-    override suspend fun createOrUpdateMember(member: Member): Member {
-        return memberRepository.upsertMember(member).getOrThrow()
+    override suspend fun addMember(member: Member): Member {
+        return memberRepository.insertMember(member).getOrThrow()
     }
 
     override suspend fun deleteMember(uid: String): Boolean {
