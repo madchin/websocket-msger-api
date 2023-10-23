@@ -23,9 +23,9 @@ fun Route.chat(
     get("/chat/{id}") {
         val chatId = call.parameters.getOrFail("id")
         val principal = call.principal<JWTPrincipal>()
-        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ExplicitException.Forbidden
+        val userIdClaim = principal?.payload?.getClaim("uid")?.asString()!!
 
-        chatService.getChat(chatId, userIdClaim.asString()).also {
+        chatService.getChat(chatId, userIdClaim).also {
             call.respond(HttpStatusCode.OK, it)
         }
     }
@@ -33,18 +33,18 @@ fun Route.chat(
     post("/chat") {
         val principal = call.principal<JWTPrincipal>()
         val chatDTO = call.receive<ChatDTO>()
-        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ExplicitException.Forbidden
+        val userIdClaim = principal?.payload?.getClaim("uid")?.asString()!!
 
-        chatService.createChat(chatDTO, userIdClaim.asString()).also {
+        chatService.createChat(chatDTO, userIdClaim).also {
             call.respond(HttpStatusCode.Created, it)
         }
     }
     post("/chat/{id}/join-chat") {
         val chatId = call.parameters.getOrFail("id")
         val principal = call.principal<JWTPrincipal>()
-        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ExplicitException.Forbidden
+        val userIdClaim = principal?.payload?.getClaim("uid")?.asString()!!
 
-        chatService.joinChat(chatId, userIdClaim.asString()).also {
+        chatService.joinChat(chatId, userIdClaim).also {
             call.respond(HttpStatusCode.OK)
         }
     }
@@ -53,9 +53,9 @@ fun Route.chat(
         val chatId = call.parameters.getOrFail("id")
         val chatDTO = call.receive<ChatDTO>()
         val principal = call.principal<JWTPrincipal>()
-        val userIdClaim = principal?.payload?.getClaim("uid") ?: throw ExplicitException.Forbidden
+        val userIdClaim = principal?.payload?.getClaim("uid")?.asString()!!
 
-        chatService.changeChatName(chatId, chatDTO.name, userIdClaim.asString()).also {
+        chatService.changeChatName(chatId, chatDTO.name, userIdClaim).also {
             call.respond(HttpStatusCode.OK)
         }
     }

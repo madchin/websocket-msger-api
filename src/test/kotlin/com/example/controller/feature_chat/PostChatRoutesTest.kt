@@ -8,39 +8,14 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.config.*
 import io.ktor.server.testing.*
-import io.ktor.util.*
-import java.util.UUID
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
-class ChatRoutesTest {
-    @Test
-    fun `Fail to get chat when unauthorized`() = testApplication {
-        val randomUid = UUID.randomUUID().toString()
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        client.get("/chat/$randomUid").apply {
-            assertEquals(HttpStatusCode.Unauthorized, status)
-        }
-    }
-    @OptIn(InternalAPI::class)
-    @Test
-    fun `Fail to get chat which not exists when authorized`() = testApplication {
-        val randomUid = UUID.randomUUID().toString()
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        startApplication()
-        client.get("/chat/$randomUid") {
-            val token = JwtConfig.createToken("user_id")
-            bearerAuth(token)
-        }.apply {
-            assertEquals(HttpStatusCode.NotFound, status)
-        }
-    }
+class PostChatRoutesTest {
     @Test
     fun `Fail to post chat when unauthorized`() = testApplication {
         environment {
@@ -64,12 +39,12 @@ class ChatRoutesTest {
         environment {
             config = ApplicationConfig("application-test.conf")
         }
-        startApplication()
         val client = createClient {
             install(ContentNegotiation) {
                 json()
             }
         }
+        startApplication()
         client.post("/chat") {
             val token = JwtConfig.createToken("user_id")
             bearerAuth(token)
