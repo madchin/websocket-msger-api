@@ -3,7 +3,6 @@ package com.example.controller.util
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
-import com.example.model.User
 import io.ktor.server.application.*
 import io.ktor.server.auth.jwt.*
 import java.util.*
@@ -40,10 +39,10 @@ object JwtConfig {
         )
     }
 
-    fun createToken(user: User, expirationTime: Long = sevenDaysInMs): String = JWT.create()
+    fun createToken(userId: String, expirationTime: Long = sevenDaysInMs): String = JWT.create()
         .withAudience(jwtAudience)
         .withIssuer(jwtDomain)
-        .withClaim("uid", user.id)
+        .withClaim("uid", userId)
         .withExpiresAt(Date(System.currentTimeMillis() + expirationTime))
         .sign(Algorithm.HMAC256(jwtSecret))
 

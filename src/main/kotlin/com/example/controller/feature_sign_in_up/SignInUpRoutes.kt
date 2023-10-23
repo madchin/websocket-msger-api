@@ -14,12 +14,13 @@ import io.ktor.server.sessions.*
 
 
 fun Route.signInUp(authService: AuthService) {
+
     post("/sign-in") {
         val userDto = call.receive<UserDTO>()
         authService.login(userDto).also { user ->
-            val token = JwtConfig.createToken(user)
+            val token = JwtConfig.createToken(user.id!!)
 
-            call.sessions.set(UserSession(uid = user.id!!))
+            call.sessions.set(UserSession(uid = user.id))
             call.respond(hashMapOf("token" to token, "uid" to user.id))
         }
     }
