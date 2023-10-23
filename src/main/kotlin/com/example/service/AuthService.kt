@@ -5,6 +5,6 @@ import com.example.model.UserDTO
 
 interface AuthService {
     suspend fun login(userDto: UserDTO): User
-    suspend fun register(userDto: UserDTO)
+    suspend fun register(userDto: UserDTO): User
 
 }
