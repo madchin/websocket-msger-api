@@ -56,7 +56,7 @@ fun Route.chat(
         val userIdClaim = principal?.payload?.getClaim("uid")?.asString()!!
 
         chatService.changeChatName(chatId, chatDTO.name, userIdClaim).also {
-            call.respond(HttpStatusCode.OK)
+            call.respond(HttpStatusCode.OK, it)
         }
     }
     webSocket("/chat/{id}") { // websocketSession

@@ -49,7 +49,7 @@ class UserRepositoryImpl : UserRepository {
             if (it != 0) {
                 return@dbQuery Result.success(true)
             }
-            return@dbQuery Result.failure(ExplicitException.UserUpdate)
+            return@dbQuery Result.failure(ExplicitException.UserNotFound)
         }
     }
 
@@ -60,7 +60,7 @@ class UserRepositoryImpl : UserRepository {
             if (it != 0) {
                 return@dbQuery Result.success(true)
             }
-            return@dbQuery Result.failure(ExplicitException.UserUpdate)
+            return@dbQuery Result.failure(ExplicitException.UserNotFound)
         }
     }
 

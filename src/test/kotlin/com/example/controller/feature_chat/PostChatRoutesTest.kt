@@ -142,12 +142,11 @@ class PostChatRoutesTest {
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
             body<Chat>().apply {
-                assertEquals(CHAT_TO_CREATE_NAME, name)
                 val addedMember = this.lastSeenMembers.find { member -> member.containsKey(SECOND_USER_ID) }
                 val addedMemberTimestamp = addedMember?.get(SECOND_USER_ID)
+                assertEquals(CHAT_TO_CREATE_NAME, name)
                 assertNotNull(addedMember)
                 assertTrue(addedMemberTimestamp is Long)
-                assertEquals(CHAT_TO_CREATE_NAME, name)
             }
         }
     }
