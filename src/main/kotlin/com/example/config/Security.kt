@@ -1,7 +1,6 @@
 package com.example.config
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
+import com.example.controller.util.JwtConfig
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.http.*
@@ -28,41 +27,17 @@ fun AuthenticationConfig.configureOAuth() {
     }
 }
 
-fun AuthenticationConfig.configureJWT(environment: ApplicationEnvironment) {
-    val jwtAudience = environment.config.property("jwt.audience").getString()
-    val jwtDomain = environment.config.property("jwt.domain").getString()
-    val jwtRealm = environment.config.property("jwt.realm").getString()
-    val jwtSecret = environment.config.property("jwt.secret").getString()
+fun AuthenticationConfig.configureJWT() {
     jwt("auth-jwt") {
-        realm = jwtRealm
-        verifier(
-            JWT
-                .require(Algorithm.HMAC256(jwtSecret))
-                .withAudience(jwtAudience)
-                .withIssuer(jwtDomain)
-                .build()
-        )
-        validate { credential ->
-            val payload = credential.payload
-            val containsAudience = payload.audience.contains(jwtAudience)
-            val userId = payload.getClaim("uid").asString()
-            val isUserIdProper = userId != null && userId.isNotBlank()
-            if (containsAudience && isUserIdProper) {
-                JWTPrincipal(payload)
-            } else {
-                null
-            }
-        }
-        challenge { defaultScheme, realm ->
-            call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
-        }
+        verifier(JwtConfig.tokenVerifier())
+        validate { JwtConfig.payloadValidator(it) }
+        challenge { _, _ -> call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired") }
     }
 }
 
 fun Application.configureSecurity() {
-    val appEnvironment = environment
     install(Authentication) {
         configureOAuth()
-        configureJWT(appEnvironment)
+        configureJWT()
     }
 }
