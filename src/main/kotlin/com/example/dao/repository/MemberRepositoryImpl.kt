@@ -14,8 +14,8 @@ class MemberRepositoryImpl : MemberRepository {
         name = row[Members.name]
     )
 
-    override suspend fun upsertMember(member: Member): Result<Member> = dbQuery {
-        Members.upsert {
+    override suspend fun insertMember(member: Member): Result<Member> = dbQuery {
+        Members.insert {
             it[uid] = UUID.fromString(member.uid)
             it[name] = member.name
         }.run {
@@ -23,7 +23,7 @@ class MemberRepositoryImpl : MemberRepository {
             if (insertedMember != null) {
                 return@dbQuery Result.success(insertedMember)
             }
-            return@dbQuery Result.failure(ExplicitException.MemberUpsert)
+            return@dbQuery Result.failure(ExplicitException.MemberInsert)
         }
     }
 
@@ -40,13 +40,14 @@ class MemberRepositoryImpl : MemberRepository {
             }
     }
 
-    override suspend fun updateMemberName(uid: String, name: String): Result<Boolean> = dbQuery {
+    override suspend fun updateMemberName(uid: String, name: String): Result<Member> = dbQuery {
         Members
             .update({ Members.uid eq UUID.fromString(uid) }) {
                 it[Members.name] = name
             }.let {
                 if (it != 0) {
-                    return@dbQuery Result.success(true)
+                    val updatedMember = Members.select { Members.uid eq UUID.fromString(uid) }.singleOrNull()?.let(::resultRowToMember)
+                    return@dbQuery Result.success(updatedMember!!)
                 }
                 return@dbQuery Result.failure(ExplicitException.MemberNotFound)
             }

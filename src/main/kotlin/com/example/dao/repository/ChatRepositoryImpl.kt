@@ -46,8 +46,8 @@ class ChatRepositoryImpl : ChatRepository {
                 it[Chats.name] = name
             }.let {
                 if (it != 0) {
-                    val updatedChat = Chats.select { Chats.id eq UUID.fromString(chatId) }.map(::resultRowToChat).first()
-                    return@dbQuery Result.success(updatedChat)
+                    val updatedChat = Chats.select { Chats.id eq UUID.fromString(chatId) }.singleOrNull()?.let(::resultRowToChat)
+                    return@dbQuery Result.success(updatedChat!!)
                 }
                 return@dbQuery Result.failure(ExplicitException.ChatNotFound)
             }
@@ -60,8 +60,8 @@ class ChatRepositoryImpl : ChatRepository {
                 it[lastSeenMembers] = chat.lastSeenMembers + mapOf(memberUid to lastSeenTimestamp)
             }.run {
                 if (this != 0) {
-                    val updatedChat = Chats.select { Chats.id eq UUID.fromString(chat.id) }.map(::resultRowToChat).first()
-                    return@dbQuery Result.success(updatedChat)
+                    val updatedChat = Chats.select { Chats.id eq UUID.fromString(chat.id) }.singleOrNull()?.let(::resultRowToChat)
+                    return@dbQuery Result.success(updatedChat!!)
                 }
                 return@dbQuery Result.failure(ExplicitException.ChatNotFound)
             }

@@ -12,7 +12,7 @@ sealed class ExplicitException(
     Throwable() {
     data object ChatInsert : ExplicitException(message = "Chat has not been inserted")
     data object ChatNotFound : ExplicitException(status = HttpStatusCode.NotFound, message = "Chat has not been found")
-    data object MemberUpsert : ExplicitException(message = "Member has not been inserted nor updated")
+    data object MemberInsert : ExplicitException(message = "Member has not been inserted nor updated")
     data object MemberNotFound : ExplicitException(status = HttpStatusCode.NotFound, message = "Member has not been found")
     data object MessageInsert : ExplicitException(message = "Message has not been inserted")
     data object MessagesNotFound : ExplicitException(status = HttpStatusCode.NotFound, message = "Messages has not been found")
