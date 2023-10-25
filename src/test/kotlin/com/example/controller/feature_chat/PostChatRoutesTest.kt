@@ -1,9 +1,11 @@
 package com.example.controller.feature_chat
 
 import com.example.controller.util.JwtConfig
+import com.example.controller.util.ValidationReason
 import com.example.model.Chat
 import com.example.model.ChatDTO
 import com.example.service.ServiceFactory
+import com.example.util.EntityFieldLength
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -48,7 +50,7 @@ class PostChatRoutesTest {
             val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(ChatDTO(CHAT_TO_CREATE_NAME))
+            setBody(ChatDTO(chatToCreateName))
         }.apply {
             assertEquals(HttpStatusCode.Created, status)
             body<Chat>().apply {
@@ -56,7 +58,7 @@ class PostChatRoutesTest {
                 val addedMemberTimestamp = addedMember?.get(FIRST_USER_ID)
                 assertNotNull(addedMember)
                 assertTrue(addedMemberTimestamp is Long)
-                assertEquals(CHAT_TO_CREATE_NAME, name)
+                assertEquals(chatToCreateName, name)
             }
         }
     }
@@ -72,7 +74,7 @@ class PostChatRoutesTest {
             }
         }
         startApplication()
-        val chatToCreate = ChatDTO(CHAT_TO_CREATE_NAME)
+        val chatToCreate = ChatDTO(chatToCreateName)
         val token = JwtConfig.createToken(FIRST_USER_ID)
         ServiceFactory.chatService.createChat(chatToCreate, FIRST_USER_ID)
         client.post("/chat") {
@@ -86,7 +88,7 @@ class PostChatRoutesTest {
                 val addedMemberTimestamp = addedMember?.get(FIRST_USER_ID)
                 assertNotNull(addedMember)
                 assertTrue(addedMemberTimestamp is Long)
-                assertEquals(CHAT_TO_CREATE_NAME, name)
+                assertEquals(chatToCreateName, name)
             }
         }
     }
@@ -128,20 +130,106 @@ class PostChatRoutesTest {
             }
         }
         startApplication()
-        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_TO_CREATE_NAME), FIRST_USER_ID)
+        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatToCreateName), FIRST_USER_ID)
         client.post("/chat/${createdChat.id}/join-chat") {
             val token = JwtConfig.createToken(SECOND_USER_ID)
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(ChatDTO(CHAT_TO_CREATE_NAME))
+            setBody(ChatDTO(chatToCreateName))
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
             body<Chat>().apply {
                 val addedMember = this.lastSeenMembers.find { member -> member.containsKey(SECOND_USER_ID) }
                 val addedMemberTimestamp = addedMember?.get(SECOND_USER_ID)
-                assertEquals(CHAT_TO_CREATE_NAME, name)
+                assertEquals(chatToCreateName, name)
                 assertNotNull(addedMember)
                 assertTrue(addedMemberTimestamp is Long)
+            }
+        }
+    }
+
+    @Test
+    fun `Authorized - Fail to create chat which chat name violates min chat name length`() = testApplication {
+        environment {
+            config = ApplicationConfig("application-test.conf")
+        }
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+        startApplication()
+        client.post("/chat") {
+            val token = JwtConfig.createToken(FIRST_USER_ID)
+            bearerAuth(token)
+            contentType(ContentType.Application.Json)
+            setBody(ChatDTO(chatNameMinLengthViolation))
+        }.apply {
+            assertEquals(HttpStatusCode.BadRequest, status)
+            body<String>().apply {
+                assertEquals(
+                    this, ValidationReason.length(
+                        ChatDTO::name.name,
+                        chatNameMinLengthViolation.length,
+                        EntityFieldLength.Chats.Name.minLength,
+                        EntityFieldLength.Chats.Name.maxLength
+                    )
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `Authorized - Fail to create chat which chat name violates max chat name length`() = testApplication {
+        environment {
+            config = ApplicationConfig("application-test.conf")
+        }
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+        startApplication()
+        client.post("/chat") {
+            val token = JwtConfig.createToken(FIRST_USER_ID)
+            bearerAuth(token)
+            contentType(ContentType.Application.Json)
+            setBody(ChatDTO(chatNameMaxLengthViolation))
+        }.apply {
+            assertEquals(HttpStatusCode.BadRequest, status)
+            body<String>().apply {
+                assertEquals(
+                    this, ValidationReason.length(
+                        ChatDTO::name.name,
+                        chatNameMaxLengthViolation.length,
+                        EntityFieldLength.Chats.Name.minLength,
+                        EntityFieldLength.Chats.Name.maxLength
+                    )
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `Authorized - Fail to create chat which chat name is blank`() = testApplication {
+        environment {
+            config = ApplicationConfig("application-test.conf")
+        }
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+        startApplication()
+        client.post("/chat") {
+            val token = JwtConfig.createToken(FIRST_USER_ID)
+            bearerAuth(token)
+            contentType(ContentType.Application.Json)
+            setBody(ChatDTO(CHAT_NAME_BLANK))
+        }.apply {
+            assertEquals(HttpStatusCode.BadRequest, status)
+            body<String>().apply {
+                assertEquals(this, ValidationReason.blank(ChatDTO::name.name))
             }
         }
     }
@@ -149,7 +237,10 @@ class PostChatRoutesTest {
     private companion object {
         const val FIRST_USER_ID = "first_user_id"
         const val SECOND_USER_ID = "second_user_id"
-        const val CHAT_TO_CREATE_NAME = "chatName"
+        const val CHAT_NAME_BLANK = "  "
+        val chatToCreateName = "c".repeat(EntityFieldLength.Chats.Name.minLength + 1)
+        val chatNameMinLengthViolation = "c".repeat(EntityFieldLength.Chats.Name.minLength - 1)
+        val chatNameMaxLengthViolation = "c".repeat(EntityFieldLength.Chats.Name.maxLength + 1)
         val randomUUID = UUID.randomUUID().toString()
     }
 }

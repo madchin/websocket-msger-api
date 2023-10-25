@@ -52,7 +52,6 @@ fun Application.configureRequestValidation() {
     install(RequestValidation) {
         validateUser()
         validateChat()
-        validateMember()
         validateMessage()
     }
 }
