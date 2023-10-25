@@ -13,31 +13,10 @@ import io.ktor.server.config.*
 import io.ktor.server.testing.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-typealias SignInResponse = HashMap<String, String>
-
-class SignInRoutesTest {
+class SignUpRoutesTest {
     @Test
-    fun `Fail to sign in when user not exist`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        client.post("/sign-in") {
-            contentType(ContentType.Application.Json)
-            setBody(UserDTO(USERNAME, EMAIL, PASSWORD))
-        }.apply {
-            assertEquals(HttpStatusCode.NotFound, status)
-        }
-    }
-
-    @Test
-    fun `Fail to sign in when wrong password provided`() = testApplication {
+    fun `Fail to sign up when user with same username already exist`() = testApplication {
         environment {
             config = ApplicationConfig("application-test.conf")
         }
@@ -47,20 +26,21 @@ class SignInRoutesTest {
             }
         }
         startApplication()
-        ServiceFactory.authService.register(UserDTO(USERNAME, EMAIL, PASSWORD + "random"))
-        client.post("/sign-in") {
+        val user = UserDTO(USERNAME, EMAIL, PASSWORD)
+        ServiceFactory.authService.register(user)
+        client.post("/sign-up") {
             contentType(ContentType.Application.Json)
-            setBody(UserDTO(USERNAME, EMAIL, PASSWORD))
+            setBody(user)
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<ErrorResponse>().apply {
-                assertEquals(ExplicitException.WrongCredentials.message, message)
+                assertEquals(ExplicitException.DuplicateUser.message, message)
             }
         }
     }
 
     @Test
-    fun `Successfully sign in`() = testApplication {
+    fun `Successfully sign up`() = testApplication {
         environment {
             config = ApplicationConfig("application-test.conf")
         }
@@ -69,17 +49,11 @@ class SignInRoutesTest {
                 json()
             }
         }
-        startApplication()
-        val createdUser = ServiceFactory.authService.register(UserDTO(USERNAME, EMAIL, PASSWORD))
-        client.post("/sign-in") {
+        client.post("/sign-up") {
             contentType(ContentType.Application.Json)
             setBody(UserDTO(USERNAME, EMAIL, PASSWORD))
         }.apply {
-            assertEquals(HttpStatusCode.OK, status)
-            body<SignInResponse>().apply {
-                assertTrue { this["token"] != null && this["token"]!!.isNotBlank() }
-                assertEquals(this["uid"], createdUser.id!!)
-            }
+            assertEquals(HttpStatusCode.Created, status)
         }
     }
 
@@ -89,3 +63,5 @@ class SignInRoutesTest {
         const val EMAIL = "email"
     }
 }
+
+//FIXME add tests for requestValidationException handler in all tests in com.example.controller.*
