@@ -26,9 +26,8 @@ fun Route.member(memberService: MemberService) {
         val member = call.receive<MemberDTO>()
         val principal = call.principal<JWTPrincipal>()
         val currentUserId = principal?.payload?.getClaim("uid")?.asString()!!
-        val currentMemberWithUpdatedName = member.toMember(currentUserId)
 
-        memberService.updateMemberName(currentMemberWithUpdatedName.uid, currentMemberWithUpdatedName.name).also {
+        memberService.updateMemberName(currentUserId, member.name).also {
             call.respond(HttpStatusCode.OK, it)
         }
     }

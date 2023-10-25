@@ -1,9 +1,7 @@
 package com.example.controller.feature_member_manage
 
 import com.example.controller.util.JwtConfig
-import com.example.dao.RepositoryFactory
 import com.example.model.Member
-import com.example.model.User
 import com.example.model.UserDTO
 import com.example.service.ServiceFactory
 import io.ktor.client.request.*
@@ -32,10 +30,10 @@ class GetMemberRoutesTest {
         }
         startApplication()
         client.get("/member") {
-            val token = JwtConfig.createToken("user_id")
+            val token = JwtConfig.createToken(firstUserId)
             bearerAuth(token)
         }.apply {
-            assertEquals(HttpStatusCode.BadRequest, status)
+            assertEquals(HttpStatusCode.NotFound, status)
         }
     }
 
@@ -45,13 +43,17 @@ class GetMemberRoutesTest {
             config = ApplicationConfig("application-test.conf")
         }
         startApplication()
-        val registeredUser = ServiceFactory.authService.register(UserDTO("username","email","password"))
-        val token = JwtConfig.createToken(registeredUser.id!!)
+        val registeredUser = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
         ServiceFactory.memberService.addMember(Member(registeredUser.id!!, "memberName"))
         client.get("/member") {
+            val token = JwtConfig.createToken(registeredUser.id!!)
             bearerAuth(token)
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
         }
+    }
+
+    private companion object {
+        val firstUserId = UUID.randomUUID().toString()
     }
 }
