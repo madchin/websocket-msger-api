@@ -26,3 +26,12 @@
 ### Version *0.5.0*
 
 * Add websocket for chat communication
+
+### Version *0.6.0*
+
+* Configured Request Validation plugin
+* Configured Session plugin
+* Added password hashing
+* Added factory singletons for repos / services / configs / sockets
+* Added missing crud operations
+* Added tests for all http operations
