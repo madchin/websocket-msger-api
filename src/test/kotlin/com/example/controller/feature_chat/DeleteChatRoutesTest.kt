@@ -16,20 +16,10 @@ import kotlin.test.assertEquals
 class DeleteChatRoutesTest {
     @Test
     fun `Unauthorized - Fail to delete chat`() = testApplication {
-        val randomUUID = UUID.randomUUID().toString()
         environment {
             config = ApplicationConfig("application-test.conf")
         }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
-        client.post("/chat/$randomUUID/join-chat") {
-            contentType(ContentType.Application.Json)
-            setBody(ChatDTO(CHAT_TO_CREATE_NAME))
-        }.apply {
+        client.delete("/chat/$randomUUID").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
         }
     }
@@ -82,5 +72,6 @@ class DeleteChatRoutesTest {
         const val FIRST_USER_ID = "first_user_id"
         const val SECOND_USER_ID = "second_user_id"
         const val CHAT_TO_CREATE_NAME = "chatName"
+        val randomUUID = UUID.randomUUID().toString()
     }
 }

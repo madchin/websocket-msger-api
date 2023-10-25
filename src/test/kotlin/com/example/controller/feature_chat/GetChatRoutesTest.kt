@@ -18,23 +18,21 @@ import kotlin.test.assertEquals
 class GetChatRoutesTest {
     @Test
     fun `Unauthorized - fail to get chat`() = testApplication {
-        val randomUid = UUID.randomUUID().toString()
         environment {
             config = ApplicationConfig("application-test.conf")
         }
-        client.get("/chat/$randomUid").apply {
+        client.get("/chat/$randomUUID").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
         }
     }
 
     @Test
     fun `Authorized - Fail to get chat which not exists`() = testApplication {
-        val randomUid = UUID.randomUUID().toString()
         environment {
             config = ApplicationConfig("application-test.conf")
         }
         startApplication()
-        client.get("/chat/$randomUid") {
+        client.get("/chat/$randomUUID") {
             val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
         }.apply {
@@ -88,5 +86,6 @@ class GetChatRoutesTest {
     private companion object {
         const val FIRST_USER_ID = "first_user_id"
         const val SECOND_USER_ID = "second_user_id"
+        val randomUUID = UUID.randomUUID().toString()
     }
 }

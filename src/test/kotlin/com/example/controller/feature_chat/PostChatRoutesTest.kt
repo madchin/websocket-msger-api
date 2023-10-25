@@ -28,10 +28,7 @@ class PostChatRoutesTest {
                 json()
             }
         }
-        client.post("/chat") {
-            contentType(ContentType.Application.Json)
-            setBody(ChatDTO(CHAT_TO_CREATE_NAME))
-        }.apply {
+        client.post("/chat").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
         }
     }
@@ -96,7 +93,6 @@ class PostChatRoutesTest {
 
     @Test
     fun `Unauthorized - Fail to join chat`() = testApplication {
-        val randomUUID = UUID.randomUUID().toString()
         environment {
             config = ApplicationConfig("application-test.conf")
         }
@@ -109,7 +105,6 @@ class PostChatRoutesTest {
 
     @Test
     fun `Authorized - Fail to join chat which not exists`() = testApplication {
-        val randomUUID = UUID.randomUUID().toString()
         environment {
             config = ApplicationConfig("application-test.conf")
         }
@@ -155,5 +150,6 @@ class PostChatRoutesTest {
         const val FIRST_USER_ID = "first_user_id"
         const val SECOND_USER_ID = "second_user_id"
         const val CHAT_TO_CREATE_NAME = "chatName"
+        val randomUUID = UUID.randomUUID().toString()
     }
 }
