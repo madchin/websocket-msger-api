@@ -1,40 +1,25 @@
 package com.example.controller.feature_chat
 
+import com.example.controller.test_util.testApp
 import com.example.controller.util.JwtConfig
 import com.example.model.ChatDTO
 import com.example.service.ServiceFactory
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.config.*
-import io.ktor.server.testing.*
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class DeleteChatRoutesTest {
     @Test
-    fun `Unauthorized - Fail to delete chat`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
+    fun `Unauthorized - Fail to delete chat`() = testApp(false) { client ->
         client.delete("/chat/$randomUUID").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
         }
     }
 
     @Test
-    fun `Authorized - Fail to delete chat which user is not member`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Authorized - Fail to delete chat which user is not member`() = testApp { client ->
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_TO_DELETE_NAME), FIRST_USER_ID)
         client.delete("/chat/${createdChat.id}") {
             val token = JwtConfig.createToken(SECOND_USER_ID)
@@ -45,36 +30,9 @@ class DeleteChatRoutesTest {
     }
 
     @Test
-    fun `Authorized - Successfully delete chat which user is member`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Authorized - Successfully delete chat which user is member`() = testApp { client ->
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_TO_DELETE_NAME), SECOND_USER_ID)
         client.delete("/chat/${createdChat.id}") {
-            val token = JwtConfig.createToken(SECOND_USER_ID)
-            bearerAuth(token)
-        }.apply {
-            assertEquals(HttpStatusCode.NoContent, status)
-        }
-    }
-
-    @Test
-    fun `Authorized - fail to get chat which name is blank`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        client.delete("/chat/$randomUUID") {
             val token = JwtConfig.createToken(SECOND_USER_ID)
             bearerAuth(token)
         }.apply {

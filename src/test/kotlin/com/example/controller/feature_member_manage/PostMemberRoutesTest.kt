@@ -1,17 +1,14 @@
 package com.example.controller.feature_member_manage
 
+import com.example.controller.test_util.testApp
 import com.example.controller.util.JwtConfig
 import com.example.model.Member
 import com.example.model.MemberDTO
 import com.example.model.UserDTO
 import com.example.service.ServiceFactory
 import io.ktor.client.call.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.config.*
-import io.ktor.server.testing.*
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,27 +17,14 @@ import kotlin.test.assertTrue
 class PostMemberRoutesTest {
 
     @Test
-    fun `Unauthorized - fail to add member`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-
+    fun `Unauthorized - fail to add member`() = testApp(false) { client ->
         client.post("/member/add-member").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
         }
     }
 
     @Test
-    fun `Authorized - Successfully add member`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Authorized - Successfully add member`() = testApp { client ->
         val registeredUser = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
         client.post("/member/add-member") {
             val token = JwtConfig.createToken(registeredUser.id!!)
@@ -57,16 +41,7 @@ class PostMemberRoutesTest {
     }
 
     @Test
-    fun `Authorized - Fail to add member when user not exist`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Authorized - Fail to add member when user not exist`() = testApp { client ->
         client.post("/member/add-member") {
             val token = JwtConfig.createToken(firstUserId)
             bearerAuth(token)
