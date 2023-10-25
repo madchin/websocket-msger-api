@@ -35,12 +35,10 @@ class DeleteChatRoutesTest {
             }
         }
         startApplication()
-        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_TO_CREATE_NAME), FIRST_USER_ID)
+        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_TO_DELETE_NAME), FIRST_USER_ID)
         client.delete("/chat/${createdChat.id}") {
             val token = JwtConfig.createToken(SECOND_USER_ID)
             bearerAuth(token)
-            contentType(ContentType.Application.Json)
-            setBody(CHAT_TO_CREATE_NAME)
         }.apply {
             assertEquals(HttpStatusCode.Forbidden, status)
         }
@@ -57,12 +55,28 @@ class DeleteChatRoutesTest {
             }
         }
         startApplication()
-        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_TO_CREATE_NAME), SECOND_USER_ID)
+        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_TO_DELETE_NAME), SECOND_USER_ID)
         client.delete("/chat/${createdChat.id}") {
             val token = JwtConfig.createToken(SECOND_USER_ID)
             bearerAuth(token)
-            contentType(ContentType.Application.Json)
-            setBody(CHAT_TO_CREATE_NAME)
+        }.apply {
+            assertEquals(HttpStatusCode.NoContent, status)
+        }
+    }
+
+    @Test
+    fun `Authorized - fail to get chat which name is blank`() = testApplication {
+        environment {
+            config = ApplicationConfig("application-test.conf")
+        }
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+        client.delete("/chat/$randomUUID") {
+            val token = JwtConfig.createToken(SECOND_USER_ID)
+            bearerAuth(token)
         }.apply {
             assertEquals(HttpStatusCode.NoContent, status)
         }
@@ -71,7 +85,7 @@ class DeleteChatRoutesTest {
     private companion object {
         const val FIRST_USER_ID = "first_user_id"
         const val SECOND_USER_ID = "second_user_id"
-        const val CHAT_TO_CREATE_NAME = "chatName"
+        const val CHAT_TO_DELETE_NAME = "chatName"
         val randomUUID = UUID.randomUUID().toString()
     }
 }

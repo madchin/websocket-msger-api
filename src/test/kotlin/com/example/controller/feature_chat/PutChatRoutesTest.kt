@@ -1,9 +1,11 @@
 package com.example.controller.feature_chat
 
 import com.example.controller.util.JwtConfig
+import com.example.controller.util.ValidationReason
 import com.example.model.Chat
 import com.example.model.ChatDTO
 import com.example.service.ServiceFactory
+import com.example.util.EntityFieldLength
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -27,12 +29,12 @@ class PutChatRoutesTest {
             }
         }
         startApplication()
-        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_NAME), FIRST_USER_ID)
+        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatToCreateName), FIRST_USER_ID)
         client.put("/chat/${createdChat.id}/change-name") {
             val token = JwtConfig.createToken(SECOND_USER_ID)
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(ChatDTO("newName"))
+            setBody(ChatDTO(chatToUpdateName))
         }.apply {
             assertEquals(HttpStatusCode.Forbidden, status)
         }
@@ -49,17 +51,17 @@ class PutChatRoutesTest {
             }
         }
         startApplication()
-        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_NAME), FIRST_USER_ID)
+        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatToCreateName), FIRST_USER_ID)
         ServiceFactory.chatService.joinChat(createdChat.id!!, SECOND_USER_ID)
         client.put("/chat/${createdChat.id}/change-name") {
             val token = JwtConfig.createToken(SECOND_USER_ID)
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(ChatDTO("newName"))
+            setBody(ChatDTO(chatToUpdateName))
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
             body<Chat>().apply {
-                assertEquals("newName", name)
+                assertEquals(chatToUpdateName, name)
             }
         }
     }
@@ -75,16 +77,16 @@ class PutChatRoutesTest {
             }
         }
         startApplication()
-        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_NAME), FIRST_USER_ID)
+        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatToCreateName), FIRST_USER_ID)
         client.put("/chat/${createdChat.id}/change-name") {
             val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(ChatDTO("newName"))
+            setBody(ChatDTO(chatToUpdateName))
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
             body<Chat>().apply {
-                assertEquals("newName", name)
+                assertEquals(chatToUpdateName, name)
             }
         }
     }
@@ -100,7 +102,7 @@ class PutChatRoutesTest {
             }
         }
         startApplication()
-        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_NAME), FIRST_USER_ID)
+        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatToCreateName), FIRST_USER_ID)
         client.put("/chat/${createdChat.id}/change-name").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
         }
@@ -121,16 +123,106 @@ class PutChatRoutesTest {
             val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(ChatDTO("newName"))
+            setBody(ChatDTO(chatToUpdateName))
         }.apply {
             assertEquals(HttpStatusCode.NotFound, status)
+        }
+    }
+
+    @Test
+    fun `Authorized - Fail to update chat name for chat which name is blank`() = testApplication {
+        environment {
+            config = ApplicationConfig("application-test.conf")
+        }
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+        startApplication()
+        client.put("/chat/$randomUUID/change-name") {
+            val token = JwtConfig.createToken(FIRST_USER_ID)
+            bearerAuth(token)
+            contentType(ContentType.Application.Json)
+            setBody(ChatDTO(CHAT_NAME_BLANK))
+        }.apply {
+            assertEquals(HttpStatusCode.BadRequest, status)
+            body<String>().apply {
+                assertEquals(this, ValidationReason.blank(ChatDTO::name.name))
+            }
+        }
+    }
+
+    @Test
+    fun `Authorized - Fail to update chat name for chat which name violates min chat name length`() = testApplication {
+        environment {
+            config = ApplicationConfig("application-test.conf")
+        }
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+        startApplication()
+        client.put("/chat/$randomUUID/change-name") {
+            val token = JwtConfig.createToken(FIRST_USER_ID)
+            bearerAuth(token)
+            contentType(ContentType.Application.Json)
+            setBody(ChatDTO(chatNameMinLengthViolation))
+        }.apply {
+            assertEquals(HttpStatusCode.BadRequest, status)
+            body<String>().apply {
+                assertEquals(
+                    this, ValidationReason.length(
+                        ChatDTO::name.name,
+                        chatNameMinLengthViolation.length,
+                        EntityFieldLength.Chats.Name.minLength,
+                        EntityFieldLength.Chats.Name.maxLength
+                    )
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `Authorized - Fail to update chat name for chat which name violates max chat name length`() = testApplication {
+        environment {
+            config = ApplicationConfig("application-test.conf")
+        }
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+        startApplication()
+        client.put("/chat/$randomUUID/change-name") {
+            val token = JwtConfig.createToken(FIRST_USER_ID)
+            bearerAuth(token)
+            contentType(ContentType.Application.Json)
+            setBody(ChatDTO(chatNameMaxLengthViolation))
+        }.apply {
+            assertEquals(HttpStatusCode.BadRequest, status)
+            body<String>().apply {
+                assertEquals(
+                    this, ValidationReason.length(
+                        ChatDTO::name.name,
+                        chatNameMaxLengthViolation.length,
+                        EntityFieldLength.Chats.Name.minLength,
+                        EntityFieldLength.Chats.Name.maxLength
+                    )
+                )
+            }
         }
     }
 
     private companion object {
         const val FIRST_USER_ID = "first_user_id"
         const val SECOND_USER_ID = "second_user_id"
-        const val CHAT_NAME = "chatName"
+        const val CHAT_NAME_BLANK = "  "
+        val chatToCreateName = "c".repeat(EntityFieldLength.Chats.Name.minLength + 1)
+        val chatToUpdateName = "b".repeat(EntityFieldLength.Chats.Name.minLength + 1)
+        val chatNameMinLengthViolation = "c".repeat(EntityFieldLength.Chats.Name.minLength - 1)
+        val chatNameMaxLengthViolation = "c".repeat(EntityFieldLength.Chats.Name.maxLength + 1)
         val randomUUID = UUID.randomUUID().toString()
     }
 }

@@ -13,6 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class GetMemberRoutesTest {
+
     @Test
     fun `Unauthorized - fail to get member`() = testApplication {
         environment {
