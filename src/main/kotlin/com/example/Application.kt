@@ -41,6 +41,7 @@ fun Application.module() {
     configureRouting(
         ServiceFactory.chatService,
         ServiceFactory.authService,
+        ServiceFactory.memberService,
         SocketFactory.chatMemberHandler,
         SocketFactory.chatRoomHandler
     )

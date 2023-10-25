@@ -13,16 +13,17 @@ class AuthServiceImpl(private val userRepository: UserRepository) : AuthService 
             throw ExplicitException.DuplicateUser
         }
     }
+
     override suspend fun login(userDto: UserDTO): User =
         userRepository.readUser(userDto.username).getOrThrow().also {
             PasswordHasher.checkPassword(userDto.password, it.password)
         }
 
-    override suspend fun register(userDto: UserDTO) {
+    override suspend fun register(userDto: UserDTO): User {
         ensureUserIsUnique(userDto.username)
         val hashedPassword = PasswordHasher.hashPassword(userDto.password)
         val hashedUserDto = userDto.copy(password = hashedPassword)
 
-        userRepository.createUser(hashedUserDto.toUser()).getOrThrow()
+        return userRepository.createUser(hashedUserDto.toUser()).getOrThrow()
     }
 }

@@ -1,7 +1,9 @@
-package com.example.controller.feature_chat
+package com.example.controller.feature_member_manage
 
 import com.example.controller.util.JwtConfig
-import com.example.model.ChatDTO
+import com.example.model.Member
+import com.example.model.MemberDTO
+import com.example.model.UserDTO
 import com.example.service.ServiceFactory
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -13,19 +15,19 @@ import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class DeleteChatRoutesTest {
+class DeleteMemberRoutesTest {
     @Test
-    fun `Unauthorized - Fail to delete chat`() = testApplication {
+    fun `Unauthorized - fail to delete member`() = testApplication {
         environment {
             config = ApplicationConfig("application-test.conf")
         }
-        client.delete("/chat/$randomUUID").apply {
+        client.delete("/member").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
         }
     }
 
     @Test
-    fun `Authorized - Fail to delete chat which user is not member`() = testApplication {
+    fun `Authorized - Successfully delete member`() = testApplication {
         environment {
             config = ApplicationConfig("application-test.conf")
         }
@@ -35,43 +37,41 @@ class DeleteChatRoutesTest {
             }
         }
         startApplication()
-        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_TO_CREATE_NAME), FIRST_USER_ID)
-        client.delete("/chat/${createdChat.id}") {
-            val token = JwtConfig.createToken(SECOND_USER_ID)
+        val registeredUser = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        ServiceFactory.memberService.addMember(Member(registeredUser.id!!, MEMBER_NAME))
+        client.delete("/member") {
+            val token = JwtConfig.createToken(registeredUser.id!!)
             bearerAuth(token)
             contentType(ContentType.Application.Json)
-            setBody(CHAT_TO_CREATE_NAME)
-        }.apply {
-            assertEquals(HttpStatusCode.Forbidden, status)
-        }
-    }
-
-    @Test
-    fun `Authorized - Successfully delete chat which user is member`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
-        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_TO_CREATE_NAME), SECOND_USER_ID)
-        client.delete("/chat/${createdChat.id}") {
-            val token = JwtConfig.createToken(SECOND_USER_ID)
-            bearerAuth(token)
-            contentType(ContentType.Application.Json)
-            setBody(CHAT_TO_CREATE_NAME)
+            setBody(MemberDTO(MEMBER_NAME))
         }.apply {
             assertEquals(HttpStatusCode.NoContent, status)
         }
     }
 
+    @Test
+    fun `Authorized - Fail to delete member when member not exist`() = testApplication {
+        environment {
+            config = ApplicationConfig("application-test.conf")
+        }
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+        startApplication()
+        client.delete("/member") {
+            val token = JwtConfig.createToken(firstUserId)
+            bearerAuth(token)
+            contentType(ContentType.Application.Json)
+            setBody(MemberDTO(MEMBER_NAME))
+        }.apply {
+            assertEquals(HttpStatusCode.NotFound, status)
+        }
+    }
+
     private companion object {
-        const val FIRST_USER_ID = "first_user_id"
-        const val SECOND_USER_ID = "second_user_id"
-        const val CHAT_TO_CREATE_NAME = "chatName"
-        val randomUUID = UUID.randomUUID().toString()
+        val firstUserId = UUID.randomUUID().toString()
+        const val MEMBER_NAME = "member_name"
     }
 }

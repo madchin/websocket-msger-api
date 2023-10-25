@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 
 class PutChatRoutesTest {
     @Test
-    fun `Authorized - Fail to update chat name for chat which we are not member`() = testApplication {
+    fun `Authorized - Fail to update chat name for chat which user is not member`() = testApplication {
         environment {
             config = ApplicationConfig("application-test.conf")
         }
@@ -101,17 +101,13 @@ class PutChatRoutesTest {
         }
         startApplication()
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO(CHAT_NAME), FIRST_USER_ID)
-        client.put("/chat/${createdChat.id}/change-name") {
-            contentType(ContentType.Application.Json)
-            setBody(ChatDTO("newName"))
-        }.apply {
+        client.put("/chat/${createdChat.id}/change-name").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
         }
     }
 
     @Test
     fun `Authorized - Fail to update chat name for chat which not exists`() = testApplication {
-        val randomUUID = UUID.randomUUID().toString()
         environment {
             config = ApplicationConfig("application-test.conf")
         }
@@ -135,5 +131,6 @@ class PutChatRoutesTest {
         const val FIRST_USER_ID = "first_user_id"
         const val SECOND_USER_ID = "second_user_id"
         const val CHAT_NAME = "chatName"
+        val randomUUID = UUID.randomUUID().toString()
     }
 }
