@@ -25,7 +25,7 @@ object ValidationReason {
 fun RequestValidationConfig.validateChat() {
     validate<ChatDTO> { body ->
         when {
-            body.name.isBlank() -> ValidationResult.Invalid(ValidationReason.blank("name"))
+            body.name.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(ChatDTO::name.name))
             body.name.length > EntityFieldLength.Chats.Name.maxLength || body.name.length < EntityFieldLength.Chats.Name.minLength -> {
                 ValidationResult.Invalid(
                     ValidationReason.length(
@@ -45,8 +45,8 @@ fun RequestValidationConfig.validateChat() {
 fun RequestValidationConfig.validateMessage() {
     validate<Message> { body ->
         when {
-            body.chatId.isBlank() -> ValidationResult.Invalid(ValidationReason.blank("uid"))
-            body.sender.isBlank() -> ValidationResult.Invalid(ValidationReason.blank("name"))
+            body.chatId.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(Message::chatId.name))
+            body.sender.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(Message::sender.name))
             body.sender.length > EntityFieldLength.Messages.Sender.maxLength || body.sender.length < EntityFieldLength.Messages.Sender.minLength -> {
                 ValidationResult.Invalid(
                     ValidationReason.length(
@@ -58,7 +58,7 @@ fun RequestValidationConfig.validateMessage() {
                 )
             }
 
-            body.content.isBlank() -> ValidationResult.Invalid(ValidationReason.blank("content"))
+            body.content.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(Message::content.name))
             else -> ValidationResult.Valid
         }
     }
@@ -67,9 +67,9 @@ fun RequestValidationConfig.validateMessage() {
 fun RequestValidationConfig.validateUser() {
     validate<UserDTO> { body ->
         when {
-            body.username.isBlank() -> ValidationResult.Invalid(ValidationReason.blank("username"))
-            body.email.isBlank() -> ValidationResult.Invalid(ValidationReason.blank("email"))
-            body.password.isBlank() -> ValidationResult.Invalid(ValidationReason.blank("password"))
+            body.username.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(UserDTO::username.name))
+            body.email.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(UserDTO::email.name))
+            body.password.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(UserDTO::password.name))
             body.password.contains(body.username) -> ValidationResult.Invalid(ValidationReason.passwordContainUsername)
             body.username.length > EntityFieldLength.Users.Username.maxLength || body.username.length < EntityFieldLength.Users.Username.minLength -> {
                 ValidationResult.Invalid(
