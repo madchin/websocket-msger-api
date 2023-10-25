@@ -1,5 +1,6 @@
 package com.example.controller.feature_sign_in_up
 
+import com.example.controller.test_util.testApp
 import com.example.controller.util.ValidationReason
 import com.example.model.UserDTO
 import com.example.service.ServiceFactory
@@ -7,12 +8,8 @@ import com.example.util.EntityFieldLength
 import com.example.util.ErrorResponse
 import com.example.util.ExplicitException
 import io.ktor.client.call.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.config.*
-import io.ktor.server.testing.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -22,15 +19,7 @@ typealias SignInResponse = HashMap<String, String>
 
 class SignInRoutesTest {
     @Test
-    fun `Fail to sign in when user not exist`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
+    fun `Fail to sign in when user not exist`() = testApp(false) { client ->
         val (username, email, password) = generateCredentials()
         client.post("/sign-in") {
             contentType(ContentType.Application.Json)
@@ -41,17 +30,8 @@ class SignInRoutesTest {
     }
 
     @Test
-    fun `Fail to sign in when wrong password provided`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
+    fun `Fail to sign in when wrong password provided`() = testApp { client ->
         val (username, email, password) = generateCredentials()
-        startApplication()
         ServiceFactory.authService.register(UserDTO(username, email, password + "random"))
         client.post("/sign-in") {
             contentType(ContentType.Application.Json)
@@ -65,16 +45,7 @@ class SignInRoutesTest {
     }
 
     @Test
-    fun `Successfully sign in`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Successfully sign in`() = testApp { client ->
         val (username, email, password) = generateCredentials()
         val user = UserDTO(username, email, password)
         val createdUser = ServiceFactory.authService.register(user)
@@ -91,16 +62,7 @@ class SignInRoutesTest {
     }
 
     @Test
-    fun `Fail to sign in when username is blank`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Fail to sign in when username is blank`() = testApp(false) { client ->
         val (_, email, password) = generateCredentials()
         val user = UserDTO(USERNAME_BLANK, email, password)
         client.post("/sign-in") {
@@ -115,16 +77,7 @@ class SignInRoutesTest {
     }
 
     @Test
-    fun `Fail to sign in when password is blank`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Fail to sign in when password is blank`() = testApp(false) { client ->
         val (username, email, _) = generateCredentials()
         val user = UserDTO(username, email, PASSWORD_BLANK)
         client.post("/sign-in") {
@@ -139,16 +92,7 @@ class SignInRoutesTest {
     }
 
     @Test
-    fun `Fail to sign in when email is blank`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Fail to sign in when email is blank`() = testApp(false) { client ->
         val (username, _, password) = generateCredentials()
         val user = UserDTO(username, EMAIL_BLANK, password)
         client.post("/sign-in") {
@@ -163,16 +107,7 @@ class SignInRoutesTest {
     }
 
     @Test
-    fun `Fail to sign in when username violates min length`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Fail to sign in when username violates min length`() = testApp(false) { client ->
         val (_, email, password) = generateCredentials()
         val user = UserDTO(usernameMinLengthViolation, email, password)
         client.post("/sign-in") {
@@ -194,16 +129,7 @@ class SignInRoutesTest {
     }
 
     @Test
-    fun `Fail to sign in when email violates min length`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Fail to sign in when email violates min length`() = testApp(false) { client ->
         val (username, _, password) = generateCredentials()
         val user = UserDTO(username, emailMinLengthViolation, password)
         client.post("/sign-in") {
@@ -225,16 +151,7 @@ class SignInRoutesTest {
     }
 
     @Test
-    fun `Fail to sign in when password violates min length`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Fail to sign in when password violates min length`() = testApp(false) { client ->
         val (username, email, _) = generateCredentials()
         val user = UserDTO(username, email, passwordMinLengthViolation)
         client.post("/sign-in") {
@@ -256,16 +173,7 @@ class SignInRoutesTest {
     }
 
     @Test
-    fun `Fail to sign in when username violates max length`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Fail to sign in when username violates max length`() = testApp(false) { client ->
         val (_, email, password) = generateCredentials()
         val user = UserDTO(usernameMaxLengthViolation, email, password)
         client.post("/sign-in") {
@@ -287,16 +195,7 @@ class SignInRoutesTest {
     }
 
     @Test
-    fun `Fail to sign in when password violates max length`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Fail to sign in when password violates max length`() = testApp(false) { client ->
         val (username, email, _) = generateCredentials()
         val user = UserDTO(username, email, passwordMaxLengthViolation)
         client.post("/sign-in") {
@@ -318,16 +217,7 @@ class SignInRoutesTest {
     }
 
     @Test
-    fun `Fail to sign in when email violates max length`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Fail to sign in when email violates max length`() = testApp(false) { client ->
         val (username, _, password) = generateCredentials()
         val user = UserDTO(username, emailMaxLengthViolation, password)
         client.post("/sign-in") {
@@ -347,6 +237,7 @@ class SignInRoutesTest {
             }
         }
     }
+
 
     private companion object {
         var usernameCounter = 1

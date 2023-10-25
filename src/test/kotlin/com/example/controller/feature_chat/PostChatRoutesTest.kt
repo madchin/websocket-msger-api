@@ -1,5 +1,6 @@
 package com.example.controller.feature_chat
 
+import com.example.controller.test_util.testApp
 import com.example.controller.util.JwtConfig
 import com.example.controller.util.ValidationReason
 import com.example.model.Chat
@@ -7,12 +8,8 @@ import com.example.model.ChatDTO
 import com.example.service.ServiceFactory
 import com.example.util.EntityFieldLength
 import io.ktor.client.call.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.config.*
-import io.ktor.server.testing.*
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,31 +18,14 @@ import kotlin.test.assertTrue
 
 class PostChatRoutesTest {
     @Test
-    fun `Unauthorized - Fail to create chat`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
+    fun `Unauthorized - Fail to create chat`() = testApp(false) { client ->
         client.post("/chat").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
         }
     }
 
     @Test
-    fun `Authorized - Successfully create chat`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Authorized - Successfully create chat`() = testApp { client ->
         client.post("/chat") {
             val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
@@ -64,16 +44,7 @@ class PostChatRoutesTest {
     }
 
     @Test
-    fun `Authorized - Successfully create chat with name which already exists in database`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Authorized - Successfully create chat with name which already exists in database`() = testApp { client ->
         val chatToCreate = ChatDTO(chatToCreateName)
         val token = JwtConfig.createToken(FIRST_USER_ID)
         ServiceFactory.chatService.createChat(chatToCreate, FIRST_USER_ID)
@@ -94,23 +65,14 @@ class PostChatRoutesTest {
     }
 
     @Test
-    fun `Unauthorized - Fail to join chat`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-
-        startApplication()
+    fun `Unauthorized - Fail to join chat`() = testApp(false) { client ->
         client.post("/chat/$randomUUID/join-chat").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
         }
     }
 
     @Test
-    fun `Authorized - Fail to join chat which not exists`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        startApplication()
+    fun `Authorized - Fail to join chat which not exists`() = testApp { client ->
         client.post("/chat/$randomUUID/join-chat") {
             val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
@@ -120,16 +82,7 @@ class PostChatRoutesTest {
     }
 
     @Test
-    fun `Authorized - Successfully join chat`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Authorized - Successfully join chat`() = testApp { client ->
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatToCreateName), FIRST_USER_ID)
         client.post("/chat/${createdChat.id}/join-chat") {
             val token = JwtConfig.createToken(SECOND_USER_ID)
@@ -149,16 +102,7 @@ class PostChatRoutesTest {
     }
 
     @Test
-    fun `Authorized - Fail to create chat which chat name violates min chat name length`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Authorized - Fail to create chat which chat name violates min chat name length`() = testApp { client ->
         client.post("/chat") {
             val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
@@ -180,16 +124,7 @@ class PostChatRoutesTest {
     }
 
     @Test
-    fun `Authorized - Fail to create chat which chat name violates max chat name length`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Authorized - Fail to create chat which chat name violates max chat name length`() = testApp { client ->
         client.post("/chat") {
             val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
@@ -211,16 +146,7 @@ class PostChatRoutesTest {
     }
 
     @Test
-    fun `Authorized - Fail to create chat which chat name is blank`() = testApplication {
-        environment {
-            config = ApplicationConfig("application-test.conf")
-        }
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
-        startApplication()
+    fun `Authorized - Fail to create chat which chat name is blank`() = testApp { client ->
         client.post("/chat") {
             val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
