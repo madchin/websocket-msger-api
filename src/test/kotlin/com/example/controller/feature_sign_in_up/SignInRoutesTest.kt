@@ -17,6 +17,7 @@ import kotlin.test.assertTrue
 
 typealias SignInResponse = HashMap<String, String>
 
+
 class SignInRoutesTest {
     @Test
     fun `Fail to sign in when user not exist`() = testApplication {
@@ -28,9 +29,10 @@ class SignInRoutesTest {
                 json()
             }
         }
+        val (username, email, password) = generateCredentials()
         client.post("/sign-in") {
             contentType(ContentType.Application.Json)
-            setBody(UserDTO(USERNAME, EMAIL, PASSWORD))
+            setBody(UserDTO(username, email, password))
         }.apply {
             assertEquals(HttpStatusCode.NotFound, status)
         }
@@ -46,11 +48,12 @@ class SignInRoutesTest {
                 json()
             }
         }
+        val (username, email, password) = generateCredentials()
         startApplication()
-        ServiceFactory.authService.register(UserDTO(USERNAME, EMAIL, PASSWORD + "random"))
+        ServiceFactory.authService.register(UserDTO(username, email, password + "random"))
         client.post("/sign-in") {
             contentType(ContentType.Application.Json)
-            setBody(UserDTO(USERNAME, EMAIL, PASSWORD))
+            setBody(UserDTO(username, email, password))
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<ErrorResponse>().apply {
@@ -70,10 +73,12 @@ class SignInRoutesTest {
             }
         }
         startApplication()
-        val createdUser = ServiceFactory.authService.register(UserDTO(USERNAME, EMAIL, PASSWORD))
+        val (username, email, password) = generateCredentials()
+        val user = UserDTO(username, email, password)
+        val createdUser = ServiceFactory.authService.register(user)
         client.post("/sign-in") {
             contentType(ContentType.Application.Json)
-            setBody(UserDTO(USERNAME, EMAIL, PASSWORD))
+            setBody(user)
         }.apply {
             assertEquals(HttpStatusCode.OK, status)
             body<SignInResponse>().apply {
@@ -84,8 +89,19 @@ class SignInRoutesTest {
     }
 
     private companion object {
-        const val USERNAME = "username"
-        const val PASSWORD = "password"
-        const val EMAIL = "email"
+        var usernameCounter = 1
+            get() = field++
+            private set
+        var passwordCounter = 1
+            get() = field++
+            private set
+        var emailCounter: Int = 1
+            get() = field++
+            private set
+
+        fun generateUsername() = "username$usernameCounter"
+        fun generatePassword() = "password$passwordCounter"
+        fun generateEmail() = "email$emailCounter"
+        fun generateCredentials() = Triple(generateUsername(), generatePassword(), generateEmail())
     }
 }

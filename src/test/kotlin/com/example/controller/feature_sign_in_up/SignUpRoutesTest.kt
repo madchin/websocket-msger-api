@@ -26,7 +26,9 @@ class SignUpRoutesTest {
             }
         }
         startApplication()
-        val user = UserDTO(USERNAME, EMAIL, PASSWORD)
+        val (username, email, password) = generateCredentials()
+        val user = UserDTO(username, email, password)
+
         ServiceFactory.authService.register(user)
         client.post("/sign-up") {
             contentType(ContentType.Application.Json)
@@ -49,18 +51,30 @@ class SignUpRoutesTest {
                 json()
             }
         }
+        val (username, email, password) = generateCredentials()
         client.post("/sign-up") {
             contentType(ContentType.Application.Json)
-            setBody(UserDTO(USERNAME, EMAIL, PASSWORD))
+            setBody(UserDTO(username, email, password))
         }.apply {
             assertEquals(HttpStatusCode.Created, status)
         }
     }
 
     private companion object {
-        const val USERNAME = "username"
-        const val PASSWORD = "password"
-        const val EMAIL = "email"
+        var usernameCounter = 1
+            get() = field++
+            private set
+        var passwordCounter = 1
+            get() = field++
+            private set
+        var emailCounter: Int = 1
+            get() = field++
+            private set
+
+        fun generateUsername() = "username$usernameCounter"
+        fun generatePassword() = "password$passwordCounter"
+        fun generateEmail() = "email$emailCounter"
+        fun generateCredentials() = Triple(generateUsername(), generatePassword(), generateEmail())
     }
 }
 
