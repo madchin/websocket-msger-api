@@ -5,7 +5,10 @@ import io.ktor.websocket.*
 
 interface ChatRoomSocketHandler {
     val chatMembers: MutableSet<ChatMember>
-    suspend fun broadcastMessage(frame: Frame)
-    suspend fun onReceiveMessage(session: DefaultWebSocketSession, broadcastMessage: suspend (Frame) -> Unit)
-    suspend fun onJoin(chatMember: ChatMember)
+
+    fun onJoin(chatMember: ChatMember)
+
+    suspend fun broadcastMessage(chatId: String, frame: Frame)
+
+    fun onLeave(chatMember: ChatMember)
 }

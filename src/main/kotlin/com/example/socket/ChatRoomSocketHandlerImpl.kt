@@ -1,7 +1,7 @@
 package com.example.socket
 
 import com.example.model.ChatMember
-import com.example.model.Message
+import com.example.model.MessageDTO
 import com.example.service.ChatService
 import io.ktor.websocket.*
 import kotlinx.serialization.encodeToString
@@ -13,10 +13,14 @@ class ChatRoomSocketHandlerImpl(
 ) : ChatRoomSocketHandler {
     override val chatMembers: MutableSet<ChatMember> = Collections.synchronizedSet(LinkedHashSet())
 
-    override suspend fun broadcastMessage(frame: Frame) {
+    override fun onJoin(chatMember: ChatMember) {
+        chatMembers.add(chatMember)
+    }
+
+    override suspend fun broadcastMessage(chatId: String, frame: Frame) {
         if (frame is Frame.Text) {
-            val decodedMessage: Message = Json.decodeFromString(frame.readText())
-            chatService.sendMessage(decodedMessage)
+            val decodedMessage: MessageDTO = Json.decodeFromString(frame.readText())
+            chatService.sendMessage(decodedMessage.toMessage(chatId))
             val encodedMessage = Json.encodeToString(decodedMessage)
             chatMembers
                 .filter { it.member.uid != decodedMessage.sender }
@@ -26,13 +30,7 @@ class ChatRoomSocketHandlerImpl(
         }
     }
 
-    override suspend fun onReceiveMessage(session: DefaultWebSocketSession, broadcastMessage: suspend (Frame) -> Unit) {
-        for (frame in session.incoming) {
-            broadcastMessage(frame)
-        }
-    }
-
-    override suspend fun onJoin(chatMember: ChatMember) {
-        chatMembers.add(chatMember)
+    override fun onLeave(chatMember: ChatMember) {
+        chatMembers.remove(chatMember)
     }
 }

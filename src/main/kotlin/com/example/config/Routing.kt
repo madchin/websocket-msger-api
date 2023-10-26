@@ -6,7 +6,6 @@ import com.example.controller.feature_sign_in_up.signInUp
 import com.example.service.AuthService
 import com.example.service.ChatService
 import com.example.service.MemberService
-import com.example.socket.ChatMemberSocketHandler
 import com.example.socket.ChatRoomSocketHandler
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -16,12 +15,11 @@ fun Application.configureRouting(
     chatService: ChatService,
     authService: AuthService,
     memberService: MemberService,
-    chatMemberSocketHandler: ChatMemberSocketHandler,
     chatRoomSocketHandler: ChatRoomSocketHandler
 ) {
     routing {
         authenticate("auth-jwt") {
-            chat(chatService, chatMemberSocketHandler, chatRoomSocketHandler)
+            chat(chatService, chatRoomSocketHandler)
             member(memberService)
         }
         signInUp(authService)
