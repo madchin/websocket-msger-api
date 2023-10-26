@@ -1,8 +1,9 @@
 package com.example.controller.feature_chat
 
 import com.example.model.ChatDTO
+import com.example.model.ChatMember
+import com.example.model.Member
 import com.example.service.ChatService
-import com.example.socket.ChatMemberSocketHandler
 import com.example.socket.ChatRoomSocketHandler
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -16,7 +17,6 @@ import io.ktor.server.websocket.*
 
 fun Route.chat(
     chatService: ChatService,
-    chatMemberSocketHandler: ChatMemberSocketHandler,
     chatRoomSocketHandler: ChatRoomSocketHandler
 ) {
     get("/chat/{id}") {
@@ -64,15 +64,28 @@ fun Route.chat(
         val principal = call.principal<JWTPrincipal>()
         val userId = principal?.payload?.getClaim("uid")?.asString()!!
 
-        chatService.deleteChat(chatId,userId).also {
+        chatService.deleteChat(chatId, userId).also {
             call.respond(HttpStatusCode.NoContent)
         }
     }
-    webSocket("/chat/{id}") { // websocketSession
+    webSocket("/chat/socket/{id}") { // websocketSession
         val chatId = call.parameters.getOrFail("id")
-        val memberId = call.request.queryParameters.getOrFail("member-id")
+        val memberName = call.request.queryParameters.getOrFail("member-name")
+        val principal = call.principal<JWTPrincipal>()
+        val userId = principal?.payload?.getClaim("uid")?.asString()!!
         val memberSession = this
-        chatMemberSocketHandler.joinChat(chatId, memberId, memberSession, chatRoomSocketHandler::onJoin)
-        chatRoomSocketHandler.onReceiveMessage(memberSession, chatRoomSocketHandler::broadcastMessage)
+        val chatMember = ChatMember(memberSession, Member(userId, memberName))
+
+        try {
+            chatRoomSocketHandler.onJoin(chatMember)
+            for (frame in incoming) {
+                chatRoomSocketHandler.broadcastMessage(chatId, frame)
+            }
+        } catch (e: Exception) {
+            chatRoomSocketHandler.onLeave(chatMember)
+        } finally {
+            chatRoomSocketHandler.onLeave(chatMember)
+        }
+
     }
 }
