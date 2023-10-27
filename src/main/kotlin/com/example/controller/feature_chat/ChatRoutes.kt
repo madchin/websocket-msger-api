@@ -1,8 +1,6 @@
 package com.example.controller.feature_chat
 
 import com.example.model.ChatDTO
-import com.example.model.ChatMember
-import com.example.model.Member
 import com.example.service.ChatService
 import com.example.socket.ChatRoomSocketHandler
 import io.ktor.http.*
@@ -68,23 +66,23 @@ fun Route.chat(
             call.respond(HttpStatusCode.NoContent)
         }
     }
-    webSocket("/chat/socket/{id}") { // websocketSession
+
+    webSocket("/chat/socket/{id}") {
         val chatId = call.parameters.getOrFail("id")
-        val memberName = call.request.queryParameters.getOrFail("member-name")
         val principal = call.principal<JWTPrincipal>()
         val userId = principal?.payload?.getClaim("uid")?.asString()!!
         val memberSession = this
-        val chatMember = ChatMember(memberSession, Member(userId, memberName))
 
         try {
-            chatRoomSocketHandler.onJoin(chatMember)
+            chatRoomSocketHandler.onJoin(memberSession, userId, chatId)
             for (frame in incoming) {
                 chatRoomSocketHandler.broadcastMessage(chatId, frame)
             }
         } catch (e: Exception) {
-            chatRoomSocketHandler.onLeave(chatMember)
+            chatRoomSocketHandler.onLeave(memberSession, userId)
+            throw e
         } finally {
-            chatRoomSocketHandler.onLeave(chatMember)
+            chatRoomSocketHandler.onLeave(memberSession, userId)
         }
 
     }

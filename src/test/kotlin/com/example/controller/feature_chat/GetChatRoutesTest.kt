@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 
 class GetChatRoutesTest {
     @Test
-    fun `Unauthorized - fail to get chat`() = testApp(false) {client ->
+    fun `Unauthorized - fail to get chat`() = testApp(false) { client ->
         client.get("/chat/$randomUUID").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
         }
@@ -45,7 +45,7 @@ class GetChatRoutesTest {
     }
 
     @Test
-    fun `Authorized - Fail to get chat which user is not member`() = testApp {client ->
+    fun `Authorized - Fail to get chat which user is not member`() = testApp { client ->
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO("example"), FIRST_USER_ID)
         client.get("/chat/${createdChat.id}") {
             val token = JwtConfig.createToken(SECOND_USER_ID)

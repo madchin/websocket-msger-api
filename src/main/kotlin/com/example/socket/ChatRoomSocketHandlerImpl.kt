@@ -31,10 +31,6 @@ class ChatRoomSocketHandlerImpl(
         }
         val chatMember = ChatMember(memberSession, member)
         chatMembers.add(chatMember)
-
-        println("chat member joining in onJoin $chatMember")
-
-        println("chat members in onJoin ${chatMembers.size}")
     }
 
 

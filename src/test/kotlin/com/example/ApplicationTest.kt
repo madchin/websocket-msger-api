@@ -29,7 +29,7 @@ fun Application.module() {
         RepositoryFactory.memberRepository,
         RepositoryFactory.userRepository
     )
-    SocketFactory.init(ServiceFactory.chatService)
+    SocketFactory.init(ServiceFactory.chatService, ServiceFactory.memberService)
     JwtConfig.init(environment)
     configureHTTP()
     configureSerialization()
