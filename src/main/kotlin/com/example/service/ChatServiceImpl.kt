@@ -35,6 +35,9 @@ class ChatServiceImpl(
             ensureUserIsChatMember(this, userId)
         }
 
+    override suspend fun findChat(chatId: String): Chat =
+        chatRepository.readChat(chatId = chatId).getOrThrow()
+
     override suspend fun changeChatName(chatId: String, name: String, userId: String): Chat =
         chatRepository.readChat(chatId).getOrThrow().let {
             ensureUserIsChatMember(it, userId)
