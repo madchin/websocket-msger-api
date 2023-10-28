@@ -31,6 +31,8 @@ class ChatRoomSocketHandlerImpl(
         }
         val chatMember = ChatMember(memberSession, member)
         chatMembers.add(chatMember)
+        val message = Json.encodeToString(MessageDTO(member.uid, "Member ${member.name} joined chat"))
+        memberSession.send(message)
     }
 
 

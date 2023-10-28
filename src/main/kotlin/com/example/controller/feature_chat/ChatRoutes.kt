@@ -13,9 +13,32 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 import io.ktor.server.websocket.*
 
+fun Route.socketChat(
+    chatRoomSocketHandler: ChatRoomSocketHandler
+) {
+    webSocket("/chat/socket/{id}") {
+        val memberSession = this
+        val chatId = call.parameters.getOrFail("id")
+        val principal = call.principal<JWTPrincipal>()
+        val userId = principal?.payload?.getClaim("uid")?.asString()!!
+
+        try {
+            chatRoomSocketHandler.onJoin(memberSession, userId, chatId)
+            for (frame in incoming) {
+                chatRoomSocketHandler.broadcastMessage(chatId, frame)
+            }
+        } catch (e: Exception) {
+            chatRoomSocketHandler.onLeave(memberSession, userId)
+            throw e
+        } finally {
+            chatRoomSocketHandler.onLeave(memberSession, userId)
+        }
+
+    }
+}
+
 fun Route.chat(
     chatService: ChatService,
-    chatRoomSocketHandler: ChatRoomSocketHandler
 ) {
     get("/chat/{id}") {
         val chatId = call.parameters.getOrFail("id")
@@ -65,25 +88,5 @@ fun Route.chat(
         chatService.deleteChat(chatId, userId).also {
             call.respond(HttpStatusCode.NoContent)
         }
-    }
-
-    webSocket("/chat/socket/{id}") {
-        val chatId = call.parameters.getOrFail("id")
-        val principal = call.principal<JWTPrincipal>()
-        val userId = principal?.payload?.getClaim("uid")?.asString()!!
-        val memberSession = this
-
-        try {
-            chatRoomSocketHandler.onJoin(memberSession, userId, chatId)
-            for (frame in incoming) {
-                chatRoomSocketHandler.broadcastMessage(chatId, frame)
-            }
-        } catch (e: Exception) {
-            chatRoomSocketHandler.onLeave(memberSession, userId)
-            throw e
-        } finally {
-            chatRoomSocketHandler.onLeave(memberSession, userId)
-        }
-
     }
 }
