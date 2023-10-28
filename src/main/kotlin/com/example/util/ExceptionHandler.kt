@@ -31,6 +31,8 @@ sealed class ExplicitException(
     data object Forbidden : ExplicitException(status = HttpStatusCode.Forbidden)
 
     data object DuplicateUser : ExplicitException(message = "User already exists")
+
+    data object Unauthorized : ExplicitException(status = HttpStatusCode.Unauthorized, message = "Unauthorized")
 }
 
 @Serializable
