@@ -112,12 +112,12 @@ class PostChatRoutesTest {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<String>().apply {
                 assertEquals(
-                    this, ValidationReason.length(
+                    ValidationReason.length(
                         ChatDTO::name.name,
                         chatNameMinLengthViolation.length,
                         EntityFieldLength.Chats.Name.minLength,
                         EntityFieldLength.Chats.Name.maxLength
-                    )
+                    ), this
                 )
             }
         }
@@ -134,12 +134,12 @@ class PostChatRoutesTest {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<String>().apply {
                 assertEquals(
-                    this, ValidationReason.length(
+                    ValidationReason.length(
                         ChatDTO::name.name,
                         chatNameMaxLengthViolation.length,
                         EntityFieldLength.Chats.Name.minLength,
                         EntityFieldLength.Chats.Name.maxLength
-                    )
+                    ), this
                 )
             }
         }
@@ -155,7 +155,7 @@ class PostChatRoutesTest {
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<String>().apply {
-                assertEquals(this, ValidationReason.blank(ChatDTO::name.name))
+                assertEquals(ValidationReason.blank(ChatDTO::name.name), this)
             }
         }
     }

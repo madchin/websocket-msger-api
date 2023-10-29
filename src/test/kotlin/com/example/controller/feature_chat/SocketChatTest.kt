@@ -26,7 +26,7 @@ class SocketChatTest {
             val token = JwtConfig.createToken(firstUserId)
             bearerAuth(token)
         }) {
-            assertEquals(ChatRoomSocketHandlerImpl.CHAT_NOT_FOUND_MESSAGE, closeReason.await()?.message)
+            assertEquals(closeReason.await()?.message, ChatRoomSocketHandlerImpl.CHAT_NOT_FOUND_MESSAGE)
         }
     }
 
@@ -37,7 +37,7 @@ class SocketChatTest {
             val token = JwtConfig.createToken(firstUserId)
             bearerAuth(token)
         }) {
-            assertEquals(ChatRoomSocketHandlerImpl.MEMBER_NOT_FOUND_MESSAGE, closeReason.await()?.message)
+            assertEquals(closeReason.await()?.message, ChatRoomSocketHandlerImpl.MEMBER_NOT_FOUND_MESSAGE)
         }
     }
 
