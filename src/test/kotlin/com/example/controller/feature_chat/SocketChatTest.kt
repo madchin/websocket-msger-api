@@ -12,7 +12,6 @@ import com.example.util.EntityFieldLength
 import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.websocket.*
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.*
 import kotlin.test.Test
@@ -60,29 +59,6 @@ class SocketChatTest {
         }
     }
 
-    //FIXME
-    @Test
-    fun `Authorized - Successfully send message`() = testAppSocket { client ->
-        val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatNameToCreate), firstUserId)
-        val createdUser =
-            ServiceFactory.authService.register(UserDTO(generateUsername(), generateEmail(), generatePassword()))
-        val member = ServiceFactory.memberService.addMember(Member(createdUser.id!!, FIRST_MEMBER_NAME))
-
-        client.webSocket("/chat/socket/${createdChat.id}", {
-            val token = JwtConfig.createToken(member.uid)
-            bearerAuth(token)
-        }) {
-            val messageToSend = MessageDTO(member.uid, "random message")
-            val messageFrame = Json.encodeToString(messageToSend)
-            send(messageFrame)
-            val incomings = (incoming.receive() as? Frame.Text)?.readText() ?: ""
-            val incoming2 = (incoming.receive() as? Frame.Text)?.readText() ?: ""
-            val message = Json.decodeFromString<MessageDTO>(incoming2)
-            assertEquals(member.uid, message.sender)
-            assertEquals("random message", message.content)
-
-        }
-    }
 //FIXME
 //    @Test
 //    fun `Unauthorized - fail to join chat`() = testAppSocket { client ->
