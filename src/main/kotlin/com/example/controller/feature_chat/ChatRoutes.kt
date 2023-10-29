@@ -1,8 +1,6 @@
 package com.example.controller.feature_chat
 
 import com.example.model.ChatDTO
-import com.example.model.ChatMember
-import com.example.model.Member
 import com.example.service.ChatService
 import com.example.socket.ChatRoomSocketHandler
 import io.ktor.http.*
@@ -15,9 +13,32 @@ import io.ktor.server.routing.*
 import io.ktor.server.util.*
 import io.ktor.server.websocket.*
 
+fun Route.socketChat(
+    chatRoomSocketHandler: ChatRoomSocketHandler
+) {
+    webSocket("/chat/socket/{id}") {
+        val memberSession = this
+        val chatId = call.parameters.getOrFail("id")
+        val principal = call.principal<JWTPrincipal>()
+        val userId = principal?.payload?.getClaim("uid")?.asString()!!
+
+        try {
+            chatRoomSocketHandler.onJoin(memberSession, userId, chatId)
+            for (frame in incoming) {
+                chatRoomSocketHandler.broadcastMessage(chatId, frame)
+            }
+        } catch (e: Exception) {
+            chatRoomSocketHandler.onLeave(memberSession, userId)
+            throw e
+        } finally {
+            chatRoomSocketHandler.onLeave(memberSession, userId)
+        }
+
+    }
+}
+
 fun Route.chat(
     chatService: ChatService,
-    chatRoomSocketHandler: ChatRoomSocketHandler
 ) {
     get("/chat/{id}") {
         val chatId = call.parameters.getOrFail("id")
@@ -67,25 +88,5 @@ fun Route.chat(
         chatService.deleteChat(chatId, userId).also {
             call.respond(HttpStatusCode.NoContent)
         }
-    }
-    webSocket("/chat/socket/{id}") { // websocketSession
-        val chatId = call.parameters.getOrFail("id")
-        val memberName = call.request.queryParameters.getOrFail("member-name")
-        val principal = call.principal<JWTPrincipal>()
-        val userId = principal?.payload?.getClaim("uid")?.asString()!!
-        val memberSession = this
-        val chatMember = ChatMember(memberSession, Member(userId, memberName))
-
-        try {
-            chatRoomSocketHandler.onJoin(chatMember)
-            for (frame in incoming) {
-                chatRoomSocketHandler.broadcastMessage(chatId, frame)
-            }
-        } catch (e: Exception) {
-            chatRoomSocketHandler.onLeave(chatMember)
-        } finally {
-            chatRoomSocketHandler.onLeave(chatMember)
-        }
-
     }
 }

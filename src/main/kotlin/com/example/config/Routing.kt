@@ -1,6 +1,7 @@
 package com.example.config
 
 import com.example.controller.feature_chat.chat
+import com.example.controller.feature_chat.socketChat
 import com.example.controller.feature_member_manage.member
 import com.example.controller.feature_sign_in_up.signInUp
 import com.example.service.AuthService
@@ -19,8 +20,9 @@ fun Application.configureRouting(
 ) {
     routing {
         authenticate("auth-jwt") {
-            chat(chatService, chatRoomSocketHandler)
+            chat(chatService)
             member(memberService)
+            socketChat(chatRoomSocketHandler)
         }
         signInUp(authService)
     }

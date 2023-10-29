@@ -1,13 +1,13 @@
 package com.example.config
 
 import com.example.controller.util.JwtConfig
+import com.example.util.ExplicitException
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import io.ktor.server.response.*
 
 fun AuthenticationConfig.configureOAuth() {
     oauth("auth-oauth-google") {
@@ -31,7 +31,8 @@ fun AuthenticationConfig.configureJWT() {
     jwt("auth-jwt") {
         verifier(JwtConfig.tokenVerifier())
         validate { JwtConfig.payloadValidator(it) }
-        challenge { _, _ -> call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired") }
+        // Delegate response handler to StatusPages plugin
+        challenge { _, _ -> throw ExplicitException.Unauthorized }
     }
 }
 

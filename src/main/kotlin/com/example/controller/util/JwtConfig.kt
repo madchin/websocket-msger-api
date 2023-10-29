@@ -18,7 +18,7 @@ private class JwtConfigException(missingField: String) :
     Throwable(message = "Missing $missingField in application.conf")
 
 object JwtConfig {
-    private const val sevenDaysInMs = 60000L * 60000 * 24 * 7
+    private const val sevenDaysInMs = 60000L * 60 * 24 * 7
     private lateinit var jwtAudience: String
     private lateinit var jwtDomain: String
     private lateinit var jwtSecret: String
