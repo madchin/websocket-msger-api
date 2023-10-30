@@ -54,7 +54,7 @@ class SocketChatTest {
         }) {
             val frame = (incoming.receive() as? Frame.Text)?.readText() ?: ""
             val decodedMessage: MessageDTO = Json.decodeFromString(frame)
-            assertEquals(decodedMessage.sender, member.name)
+            assertEquals(decodedMessage.sender, member.uid)
             assertEquals(decodedMessage.content, "Member ${member.name} joined chat")
         }
     }
