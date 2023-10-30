@@ -46,21 +46,22 @@ class ChatRepositoryImpl : ChatRepository {
                 it[Chats.name] = name
             }.let {
                 if (it != 0) {
-                    val updatedChat = Chats.select { Chats.id eq UUID.fromString(chatId) }.singleOrNull()?.let(::resultRowToChat)
+                    val updatedChat =
+                        Chats.select { Chats.id eq UUID.fromString(chatId) }.singleOrNull()?.let(::resultRowToChat)
                     return@dbQuery Result.success(updatedChat!!)
                 }
                 return@dbQuery Result.failure(ExplicitException.ChatNotFound)
             }
     }
 
-    override suspend fun updateChatLastSeenMembers(chat: Chat, memberUid: String): Result<Chat> =
+    override suspend fun updateChatLastSeenMembers(chat: Chat, memberUid: String, timestamp: Long): Result<Chat> =
         dbQuery {
-            val lastSeenTimestamp = System.currentTimeMillis()
             Chats.update {
-                it[lastSeenMembers] = chat.lastSeenMembers + mapOf(memberUid to lastSeenTimestamp)
+                it[lastSeenMembers] = chat.lastSeenMembers + mapOf(memberUid to timestamp)
             }.run {
                 if (this != 0) {
-                    val updatedChat = Chats.select { Chats.id eq UUID.fromString(chat.id) }.singleOrNull()?.let(::resultRowToChat)
+                    val updatedChat =
+                        Chats.select { Chats.id eq UUID.fromString(chat.id) }.singleOrNull()?.let(::resultRowToChat)
                     return@dbQuery Result.success(updatedChat!!)
                 }
                 return@dbQuery Result.failure(ExplicitException.ChatNotFound)

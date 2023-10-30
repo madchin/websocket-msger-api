@@ -6,13 +6,13 @@ import com.example.model.UserDTO
 import com.example.util.ExplicitException
 import com.example.util.PasswordHasher
 
-suspend fun ensureUserIsUnique(userRepository: UserRepository, username: String) {
+private suspend fun ensureUserIsUnique(userRepository: UserRepository, username: String) {
     userRepository.readUser(username).getOrNull()?.let {
         throw ExplicitException.DuplicateUser
     }
 }
 
-fun ensurePasswordIsCorrect(attemptUser: UserDTO, retrievedUser: User) {
+private fun ensurePasswordIsCorrect(attemptUser: UserDTO, retrievedUser: User) {
     if (!PasswordHasher.checkPassword(attemptUser.password, retrievedUser.password)) {
         throw ExplicitException.WrongCredentials
     }
