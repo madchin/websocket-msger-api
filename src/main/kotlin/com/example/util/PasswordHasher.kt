@@ -3,12 +3,6 @@ package com.example.util
 import org.mindrot.jbcrypt.BCrypt
 
 object PasswordHasher {
-    fun checkPassword(attempt: String, hashed: String) {
-        val isPasswordCorrect = BCrypt.checkpw(attempt, hashed)
-        if (!isPasswordCorrect) {
-            throw ExplicitException.WrongCredentials
-        }
-    }
-
+    fun checkPassword(attempt: String, hashed: String): Boolean = BCrypt.checkpw(attempt, hashed)
     fun hashPassword(password: String) = BCrypt.hashpw(password, BCrypt.gensalt())
 }
