@@ -8,7 +8,7 @@ import kotlinx.coroutines.runBlocking
 import kotlin.test.*
 
 
-internal class AuthServiceTest : TestConfig() {
+class AuthServiceTest : TestConfig() {
     @Test
     fun `Fail to login when user with username not exists`(): Unit = runBlocking {
         assertFailsWith<ExplicitException.UserNotFound> {
