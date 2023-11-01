@@ -27,7 +27,7 @@ class MemberServiceTest : TestConfig() {
     }
 
     @Test
-    fun `Successfully add member`() = runBlocking {
+    fun `Successfully add member`(): Unit = runBlocking {
         val user = createUser()
         val member = ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
 
@@ -36,14 +36,14 @@ class MemberServiceTest : TestConfig() {
     }
 
     @Test
-    fun `Fail to read member which not exists`() = runBlocking {
+    fun `Fail to read member which not exists`(): Unit = runBlocking {
         assertFailsWith<ExplicitException.MemberNotFound> {
             ServiceFactory.memberService.getMember(firstUserId)
         }
     }
 
     @Test
-    fun `Successfully read member`() = runBlocking {
+    fun `Successfully read member`(): Unit = runBlocking {
         val member = addMember()
         val readMember = ServiceFactory.memberService.getMember(member.uid)
 
@@ -52,14 +52,14 @@ class MemberServiceTest : TestConfig() {
     }
 
     @Test
-    fun `Fail to update member name when member not exists`() = runBlocking {
+    fun `Fail to update member name when member not exists`(): Unit = runBlocking {
         assertFailsWith<ExplicitException.MemberNotFound> {
             ServiceFactory.memberService.updateMemberName(firstUserId, USERNAME_TO_UPDATE)
         }
     }
 
     @Test
-    fun `Successfully update member name`() = runBlocking {
+    fun `Successfully update member name`(): Unit = runBlocking {
         val member = addMember()
         val updatedMember = ServiceFactory.memberService.updateMemberName(member.uid, USERNAME_TO_UPDATE)
 
@@ -69,14 +69,14 @@ class MemberServiceTest : TestConfig() {
     }
 
     @Test
-    fun `Fail to delete member which not exists`() = runBlocking {
+    fun `Fail to delete member which not exists`(): Unit = runBlocking {
         assertFailsWith<ExplicitException.MemberNotFound> {
             ServiceFactory.memberService.deleteMember(firstUserId)
         }
     }
 
     @Test
-    fun `Successfully delete member`() = runBlocking {
+    fun `Successfully delete member`(): Unit = runBlocking {
         val member = addMember()
         val deleteResult = ServiceFactory.memberService.deleteMember(member.uid)
         assertTrue(deleteResult)
