@@ -16,6 +16,8 @@ sealed class ExplicitException(
     data object MemberNotFound :
         ExplicitException(status = HttpStatusCode.NotFound, message = "Member has not been found")
 
+    data object DuplicateMember : ExplicitException(message = "Member already exists")
+
     data object MessageInsert : ExplicitException(message = "Message has not been inserted")
     data object MessagesNotFound :
         ExplicitException(status = HttpStatusCode.NotFound, message = "Messages has not been found")
