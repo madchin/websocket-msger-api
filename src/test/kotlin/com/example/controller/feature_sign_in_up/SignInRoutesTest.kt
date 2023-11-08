@@ -117,12 +117,8 @@ class SignInRoutesTest {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<String>().apply {
                 assertEquals(
-                    ValidationReason.length(
-                        UserDTO::username.name,
-                        usernameMinLengthViolation.length,
-                        EntityFieldLength.Users.Username.minLength,
-                        EntityFieldLength.Users.Username.maxLength
-                    ), this
+                    ValidationReason.tooShort(UserDTO::username.name, EntityFieldLength.Users.Username.minLength),
+                    this
                 )
             }
         }
@@ -139,12 +135,8 @@ class SignInRoutesTest {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<String>().apply {
                 assertEquals(
-                    ValidationReason.length(
-                        UserDTO::email.name,
-                        emailMinLengthViolation.length,
-                        EntityFieldLength.Users.Email.minLength,
-                        EntityFieldLength.Users.Email.maxLength
-                    ), this
+                    ValidationReason.tooShort(UserDTO::email.name, EntityFieldLength.Users.Email.minLength),
+                    this
                 )
             }
         }
@@ -161,12 +153,8 @@ class SignInRoutesTest {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<String>().apply {
                 assertEquals(
-                    ValidationReason.length(
-                        UserDTO::password.name,
-                        passwordMinLengthViolation.length,
-                        EntityFieldLength.Users.Password.minLength,
-                        EntityFieldLength.Users.Password.maxLength
-                    ), this
+                    ValidationReason.tooShort(UserDTO::password.name, EntityFieldLength.Users.Password.minLength),
+                    this
                 )
             }
         }
@@ -183,12 +171,8 @@ class SignInRoutesTest {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<String>().apply {
                 assertEquals(
-                    this, ValidationReason.length(
-                        UserDTO::username.name,
-                        usernameMaxLengthViolation.length,
-                        EntityFieldLength.Users.Username.minLength,
-                        EntityFieldLength.Users.Username.maxLength
-                    )
+                    ValidationReason.tooLong(UserDTO::username.name, EntityFieldLength.Users.Username.maxLength),
+                    this
                 )
             }
         }
@@ -205,12 +189,8 @@ class SignInRoutesTest {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<String>().apply {
                 assertEquals(
-                    this, ValidationReason.length(
-                        UserDTO::password.name,
-                        passwordMaxLengthViolation.length,
-                        EntityFieldLength.Users.Password.minLength,
-                        EntityFieldLength.Users.Password.maxLength
-                    )
+                    ValidationReason.tooLong(UserDTO::password.name, EntityFieldLength.Users.Password.maxLength),
+                    this
                 )
             }
         }
@@ -227,12 +207,8 @@ class SignInRoutesTest {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<String>().apply {
                 assertEquals(
-                    this, ValidationReason.length(
-                        UserDTO::email.name,
-                        emailMaxLengthViolation.length,
-                        EntityFieldLength.Users.Email.minLength,
-                        EntityFieldLength.Users.Email.maxLength
-                    )
+                    ValidationReason.tooLong(UserDTO::email.name, EntityFieldLength.Users.Email.maxLength),
+                    this
                 )
             }
         }
