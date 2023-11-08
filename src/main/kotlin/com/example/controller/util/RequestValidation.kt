@@ -12,29 +12,24 @@ import io.ktor.server.response.*
 object ValidationReason {
     fun blank(field: String) = "$field field cannot be blank"
     const val passwordContainUsername = "Password cannot contain username"
-    private fun toLong(field: String, maxLength: Int) = "$field max accepted length is $maxLength"
-    private fun toShort(field: String, minLength: Int) = "$field min accepted length is $minLength"
-    fun length(field: String, currLength: Int, minLength: Int, maxLength: Int): String {
-        return when {
-            currLength > maxLength -> toLong(field, maxLength)
-            else -> toShort(field, minLength)
-        }
-    }
+    fun tooLong(field: String, maxLength: Int) = "$field max accepted length is $maxLength"
+    fun tooShort(field: String, minLength: Int) = "$field min accepted length is $minLength"
 }
+
+fun String.isNotShort(minLength: Int): Boolean = this.length < minLength
+fun String.isNotLong(maxLength: Int): Boolean = this.length < maxLength
 
 fun RequestValidationConfig.validateChat() {
     validate<ChatDTO> { body ->
+        val name = EntityFieldLength.Chats.Name
         when {
             body.name.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(ChatDTO::name.name))
-            body.name.length > EntityFieldLength.Chats.Name.maxLength || body.name.length < EntityFieldLength.Chats.Name.minLength -> {
-                ValidationResult.Invalid(
-                    ValidationReason.length(
-                        ChatDTO::name.name,
-                        body.name.length,
-                        EntityFieldLength.Chats.Name.minLength,
-                        EntityFieldLength.Chats.Name.maxLength
-                    )
-                )
+            body.name.isNotLong(name.maxLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooLong(ChatDTO::name.name, name.maxLength))
+            }
+
+            body.name.isNotShort(name.minLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooLong(ChatDTO::name.name, name.minLength))
             }
 
             else -> ValidationResult.Valid
@@ -44,18 +39,16 @@ fun RequestValidationConfig.validateChat() {
 
 fun RequestValidationConfig.validateMessage() {
     validate<Message> { body ->
+        val sender = EntityFieldLength.Messages.Sender
         when {
             body.chatId.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(Message::chatId.name))
             body.sender.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(Message::sender.name))
-            body.sender.length > EntityFieldLength.Messages.Sender.maxLength || body.sender.length < EntityFieldLength.Messages.Sender.minLength -> {
-                ValidationResult.Invalid(
-                    ValidationReason.length(
-                        Message::sender.name,
-                        body.sender.length,
-                        EntityFieldLength.Messages.Sender.minLength,
-                        EntityFieldLength.Messages.Sender.maxLength
-                    )
-                )
+            body.sender.isNotLong(sender.maxLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooLong(Message::sender.name, sender.maxLength))
+            }
+
+            body.sender.isNotShort(sender.minLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooShort(Message::sender.name, sender.minLength))
             }
 
             body.content.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(Message::content.name))
@@ -66,42 +59,36 @@ fun RequestValidationConfig.validateMessage() {
 
 fun RequestValidationConfig.validateUser() {
     validate<UserDTO> { body ->
+        val username = EntityFieldLength.Users.Username
+        val email = EntityFieldLength.Users.Email
+        val password = EntityFieldLength.Users.Password
         when {
             body.username.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(UserDTO::username.name))
             body.email.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(UserDTO::email.name))
             body.password.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(UserDTO::password.name))
             body.password.contains(body.username) -> ValidationResult.Invalid(ValidationReason.passwordContainUsername)
-            body.username.length > EntityFieldLength.Users.Username.maxLength || body.username.length < EntityFieldLength.Users.Username.minLength -> {
-                ValidationResult.Invalid(
-                    ValidationReason.length(
-                        UserDTO::username.name,
-                        body.username.length,
-                        EntityFieldLength.Users.Username.minLength,
-                        EntityFieldLength.Users.Username.maxLength
-                    )
-                )
+            body.username.isNotLong(username.maxLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::username.name, username.maxLength))
             }
 
-            body.email.length > EntityFieldLength.Users.Email.maxLength || body.email.length < EntityFieldLength.Users.Email.minLength -> {
-                ValidationResult.Invalid(
-                    ValidationReason.length(
-                        UserDTO::email.name,
-                        body.email.length,
-                        EntityFieldLength.Users.Email.minLength,
-                        EntityFieldLength.Users.Email.maxLength
-                    )
-                )
+            body.username.isNotShort(username.minLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooShort(UserDTO::username.name, username.minLength))
             }
 
-            body.password.length > EntityFieldLength.Users.Password.maxLength || body.password.length < EntityFieldLength.Users.Password.minLength -> {
-                ValidationResult.Invalid(
-                    ValidationReason.length(
-                        UserDTO::password.name,
-                        body.password.length,
-                        EntityFieldLength.Users.Password.minLength,
-                        EntityFieldLength.Users.Password.maxLength
-                    )
-                )
+            body.email.isNotLong(email.maxLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::email.name, email.maxLength))
+            }
+
+            body.email.isNotShort(email.minLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::email.name, email.minLength))
+            }
+
+            body.password.isNotLong(password.maxLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::password.name, password.maxLength))
+            }
+
+            body.password.isNotLong(password.minLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::password.name, password.minLength))
             }
 
             else -> ValidationResult.Valid
