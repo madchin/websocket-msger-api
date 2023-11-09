@@ -1,5 +1,6 @@
 package com.example.controller.feature_chat
 
+import com.example.TestConfig
 import com.example.controller.test_util.testApp
 import com.example.controller.util.JwtConfig
 import com.example.model.Chat
@@ -12,7 +13,7 @@ import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class GetChatRoutesTest {
+class GetChatRoutesTest : TestConfig() {
     @Test
     fun `Unauthorized - fail to get chat`() = testApp(false) { client ->
         client.get("/chat/$randomUUID").apply {
@@ -33,6 +34,7 @@ class GetChatRoutesTest {
     @Test
     fun `Authorized - Successfully get chat which user is member`() = testApp { client ->
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO("example"), FIRST_USER_ID)
+
         client.get("/chat/${createdChat.id}") {
             val token = JwtConfig.createToken(FIRST_USER_ID)
             bearerAuth(token)
@@ -47,6 +49,7 @@ class GetChatRoutesTest {
     @Test
     fun `Authorized - Fail to get chat which user is not member`() = testApp { client ->
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO("example"), FIRST_USER_ID)
+
         client.get("/chat/${createdChat.id}") {
             val token = JwtConfig.createToken(SECOND_USER_ID)
             bearerAuth(token)

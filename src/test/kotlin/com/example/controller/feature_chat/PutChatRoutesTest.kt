@@ -1,6 +1,8 @@
 package com.example.controller.feature_chat
 
+import com.example.TestConfig
 import com.example.controller.test_util.testApp
+import com.example.controller.util.ErrorResponse
 import com.example.controller.util.JwtConfig
 import com.example.controller.util.ValidationReason
 import com.example.model.Chat
@@ -14,7 +16,7 @@ import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PutChatRoutesTest {
+class PutChatRoutesTest : TestConfig() {
     @Test
     fun `Authorized - Fail to update chat name for chat which user is not member`() = testApp { client ->
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatToCreateName), FIRST_USER_ID)
@@ -90,8 +92,13 @@ class PutChatRoutesTest {
             setBody(ChatDTO(CHAT_NAME_BLANK))
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
-                assertEquals(ValidationReason.blank(ChatDTO::name.name), this)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.blank(ChatDTO::name.name)
+                    ), this
+                )
             }
         }
     }
@@ -106,11 +113,12 @@ class PutChatRoutesTest {
                 setBody(ChatDTO(chatNameMinLengthViolation))
             }.apply {
                 assertEquals(HttpStatusCode.BadRequest, status)
-                body<String>().apply {
+                body<ErrorResponse>().apply {
                     assertEquals(
-                        ValidationReason.tooShort(
-                            ChatDTO::name.name, EntityFieldLength.Chats.Name.maxLength),
-                        this
+                        ErrorResponse(
+                            ErrorResponse.Type.VALIDATION,
+                            ValidationReason.tooShort(ChatDTO::name.name, EntityFieldLength.Chats.Name.minLength)
+                        ), this
                     )
                 }
             }
@@ -126,10 +134,12 @@ class PutChatRoutesTest {
                 setBody(ChatDTO(chatNameMaxLengthViolation))
             }.apply {
                 assertEquals(HttpStatusCode.BadRequest, status)
-                body<String>().apply {
+                body<ErrorResponse>().apply {
                     assertEquals(
-                        ValidationReason.tooShort(ChatDTO::name.name, EntityFieldLength.Chats.Name.minLength),
-                        this
+                        ErrorResponse(
+                            ErrorResponse.Type.VALIDATION,
+                            ValidationReason.tooLong(ChatDTO::name.name, EntityFieldLength.Chats.Name.maxLength)
+                        ), this
                     )
                 }
             }

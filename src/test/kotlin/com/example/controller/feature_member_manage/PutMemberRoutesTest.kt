@@ -1,5 +1,6 @@
 package com.example.controller.feature_member_manage
 
+import com.example.TestConfig
 import com.example.controller.test_util.testApp
 import com.example.controller.util.JwtConfig
 import com.example.model.Member
@@ -14,7 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class PutMemberRoutesTest {
+class PutMemberRoutesTest : TestConfig() {
     @Test
     fun `Unauthorized - fail to update member name`() = testApp(false) { client ->
         client.put("/member/update-member-name").apply {
@@ -25,6 +26,7 @@ class PutMemberRoutesTest {
     @Test
     fun `Authorized - Successfully update member name`() = testApp { client ->
         val registeredUser = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+
         ServiceFactory.memberService.addMember(Member(registeredUser.id!!, MEMBER_NAME))
         client.put("/member/update-member-name") {
             val token = JwtConfig.createToken(registeredUser.id!!)

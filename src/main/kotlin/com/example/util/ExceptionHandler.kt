@@ -1,9 +1,6 @@
 package com.example.util
 
 import io.ktor.http.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.response.*
-import kotlinx.serialization.Serializable
 
 sealed class ExplicitException(
     val status: HttpStatusCode = HttpStatusCode.BadRequest,

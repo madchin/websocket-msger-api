@@ -1,5 +1,6 @@
 package com.example.controller.feature_member_manage
 
+import com.example.TestConfig
 import com.example.controller.test_util.testApp
 import com.example.controller.util.JwtConfig
 import com.example.model.Member
@@ -14,7 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class PostMemberRoutesTest {
+class PostMemberRoutesTest : TestConfig() {
 
     @Test
     fun `Unauthorized - fail to add member`() = testApp(false) { client ->
@@ -26,6 +27,7 @@ class PostMemberRoutesTest {
     @Test
     fun `Authorized - Successfully add member`() = testApp { client ->
         val registeredUser = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+
         client.post("/member/add-member") {
             val token = JwtConfig.createToken(registeredUser.id!!)
             bearerAuth(token)
@@ -48,7 +50,7 @@ class PostMemberRoutesTest {
             contentType(ContentType.Application.Json)
             setBody(MemberDTO(MEMBER_NAME))
         }.apply {
-            assertEquals(HttpStatusCode.BadRequest, status)
+            assertEquals(HttpStatusCode.NotFound, status)
         }
     }
 

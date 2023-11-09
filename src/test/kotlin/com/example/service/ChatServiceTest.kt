@@ -1,5 +1,6 @@
 package com.example.service
 
+import com.example.TestConfig
 import com.example.model.ChatDTO
 import com.example.model.MessageDTO
 import com.example.util.ExplicitException

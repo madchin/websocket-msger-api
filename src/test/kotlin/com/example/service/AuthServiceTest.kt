@@ -1,6 +1,6 @@
 package com.example.service
 
-import com.example.model.User
+import com.example.TestConfig
 import com.example.model.UserDTO
 import com.example.util.ExplicitException
 import com.example.util.PasswordHasher
@@ -18,7 +18,7 @@ class AuthServiceTest : TestConfig() {
 
     @Test
     fun `Fail to login when password is wrong`(): Unit = runBlocking {
-        createUser()
+        ServiceFactory.authService.register(firstUser)
         assertFailsWith<ExplicitException.WrongCredentials> {
             ServiceFactory.authService.login(wrongPasswordUser)
         }
@@ -26,7 +26,7 @@ class AuthServiceTest : TestConfig() {
 
     @Test
     fun `Successfully login`(): Unit = runBlocking {
-        createUser()
+        ServiceFactory.authService.register(firstUser)
         val loggedUser = ServiceFactory.authService.login(firstUser)
         assertEquals(firstUser.email, loggedUser.email)
         assertEquals(firstUser.username, loggedUser.username)
@@ -36,7 +36,8 @@ class AuthServiceTest : TestConfig() {
 
     @Test
     fun `Fail to register when user is not unique`(): Unit = runBlocking {
-        val user = createUser()
+        val user = ServiceFactory.authService.register(firstUser)
+
         assertFailsWith<ExplicitException.DuplicateUser> {
             ServiceFactory.authService.register(user.toUserDTO())
         }
@@ -55,8 +56,5 @@ class AuthServiceTest : TestConfig() {
         val firstUser = UserDTO("username", "email", "password")
         val wrongUsernameUser = firstUser.copy("anotherusername")
         val wrongPasswordUser = firstUser.copy(password = "xppasddas")
-        fun createUser(): User = runBlocking {
-            ServiceFactory.authService.register(firstUser)
-        }
     }
 }

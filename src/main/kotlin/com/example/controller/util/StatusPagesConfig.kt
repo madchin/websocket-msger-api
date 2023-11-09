@@ -8,7 +8,11 @@ import io.ktor.server.response.*
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ErrorResponse(val type: String, val message: String)
+data class ErrorResponse(val type: String, val message: String) {
+    object Type {
+        const val VALIDATION = "Validation"
+    }
+}
 
 fun StatusPagesConfig.responseExceptionHandler() {
     exception<Throwable> { call, cause ->
@@ -27,6 +31,9 @@ fun StatusPagesConfig.responseExceptionHandler() {
 
 fun StatusPagesConfig.requestValidationExceptionHandler() {
     exception<RequestValidationException> { call, cause ->
-        call.respond(HttpStatusCode.BadRequest, ErrorResponse("Validation", cause.reasons.joinToString()))
+        call.respond(
+            HttpStatusCode.BadRequest,
+            ErrorResponse(ErrorResponse.Type.VALIDATION, cause.reasons.joinToString())
+        )
     }
 }

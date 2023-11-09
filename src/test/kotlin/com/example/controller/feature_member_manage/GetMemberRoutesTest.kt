@@ -1,5 +1,6 @@
 package com.example.controller.feature_member_manage
 
+import com.example.TestConfig
 import com.example.controller.test_util.testApp
 import com.example.controller.util.JwtConfig
 import com.example.model.Member
@@ -11,7 +12,7 @@ import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class GetMemberRoutesTest {
+class GetMemberRoutesTest : TestConfig() {
 
     @Test
     fun `Unauthorized - fail to get member`() = testApp(false) { client ->

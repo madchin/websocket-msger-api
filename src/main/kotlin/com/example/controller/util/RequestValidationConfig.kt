@@ -26,7 +26,7 @@ fun RequestValidationConfig.validateChat() {
             }
 
             body.name.isNotShort(name.minLength) -> {
-                ValidationResult.Invalid(ValidationReason.tooLong(ChatDTO::name.name, name.minLength))
+                ValidationResult.Invalid(ValidationReason.tooShort(ChatDTO::name.name, name.minLength))
             }
 
             else -> ValidationResult.Valid
@@ -77,15 +77,15 @@ fun RequestValidationConfig.validateUser() {
             }
 
             body.email.isNotShort(email.minLength) -> {
-                ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::email.name, email.minLength))
+                ValidationResult.Invalid(ValidationReason.tooShort(UserDTO::email.name, email.minLength))
             }
 
             body.password.isNotLong(password.maxLength) -> {
                 ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::password.name, password.maxLength))
             }
 
-            body.password.isNotLong(password.minLength) -> {
-                ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::password.name, password.minLength))
+            body.password.isNotShort(password.minLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooShort(UserDTO::password.name, password.minLength))
             }
 
             else -> ValidationResult.Valid

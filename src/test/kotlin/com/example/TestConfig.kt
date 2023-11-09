@@ -1,7 +1,9 @@
-package com.example.service
+package com.example
 
 import com.example.dao.DatabaseFactory
 import com.example.dao.RepositoryFactory
+import com.example.service.ServiceFactory
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeAll
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -9,10 +11,10 @@ import kotlin.test.BeforeTest
 open class TestConfig {
 
     @BeforeTest
-    fun init(): Unit = DatabaseFactory.createTables()
+    fun init() = DatabaseFactory.createTables()
 
     @AfterTest
-    fun tearDown(): Unit = DatabaseFactory.dropTables()
+    fun tearDown() = DatabaseFactory.dropTables()
 
     private companion object {
         @JvmStatic

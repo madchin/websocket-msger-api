@@ -1,5 +1,6 @@
 package com.example.controller.feature_chat
 
+import com.example.TestConfig
 import com.example.controller.test_util.testAppSocket
 import com.example.controller.util.JwtConfig
 import com.example.model.ChatDTO
@@ -17,7 +18,7 @@ import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SocketChatTest {
+class SocketChatTest : TestConfig() {
 
     @Test
     fun `Authorized - close websocket session when chat not found`() = testAppSocket { client ->
@@ -33,6 +34,7 @@ class SocketChatTest {
     @Test
     fun `Authorized - close websocket session when member not found`() = testAppSocket { client ->
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatNameToCreate), firstUserId)
+
         client.webSocket("/chat/socket/${createdChat.id}", {
             val token = JwtConfig.createToken(firstUserId)
             bearerAuth(token)
@@ -44,8 +46,10 @@ class SocketChatTest {
     @Test
     fun `Authorized - Successfully join to socket chat`() = testAppSocket { client ->
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatNameToCreate), firstUserId)
+
         val createdUser =
             ServiceFactory.authService.register(UserDTO(generateUsername(), generateEmail(), generatePassword()))
+
         val member = ServiceFactory.memberService.addMember(Member(createdUser.id!!, FIRST_MEMBER_NAME))
 
         client.webSocket("/chat/socket/${createdChat.id}", {
