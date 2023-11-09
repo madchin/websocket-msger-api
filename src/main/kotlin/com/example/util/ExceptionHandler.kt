@@ -37,21 +37,3 @@ sealed class ExplicitException(
     data object Unauthorized : ExplicitException(status = HttpStatusCode.Unauthorized, message = "Unauthorized")
 }
 
-@Serializable
-data class ErrorResponse(val type: String, val message: String)
-
-fun StatusPagesConfig.responseExceptionHandler() {
-    exception<Throwable> { call, cause ->
-        when (cause) {
-            is ExplicitException -> call.respond(cause.status, ErrorResponse(cause.status.description, cause.message))
-            else -> {
-                val genericError = ExplicitException.Generic
-                call.respond(
-                    status = genericError.status,
-                    ErrorResponse(genericError.description, genericError.message)
-                )
-            }
-        }
-    }
-}
-
