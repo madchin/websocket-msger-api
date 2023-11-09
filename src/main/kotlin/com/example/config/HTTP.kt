@@ -1,7 +1,6 @@
 package com.example.config
 
 import com.example.controller.util.*
-import com.example.util.responseExceptionHandler
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -79,8 +78,8 @@ fun Application.configureCORS() {
 fun Application.configureHTTP() {
     configureSessions()
     configureCORS()
-    configureStatusPages()
     configureRequestValidation()
+    configureStatusPages()
     configureHeaders()
     configureSwagger()
 }

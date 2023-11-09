@@ -4,10 +4,7 @@ import com.example.model.ChatDTO
 import com.example.model.Message
 import com.example.model.UserDTO
 import com.example.util.EntityFieldLength
-import io.ktor.http.*
 import io.ktor.server.plugins.requestvalidation.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.response.*
 
 object ValidationReason {
     fun blank(field: String) = "$field field cannot be blank"
@@ -17,7 +14,7 @@ object ValidationReason {
 }
 
 fun String.isNotShort(minLength: Int): Boolean = this.length < minLength
-fun String.isNotLong(maxLength: Int): Boolean = this.length < maxLength
+fun String.isNotLong(maxLength: Int): Boolean = this.length > maxLength
 
 fun RequestValidationConfig.validateChat() {
     validate<ChatDTO> { body ->
@@ -29,7 +26,7 @@ fun RequestValidationConfig.validateChat() {
             }
 
             body.name.isNotShort(name.minLength) -> {
-                ValidationResult.Invalid(ValidationReason.tooLong(ChatDTO::name.name, name.minLength))
+                ValidationResult.Invalid(ValidationReason.tooShort(ChatDTO::name.name, name.minLength))
             }
 
             else -> ValidationResult.Valid
@@ -80,15 +77,15 @@ fun RequestValidationConfig.validateUser() {
             }
 
             body.email.isNotShort(email.minLength) -> {
-                ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::email.name, email.minLength))
+                ValidationResult.Invalid(ValidationReason.tooShort(UserDTO::email.name, email.minLength))
             }
 
             body.password.isNotLong(password.maxLength) -> {
                 ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::password.name, password.maxLength))
             }
 
-            body.password.isNotLong(password.minLength) -> {
-                ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::password.name, password.minLength))
+            body.password.isNotShort(password.minLength) -> {
+                ValidationResult.Invalid(ValidationReason.tooShort(UserDTO::password.name, password.minLength))
             }
 
             else -> ValidationResult.Valid
@@ -96,8 +93,3 @@ fun RequestValidationConfig.validateUser() {
     }
 }
 
-fun StatusPagesConfig.requestValidationExceptionHandler() {
-    exception<RequestValidationException> { call, cause ->
-        call.respond(HttpStatusCode.BadRequest, cause.reasons.joinToString())
-    }
-}

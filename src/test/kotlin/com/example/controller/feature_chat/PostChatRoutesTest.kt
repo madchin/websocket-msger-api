@@ -1,12 +1,15 @@
 package com.example.controller.feature_chat
 
+import com.example.TestConfig
 import com.example.controller.test_util.testApp
+import com.example.controller.util.ErrorResponse
 import com.example.controller.util.JwtConfig
 import com.example.controller.util.ValidationReason
 import com.example.model.Chat
 import com.example.model.ChatDTO
 import com.example.service.ServiceFactory
 import com.example.util.EntityFieldLength
+import com.example.util.ExplicitException
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -16,11 +19,19 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class PostChatRoutesTest {
+class PostChatRoutesTest : TestConfig() {
     @Test
     fun `Unauthorized - Fail to create chat`() = testApp(false) { client ->
         client.post("/chat").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.Unauthorized.description,
+                        ExplicitException.Unauthorized.message
+                    ), this
+                )
+            }
         }
     }
 
@@ -48,6 +59,7 @@ class PostChatRoutesTest {
         val chatToCreate = ChatDTO(chatToCreateName)
         val token = JwtConfig.createToken(FIRST_USER_ID)
         ServiceFactory.chatService.createChat(chatToCreate, FIRST_USER_ID)
+
         client.post("/chat") {
             bearerAuth(token)
             contentType(ContentType.Application.Json)
@@ -68,6 +80,14 @@ class PostChatRoutesTest {
     fun `Unauthorized - Fail to join chat`() = testApp(false) { client ->
         client.post("/chat/$randomUUID/join-chat").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.Unauthorized.description,
+                        ExplicitException.Unauthorized.message
+                    ), this
+                )
+            }
         }
     }
 
@@ -78,12 +98,21 @@ class PostChatRoutesTest {
             bearerAuth(token)
         }.apply {
             assertEquals(HttpStatusCode.NotFound, status)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.ChatNotFound.description,
+                        ExplicitException.ChatNotFound.message
+                    ), this
+                )
+            }
         }
     }
 
     @Test
     fun `Authorized - Successfully join chat`() = testApp { client ->
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatToCreateName), FIRST_USER_ID)
+
         client.post("/chat/${createdChat.id}/join-chat") {
             val token = JwtConfig.createToken(SECOND_USER_ID)
             bearerAuth(token)
@@ -110,10 +139,12 @@ class PostChatRoutesTest {
             setBody(ChatDTO(chatNameMinLengthViolation))
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
+            body<ErrorResponse>().apply {
                 assertEquals(
-                    ValidationReason.tooLong(ChatDTO::name.name,EntityFieldLength.Chats.Name.maxLength),
-                    this
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.tooShort(ChatDTO::name.name, EntityFieldLength.Chats.Name.minLength)
+                    ), this
                 )
             }
         }
@@ -128,10 +159,12 @@ class PostChatRoutesTest {
             setBody(ChatDTO(chatNameMaxLengthViolation))
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
+            body<ErrorResponse>().apply {
                 assertEquals(
-                    ValidationReason.tooLong(ChatDTO::name.name, EntityFieldLength.Chats.Name.maxLength),
-                    this
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.tooLong(ChatDTO::name.name, EntityFieldLength.Chats.Name.maxLength)
+                    ), this
                 )
             }
         }
@@ -146,8 +179,11 @@ class PostChatRoutesTest {
             setBody(ChatDTO(CHAT_NAME_BLANK))
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
-                assertEquals(ValidationReason.blank(ChatDTO::name.name), this)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(ErrorResponse.Type.VALIDATION, ValidationReason.blank(ChatDTO::name.name)),
+                    this
+                )
             }
         }
     }

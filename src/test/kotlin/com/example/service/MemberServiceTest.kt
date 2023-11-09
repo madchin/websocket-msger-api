@@ -1,7 +1,7 @@
 package com.example.service
 
+import com.example.TestConfig
 import com.example.model.Member
-import com.example.model.User
 import com.example.model.UserDTO
 import com.example.util.ExplicitException
 import kotlinx.coroutines.runBlocking
@@ -11,7 +11,7 @@ import kotlin.test.*
 class MemberServiceTest : TestConfig() {
     @Test
     fun `Fail to add member which already exists`(): Unit = runBlocking {
-        val user = createUser()
+        val user = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
         ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
 
         assertFailsWith<ExplicitException.DuplicateMember> {
@@ -28,7 +28,7 @@ class MemberServiceTest : TestConfig() {
 
     @Test
     fun `Successfully add member`(): Unit = runBlocking {
-        val user = createUser()
+        val user = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
         val member = ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
 
         assertEquals(user.id, member.uid)
@@ -44,7 +44,8 @@ class MemberServiceTest : TestConfig() {
 
     @Test
     fun `Successfully read member`(): Unit = runBlocking {
-        val member = addMember()
+        val user = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        val member = ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
         val readMember = ServiceFactory.memberService.getMember(member.uid)
 
         assertEquals(member.uid, readMember.uid)
@@ -60,7 +61,8 @@ class MemberServiceTest : TestConfig() {
 
     @Test
     fun `Successfully update member name`(): Unit = runBlocking {
-        val member = addMember()
+        val user = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        val member = ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
         val updatedMember = ServiceFactory.memberService.updateMemberName(member.uid, USERNAME_TO_UPDATE)
 
         assertEquals(member.uid, updatedMember.uid)
@@ -77,7 +79,8 @@ class MemberServiceTest : TestConfig() {
 
     @Test
     fun `Successfully delete member`(): Unit = runBlocking {
-        val member = addMember()
+        val user = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        val member = ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
         val deleteResult = ServiceFactory.memberService.deleteMember(member.uid)
         assertTrue(deleteResult)
     }
@@ -86,14 +89,6 @@ class MemberServiceTest : TestConfig() {
         const val USERNAME = "username"
         const val USERNAME_TO_UPDATE = "update_username"
         val firstUserId = UUID.randomUUID().toString()
-        fun createUser(): User = runBlocking {
-            ServiceFactory.authService.register(UserDTO("username", "email", "password"))
-        }
-
-        fun addMember(): Member = runBlocking {
-            val user = createUser()
-            ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
-        }
     }
 
 }

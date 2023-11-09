@@ -1,11 +1,12 @@
 package com.example.controller.feature_sign_in_up
 
+import com.example.TestConfig
 import com.example.controller.test_util.testApp
+import com.example.controller.util.ErrorResponse
 import com.example.controller.util.ValidationReason
 import com.example.model.UserDTO
 import com.example.service.ServiceFactory
 import com.example.util.EntityFieldLength
-import com.example.util.ErrorResponse
 import com.example.util.ExplicitException
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -17,7 +18,7 @@ import kotlin.test.assertTrue
 typealias SignInResponse = HashMap<String, String>
 
 
-class SignInRoutesTest {
+class SignInRoutesTest : TestConfig() {
     @Test
     fun `Fail to sign in when user not exist`() = testApp(false) { client ->
         val (username, email, password) = generateCredentials()
@@ -26,6 +27,14 @@ class SignInRoutesTest {
             setBody(UserDTO(username, email, password))
         }.apply {
             assertEquals(HttpStatusCode.NotFound, status)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.UserNotFound.description,
+                        ExplicitException.UserNotFound.message
+                    ), this
+                )
+            }
         }
     }
 
@@ -39,7 +48,12 @@ class SignInRoutesTest {
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<ErrorResponse>().apply {
-                assertEquals(ExplicitException.WrongCredentials.message, message)
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.WrongCredentials.description,
+                        ExplicitException.WrongCredentials.message
+                    ), this
+                )
             }
         }
     }
@@ -70,8 +84,13 @@ class SignInRoutesTest {
             setBody(user)
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
-                assertEquals(ValidationReason.blank(UserDTO::username.name), this)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.blank(UserDTO::username.name)
+                    ), this
+                )
             }
         }
     }
@@ -85,8 +104,13 @@ class SignInRoutesTest {
             setBody(user)
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
-                assertEquals(ValidationReason.blank(UserDTO::password.name), this)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.blank(UserDTO::password.name)
+                    ), this
+                )
             }
         }
     }
@@ -100,8 +124,13 @@ class SignInRoutesTest {
             setBody(user)
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
-                assertEquals(ValidationReason.blank(UserDTO::email.name), this)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.blank(UserDTO::email.name)
+                    ), this
+                )
             }
         }
     }
@@ -115,10 +144,12 @@ class SignInRoutesTest {
             setBody(user)
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
+            body<ErrorResponse>().apply {
                 assertEquals(
-                    ValidationReason.tooShort(UserDTO::username.name, EntityFieldLength.Users.Username.minLength),
-                    this
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.tooShort(UserDTO::username.name, EntityFieldLength.Users.Username.minLength)
+                    ), this
                 )
             }
         }
@@ -133,10 +164,12 @@ class SignInRoutesTest {
             setBody(user)
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
+            body<ErrorResponse>().apply {
                 assertEquals(
-                    ValidationReason.tooShort(UserDTO::email.name, EntityFieldLength.Users.Email.minLength),
-                    this
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.tooShort(UserDTO::email.name, EntityFieldLength.Users.Email.minLength)
+                    ), this
                 )
             }
         }
@@ -151,10 +184,12 @@ class SignInRoutesTest {
             setBody(user)
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
+            body<ErrorResponse>().apply {
                 assertEquals(
-                    ValidationReason.tooShort(UserDTO::password.name, EntityFieldLength.Users.Password.minLength),
-                    this
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.tooShort(UserDTO::password.name, EntityFieldLength.Users.Password.minLength)
+                    ), this
                 )
             }
         }
@@ -169,10 +204,12 @@ class SignInRoutesTest {
             setBody(user)
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
+            body<ErrorResponse>().apply {
                 assertEquals(
-                    ValidationReason.tooLong(UserDTO::username.name, EntityFieldLength.Users.Username.maxLength),
-                    this
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.tooLong(UserDTO::username.name, EntityFieldLength.Users.Username.maxLength)
+                    ), this
                 )
             }
         }
@@ -187,10 +224,12 @@ class SignInRoutesTest {
             setBody(user)
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
+            body<ErrorResponse>().apply {
                 assertEquals(
-                    ValidationReason.tooLong(UserDTO::password.name, EntityFieldLength.Users.Password.maxLength),
-                    this
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.tooLong(UserDTO::password.name, EntityFieldLength.Users.Password.maxLength)
+                    ), this
                 )
             }
         }
@@ -205,10 +244,12 @@ class SignInRoutesTest {
             setBody(user)
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
-            body<String>().apply {
+            body<ErrorResponse>().apply {
                 assertEquals(
-                    ValidationReason.tooLong(UserDTO::email.name, EntityFieldLength.Users.Email.maxLength),
-                    this
+                    ErrorResponse(
+                        ErrorResponse.Type.VALIDATION,
+                        ValidationReason.tooLong(UserDTO::email.name, EntityFieldLength.Users.Email.maxLength)
+                    ), this
                 )
             }
         }
@@ -216,24 +257,15 @@ class SignInRoutesTest {
 
 
     private companion object {
-        var usernameCounter = 1
-            get() = field++
-            private set
-        var passwordCounter = 1
-            get() = field++
-            private set
-        var emailCounter: Int = 1
-            get() = field++
-            private set
 
         fun generateUsername() =
-            "u".repeat(EntityFieldLength.Users.Username.minLength - usernameCounter.toString().length) + usernameCounter
+            "u".repeat(EntityFieldLength.Users.Username.minLength)
 
         fun generatePassword() =
-            "p".repeat(EntityFieldLength.Users.Password.minLength - passwordCounter.toString().length) + passwordCounter
+            "p".repeat(EntityFieldLength.Users.Password.minLength)
 
         fun generateEmail() =
-            "e".repeat(EntityFieldLength.Users.Email.minLength - emailCounter.toString().length) + emailCounter
+            "e".repeat(EntityFieldLength.Users.Email.minLength)
 
         fun generateCredentials() = Triple(generateUsername(), generateEmail(), generatePassword())
 
