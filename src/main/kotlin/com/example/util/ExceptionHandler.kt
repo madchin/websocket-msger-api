@@ -5,8 +5,9 @@ import io.ktor.http.*
 sealed class ExplicitException(
     val status: HttpStatusCode = HttpStatusCode.BadRequest,
     override val message: String = "Oops. Something went wrong!"
-) :
-    Throwable() {
+) : Throwable() {
+    val description = status.description
+
     data object ChatInsert : ExplicitException(message = "Chat has not been inserted")
     data object ChatNotFound : ExplicitException(status = HttpStatusCode.NotFound, message = "Chat has not been found")
     data object MemberInsert : ExplicitException(message = "Member has not been inserted nor updated")
@@ -21,9 +22,7 @@ sealed class ExplicitException(
 
     data object UserInsert : ExplicitException(message = "User has not been inserted")
     data object UserNotFound : ExplicitException(status = HttpStatusCode.NotFound, message = "User has not been found")
-    data object Generic : ExplicitException() {
-        val description = super.status.description
-    }
+    data object Generic : ExplicitException()
 
     data object WrongCredentials : ExplicitException(message = "Provided credentials are wrong")
 
@@ -32,5 +31,6 @@ sealed class ExplicitException(
     data object DuplicateUser : ExplicitException(message = "User already exists")
 
     data object Unauthorized : ExplicitException(status = HttpStatusCode.Unauthorized, message = "Unauthorized")
+
 }
 

@@ -3,7 +3,6 @@ package com.example
 import com.example.dao.DatabaseFactory
 import com.example.dao.RepositoryFactory
 import com.example.service.ServiceFactory
-import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeAll
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest

@@ -2,9 +2,12 @@ package com.example.controller.feature_chat
 
 import com.example.TestConfig
 import com.example.controller.test_util.testApp
+import com.example.controller.util.ErrorResponse
 import com.example.controller.util.JwtConfig
 import com.example.model.ChatDTO
 import com.example.service.ServiceFactory
+import com.example.util.ExplicitException
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import java.util.*
@@ -16,6 +19,14 @@ class DeleteChatRoutesTest : TestConfig() {
     fun `Unauthorized - Fail to delete chat`() = testApp(false) { client ->
         client.delete("/chat/$randomUUID").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.Unauthorized.description,
+                        ExplicitException.Unauthorized.message
+                    ), this
+                )
+            }
         }
     }
 
@@ -28,6 +39,14 @@ class DeleteChatRoutesTest : TestConfig() {
             bearerAuth(token)
         }.apply {
             assertEquals(HttpStatusCode.Forbidden, status)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.Forbidden.description,
+                        ExplicitException.Forbidden.message
+                    ), this
+                )
+            }
         }
     }
 

@@ -9,6 +9,7 @@ import com.example.model.Chat
 import com.example.model.ChatDTO
 import com.example.service.ServiceFactory
 import com.example.util.EntityFieldLength
+import com.example.util.ExplicitException
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -27,6 +28,14 @@ class PutChatRoutesTest : TestConfig() {
             setBody(ChatDTO(chatToUpdateName))
         }.apply {
             assertEquals(HttpStatusCode.Forbidden, status)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.Forbidden.description,
+                        ExplicitException.Forbidden.message
+                    ), this
+                )
+            }
         }
     }
 
@@ -68,6 +77,14 @@ class PutChatRoutesTest : TestConfig() {
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatToCreateName), FIRST_USER_ID)
         client.put("/chat/${createdChat.id}/change-name").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.Unauthorized.description,
+                        ExplicitException.Unauthorized.message
+                    ), this
+                )
+            }
         }
     }
 
@@ -80,6 +97,14 @@ class PutChatRoutesTest : TestConfig() {
             setBody(ChatDTO(chatToUpdateName))
         }.apply {
             assertEquals(HttpStatusCode.NotFound, status)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.ChatNotFound.description,
+                        ExplicitException.ChatNotFound.message
+                    ), this
+                )
+            }
         }
     }
 

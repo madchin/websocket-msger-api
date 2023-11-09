@@ -26,7 +26,12 @@ class SignUpRoutesTest : TestConfig() {
         }.apply {
             assertEquals(HttpStatusCode.BadRequest, status)
             body<ErrorResponse>().apply {
-                assertEquals(ExplicitException.DuplicateUser.message, message)
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.DuplicateUser.description,
+                        ExplicitException.DuplicateUser.message
+                    ), this
+                )
             }
         }
     }
@@ -224,24 +229,14 @@ class SignUpRoutesTest : TestConfig() {
     }
 
     private companion object {
-        var usernameCounter = 1
-            get() = field++
-            private set
-        var passwordCounter = 1
-            get() = field++
-            private set
-        var emailCounter: Int = 1
-            get() = field++
-            private set
-
         fun generateUsername() =
-            "u".repeat(EntityFieldLength.Users.Username.minLength - usernameCounter.toString().length) + usernameCounter
+            "u".repeat(EntityFieldLength.Users.Username.minLength)
 
         fun generatePassword() =
-            "p".repeat(EntityFieldLength.Users.Password.minLength - passwordCounter.toString().length) + passwordCounter
+            "p".repeat(EntityFieldLength.Users.Password.minLength)
 
         fun generateEmail() =
-            "e".repeat(EntityFieldLength.Users.Email.minLength - emailCounter.toString().length) + emailCounter
+            "e".repeat(EntityFieldLength.Users.Email.minLength)
 
         fun generateCredentials() = Triple(generateUsername(), generateEmail(), generatePassword())
 

@@ -2,11 +2,13 @@ package com.example.controller.feature_member_manage
 
 import com.example.TestConfig
 import com.example.controller.test_util.testApp
+import com.example.controller.util.ErrorResponse
 import com.example.controller.util.JwtConfig
 import com.example.model.Member
 import com.example.model.MemberDTO
 import com.example.model.UserDTO
 import com.example.service.ServiceFactory
+import com.example.util.ExplicitException
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -20,6 +22,14 @@ class PutMemberRoutesTest : TestConfig() {
     fun `Unauthorized - fail to update member name`() = testApp(false) { client ->
         client.put("/member/update-member-name").apply {
             assertEquals(HttpStatusCode.Unauthorized, status)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.Unauthorized.description,
+                        ExplicitException.Unauthorized.message
+                    ), this
+                )
+            }
         }
     }
 
@@ -51,6 +61,14 @@ class PutMemberRoutesTest : TestConfig() {
             setBody(MemberDTO("new_name"))
         }.apply {
             assertEquals(HttpStatusCode.NotFound, status)
+            body<ErrorResponse>().apply {
+                assertEquals(
+                    ErrorResponse(
+                        ExplicitException.MemberNotFound.description,
+                        ExplicitException.MemberNotFound.message
+                    ), this
+                )
+            }
         }
     }
 
