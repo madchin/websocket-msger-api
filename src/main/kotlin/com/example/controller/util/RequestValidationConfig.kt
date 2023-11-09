@@ -4,10 +4,7 @@ import com.example.model.ChatDTO
 import com.example.model.Message
 import com.example.model.UserDTO
 import com.example.util.EntityFieldLength
-import io.ktor.http.*
 import io.ktor.server.plugins.requestvalidation.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.response.*
 
 object ValidationReason {
     fun blank(field: String) = "$field field cannot be blank"
@@ -17,7 +14,7 @@ object ValidationReason {
 }
 
 fun String.isNotShort(minLength: Int): Boolean = this.length < minLength
-fun String.isNotLong(maxLength: Int): Boolean = this.length < maxLength
+fun String.isNotLong(maxLength: Int): Boolean = this.length > maxLength
 
 fun RequestValidationConfig.validateChat() {
     validate<ChatDTO> { body ->
@@ -96,8 +93,3 @@ fun RequestValidationConfig.validateUser() {
     }
 }
 
-fun StatusPagesConfig.requestValidationExceptionHandler() {
-    exception<RequestValidationException> { call, cause ->
-        call.respond(HttpStatusCode.BadRequest, cause.reasons.joinToString())
-    }
-}
