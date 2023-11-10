@@ -35,3 +35,15 @@
 * Added factory singletons for repos / services / configs / sockets
 * Added missing crud operations
 * Added tests for all http operations
+
+### Version *0.7.0*
+
+* Added tests for:
+  * ChatService
+  * MemberService
+  * AuthService
+  * Socket
+* Refactor:
+    * SocketImpl
+    * Tests
+    * RequestValidation
