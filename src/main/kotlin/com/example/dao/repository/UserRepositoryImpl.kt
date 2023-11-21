@@ -10,14 +10,13 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 class UserRepositoryImpl : UserRepository {
     private fun resultRowToUser(row: ResultRow) = User(
         id = row[Users.id].toString(),
-        username = row[Users.username],
         email = row[Users.email],
         password = row[Users.password]
     )
 
-    override suspend fun readUser(username: String): Result<User> = dbQuery {
+    override suspend fun readUser(email: String): Result<User> = dbQuery {
         Users
-            .select { Users.username eq username }
+            .select { Users.email eq email }
             .map(::resultRowToUser)
             .singleOrNull()
             .let {
@@ -30,7 +29,6 @@ class UserRepositoryImpl : UserRepository {
 
     override suspend fun createUser(user: User): Result<User> = dbQuery {
         Users.insert {
-            it[username] = user.username
             it[email] = user.email
             it[password] = user.password
         }.run {
@@ -42,20 +40,9 @@ class UserRepositoryImpl : UserRepository {
         }
     }
 
-    override suspend fun updateUserUsername(username: String): Result<Boolean> = dbQuery {
-        Users.update({ Users.username eq username }) {
-            it[Users.username] = username
-        }.let {
-            if (it != 0) {
-                return@dbQuery Result.success(true)
-            }
-            return@dbQuery Result.failure(ExplicitException.UserNotFound)
-        }
-    }
-
     override suspend fun updateUserPassword(user: User): Result<Boolean> = dbQuery {
-        Users.update({ Users.username eq user.username }) {
-            it[username] = user.username
+        Users.update({ Users.email eq user.email }) {
+            it[password] = user.password
         }.let {
             if (it != 0) {
                 return@dbQuery Result.success(true)
@@ -64,9 +51,9 @@ class UserRepositoryImpl : UserRepository {
         }
     }
 
-    override suspend fun deleteUser(username: String): Result<Boolean> = dbQuery {
+    override suspend fun deleteUser(email: String): Result<Boolean> = dbQuery {
         Users
-            .deleteWhere { Users.username eq username }
+            .deleteWhere { Users.email eq email }
             .let {
                 if (it != 0) {
                     return@dbQuery Result.success(true)

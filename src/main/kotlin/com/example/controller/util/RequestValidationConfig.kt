@@ -8,7 +8,6 @@ import io.ktor.server.plugins.requestvalidation.*
 
 object ValidationReason {
     fun blank(field: String) = "$field field cannot be blank"
-    const val passwordContainUsername = "Password cannot contain username"
     fun tooLong(field: String, maxLength: Int) = "$field max accepted length is $maxLength"
     fun tooShort(field: String, minLength: Int) = "$field min accepted length is $minLength"
 }
@@ -56,21 +55,11 @@ fun RequestValidationConfig.validateMessage() {
 
 fun RequestValidationConfig.validateUser() {
     validate<UserDTO> { body ->
-        val username = EntityFieldLength.Users.Username
         val email = EntityFieldLength.Users.Email
         val password = EntityFieldLength.Users.Password
         when {
-            body.username.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(UserDTO::username.name))
             body.email.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(UserDTO::email.name))
             body.password.isBlank() -> ValidationResult.Invalid(ValidationReason.blank(UserDTO::password.name))
-            body.password.contains(body.username) -> ValidationResult.Invalid(ValidationReason.passwordContainUsername)
-            body.username.isNotLong(username.maxLength) -> {
-                ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::username.name, username.maxLength))
-            }
-
-            body.username.isNotShort(username.minLength) -> {
-                ValidationResult.Invalid(ValidationReason.tooShort(UserDTO::username.name, username.minLength))
-            }
 
             body.email.isNotLong(email.maxLength) -> {
                 ValidationResult.Invalid(ValidationReason.tooLong(UserDTO::email.name, email.maxLength))
