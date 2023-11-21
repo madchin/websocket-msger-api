@@ -48,7 +48,7 @@ class SocketChatTest : TestConfig() {
         val createdChat = ServiceFactory.chatService.createChat(ChatDTO(chatNameToCreate), firstUserId)
 
         val createdUser =
-            ServiceFactory.authService.register(UserDTO(generateUsername(), generateEmail(), generatePassword()))
+            ServiceFactory.authService.register(UserDTO(generateEmail(), generatePassword()))
 
         val member = ServiceFactory.memberService.addMember(Member(createdUser.id!!, FIRST_MEMBER_NAME))
 
@@ -76,7 +76,6 @@ class SocketChatTest : TestConfig() {
         val firstUserId = UUID.randomUUID().toString()
         const val FIRST_MEMBER_NAME = "first_name"
         val chatNameToCreate = "c".repeat(EntityFieldLength.Chats.Name.minLength + 1)
-        fun generateUsername() = "u".repeat(EntityFieldLength.Users.Username.minLength + 1)
         fun generatePassword() = "p".repeat(EntityFieldLength.Users.Password.minLength + 1)
         fun generateEmail() = "e".repeat(EntityFieldLength.Users.Email.minLength + 1)
     }

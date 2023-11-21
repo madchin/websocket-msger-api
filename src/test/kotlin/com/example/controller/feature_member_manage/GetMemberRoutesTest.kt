@@ -52,7 +52,7 @@ class GetMemberRoutesTest : TestConfig() {
 
     @Test
     fun `Authorized - Successfully get member when member exists`() = testApp { client ->
-        val registeredUser = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        val registeredUser = ServiceFactory.authService.register(UserDTO("email", "password"))
         ServiceFactory.memberService.addMember(Member(registeredUser.id!!, "memberName"))
         client.get("/member") {
             val token = JwtConfig.createToken(registeredUser.id!!)

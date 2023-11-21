@@ -12,7 +12,7 @@ class AuthServiceTest : TestConfig() {
     @Test
     fun `Fail to login when user with username not exists`(): Unit = runBlocking {
         assertFailsWith<ExplicitException.UserNotFound> {
-            ServiceFactory.authService.login(wrongUsernameUser)
+            ServiceFactory.authService.login(wrongEmailUser)
         }
     }
 
@@ -29,7 +29,6 @@ class AuthServiceTest : TestConfig() {
         ServiceFactory.authService.register(firstUser)
         val loggedUser = ServiceFactory.authService.login(firstUser)
         assertEquals(firstUser.email, loggedUser.email)
-        assertEquals(firstUser.username, loggedUser.username)
         assertTrue { PasswordHasher.checkPassword(firstUser.password, loggedUser.password) }
 
     }
@@ -47,14 +46,13 @@ class AuthServiceTest : TestConfig() {
     fun `Successfully register`(): Unit = runBlocking {
         val user = ServiceFactory.authService.register(firstUser)
         assertEquals(firstUser.email, user.email)
-        assertEquals(firstUser.username, user.username)
         assertTrue { PasswordHasher.checkPassword(firstUser.password, user.password) }
         assertNotNull(user.id)
     }
 
     private companion object {
-        val firstUser = UserDTO("username", "email", "password")
-        val wrongUsernameUser = firstUser.copy("anotherusername")
+        val firstUser = UserDTO("email", "password")
+        val wrongEmailUser = firstUser.copy("anotherusername@easd.com")
         val wrongPasswordUser = firstUser.copy(password = "xppasddas")
     }
 }

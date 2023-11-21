@@ -34,7 +34,7 @@ class DeleteMemberRoutesTest : TestConfig() {
 
     @Test
     fun `Authorized - Successfully delete member`() = testApp { client ->
-        val registeredUser = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        val registeredUser = ServiceFactory.authService.register(UserDTO("email", "password"))
         ServiceFactory.memberService.addMember(Member(registeredUser.id!!, MEMBER_NAME))
         client.delete("/member") {
             val token = JwtConfig.createToken(registeredUser.id!!)

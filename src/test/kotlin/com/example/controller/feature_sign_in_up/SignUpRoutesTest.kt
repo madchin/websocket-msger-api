@@ -17,8 +17,8 @@ import kotlin.test.assertEquals
 class SignUpRoutesTest : TestConfig() {
     @Test
     fun `Fail to sign up when user with same username already exist`() = testApp { client ->
-        val (username, email, password) = generateCredentials()
-        val user = UserDTO(username, email, password)
+        val (email, password) = generateCredentials()
+        val user = UserDTO(email, password)
         ServiceFactory.authService.register(user)
         client.post("/sign-up") {
             contentType(ContentType.Application.Json)
@@ -38,40 +38,19 @@ class SignUpRoutesTest : TestConfig() {
 
     @Test
     fun `Successfully sign up`() = testApp(false) { client ->
-        val (username, email, password) = generateCredentials()
+        val (email, password) = generateCredentials()
         client.post("/sign-up") {
             contentType(ContentType.Application.Json)
-            setBody(UserDTO(username, email, password))
+            setBody(UserDTO(email, password))
         }.apply {
             assertEquals(HttpStatusCode.Created, status)
         }
     }
 
-
-    @Test
-    fun `Fail to sign up when username is blank`() = testApp(false) { client ->
-        val (_, email, password) = generateCredentials()
-        val user = UserDTO(USERNAME_BLANK, email, password)
-        client.post("/sign-up") {
-            contentType(ContentType.Application.Json)
-            setBody(user)
-        }.apply {
-            assertEquals(HttpStatusCode.BadRequest, status)
-            body<ErrorResponse>().apply {
-                assertEquals(
-                    ErrorResponse(
-                        ErrorResponse.Type.VALIDATION,
-                        ValidationReason.blank(UserDTO::username.name)
-                    ), this
-                )
-            }
-        }
-    }
-
     @Test
     fun `Fail to sign up when password is blank`() = testApp(false) { client ->
-        val (username, email, _) = generateCredentials()
-        val user = UserDTO(username, email, PASSWORD_BLANK)
+        val (email, _) = generateCredentials()
+        val user = UserDTO(email, PASSWORD_BLANK)
         client.post("/sign-up") {
             contentType(ContentType.Application.Json)
             setBody(user)
@@ -90,8 +69,8 @@ class SignUpRoutesTest : TestConfig() {
 
     @Test
     fun `Fail to sign up when email is blank`() = testApp(false) { client ->
-        val (username, _, password) = generateCredentials()
-        val user = UserDTO(username, EMAIL_BLANK, password)
+        val (_, password) = generateCredentials()
+        val user = UserDTO(EMAIL_BLANK, password)
         client.post("/sign-up") {
             contentType(ContentType.Application.Json)
             setBody(user)
@@ -109,29 +88,9 @@ class SignUpRoutesTest : TestConfig() {
     }
 
     @Test
-    fun `Fail to sign up when username violates min length`() = testApp(false) { client ->
-        val (_, email, password) = generateCredentials()
-        val user = UserDTO(usernameMinLengthViolation, email, password)
-        client.post("/sign-up") {
-            contentType(ContentType.Application.Json)
-            setBody(user)
-        }.apply {
-            assertEquals(HttpStatusCode.BadRequest, status)
-            body<ErrorResponse>().apply {
-                assertEquals(
-                    ErrorResponse(
-                        ErrorResponse.Type.VALIDATION,
-                        ValidationReason.tooShort(UserDTO::username.name, EntityFieldLength.Users.Username.minLength)
-                    ), this
-                )
-            }
-        }
-    }
-
-    @Test
     fun `Fail to sign up when email violates min length`() = testApp(false) { client ->
-        val (username, _, password) = generateCredentials()
-        val user = UserDTO(username, emailMinLengthViolation, password)
+        val (_, password) = generateCredentials()
+        val user = UserDTO(emailMinLengthViolation, password)
         client.post("/sign-up") {
             contentType(ContentType.Application.Json)
             setBody(user)
@@ -150,8 +109,8 @@ class SignUpRoutesTest : TestConfig() {
 
     @Test
     fun `Fail to sign up when password violates min length`() = testApp(false) { client ->
-        val (username, email, _) = generateCredentials()
-        val user = UserDTO(username, email, passwordMinLengthViolation)
+        val (email, _) = generateCredentials()
+        val user = UserDTO(email, passwordMinLengthViolation)
         client.post("/sign-up") {
             contentType(ContentType.Application.Json)
             setBody(user)
@@ -169,29 +128,9 @@ class SignUpRoutesTest : TestConfig() {
     }
 
     @Test
-    fun `Fail to sign up when username violates max length`() = testApp(false) { client ->
-        val (_, email, password) = generateCredentials()
-        val user = UserDTO(usernameMaxLengthViolation, email, password)
-        client.post("/sign-up") {
-            contentType(ContentType.Application.Json)
-            setBody(user)
-        }.apply {
-            assertEquals(HttpStatusCode.BadRequest, status)
-            body<ErrorResponse>().apply {
-                assertEquals(
-                    ErrorResponse(
-                        ErrorResponse.Type.VALIDATION,
-                        ValidationReason.tooLong(UserDTO::username.name, EntityFieldLength.Users.Username.maxLength)
-                    ), this
-                )
-            }
-        }
-    }
-
-    @Test
     fun `Fail to sign up when password violates max length`() = testApp(false) { client ->
-        val (username, email, _) = generateCredentials()
-        val user = UserDTO(username, email, passwordMaxLengthViolation)
+        val (email, _) = generateCredentials()
+        val user = UserDTO(email, passwordMaxLengthViolation)
         client.post("/sign-up") {
             contentType(ContentType.Application.Json)
             setBody(user)
@@ -210,8 +149,8 @@ class SignUpRoutesTest : TestConfig() {
 
     @Test
     fun `Fail to sign up when email violates max length`() = testApp(false) { client ->
-        val (username, _, password) = generateCredentials()
-        val user = UserDTO(username, emailMaxLengthViolation, password)
+        val (_, password) = generateCredentials()
+        val user = UserDTO(emailMaxLengthViolation, password)
         client.post("/sign-up") {
             contentType(ContentType.Application.Json)
             setBody(user)
@@ -229,8 +168,6 @@ class SignUpRoutesTest : TestConfig() {
     }
 
     private companion object {
-        fun generateUsername() =
-            "u".repeat(EntityFieldLength.Users.Username.minLength)
 
         fun generatePassword() =
             "p".repeat(EntityFieldLength.Users.Password.minLength)
@@ -238,13 +175,10 @@ class SignUpRoutesTest : TestConfig() {
         fun generateEmail() =
             "e".repeat(EntityFieldLength.Users.Email.minLength)
 
-        fun generateCredentials() = Triple(generateUsername(), generateEmail(), generatePassword())
+        fun generateCredentials() = Pair(generateEmail(), generatePassword())
 
-        const val USERNAME_BLANK = "   "
         const val PASSWORD_BLANK = "   "
         const val EMAIL_BLANK = "   "
-        val usernameMinLengthViolation = "u".repeat(EntityFieldLength.Users.Username.minLength - 1)
-        val usernameMaxLengthViolation = "u".repeat(EntityFieldLength.Users.Username.maxLength + 1)
         val passwordMinLengthViolation = "p".repeat(EntityFieldLength.Users.Password.minLength - 1)
         val passwordMaxLengthViolation = "p".repeat(EntityFieldLength.Users.Password.maxLength + 1)
         val emailMinLengthViolation = "e".repeat(EntityFieldLength.Users.Email.minLength - 1)

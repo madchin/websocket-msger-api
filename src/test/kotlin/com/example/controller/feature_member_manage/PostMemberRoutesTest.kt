@@ -36,7 +36,7 @@ class PostMemberRoutesTest : TestConfig() {
 
     @Test
     fun `Authorized - Successfully add member`() = testApp { client ->
-        val registeredUser = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        val registeredUser = ServiceFactory.authService.register(UserDTO( "email", "password"))
 
         client.post("/member/add-member") {
             val token = JwtConfig.createToken(registeredUser.id!!)

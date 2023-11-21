@@ -11,7 +11,7 @@ import kotlin.test.*
 class MemberServiceTest : TestConfig() {
     @Test
     fun `Fail to add member which already exists`(): Unit = runBlocking {
-        val user = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        val user = ServiceFactory.authService.register(UserDTO("email", "password"))
         ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
 
         assertFailsWith<ExplicitException.DuplicateMember> {
@@ -28,7 +28,7 @@ class MemberServiceTest : TestConfig() {
 
     @Test
     fun `Successfully add member`(): Unit = runBlocking {
-        val user = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        val user = ServiceFactory.authService.register(UserDTO("email", "password"))
         val member = ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
 
         assertEquals(user.id, member.uid)
@@ -44,7 +44,7 @@ class MemberServiceTest : TestConfig() {
 
     @Test
     fun `Successfully read member`(): Unit = runBlocking {
-        val user = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        val user = ServiceFactory.authService.register(UserDTO( "email", "password"))
         val member = ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
         val readMember = ServiceFactory.memberService.getMember(member.uid)
 
@@ -61,7 +61,7 @@ class MemberServiceTest : TestConfig() {
 
     @Test
     fun `Successfully update member name`(): Unit = runBlocking {
-        val user = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        val user = ServiceFactory.authService.register(UserDTO( "email", "password"))
         val member = ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
         val updatedMember = ServiceFactory.memberService.updateMemberName(member.uid, USERNAME_TO_UPDATE)
 
@@ -79,7 +79,7 @@ class MemberServiceTest : TestConfig() {
 
     @Test
     fun `Successfully delete member`(): Unit = runBlocking {
-        val user = ServiceFactory.authService.register(UserDTO("username", "email", "password"))
+        val user = ServiceFactory.authService.register(UserDTO( "email", "password"))
         val member = ServiceFactory.memberService.addMember(Member(user.id!!, USERNAME))
         val deleteResult = ServiceFactory.memberService.deleteMember(member.uid)
         assertTrue(deleteResult)
